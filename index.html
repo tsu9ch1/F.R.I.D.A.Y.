@@ -28,12 +28,6 @@
         .text-glow-cyan {
             text-shadow: 0 0 8px rgba(0, 240, 255, 0.8);
         }
-        .text-glow-amber {
-            text-shadow: 0 0 8px rgba(245, 158, 11, 0.8);
-        }
-        .neon-border {
-            border: 1px solid rgba(0, 240, 255, 0.4);
-        }
         /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 5px;
@@ -67,7 +61,6 @@
 </head>
 <body class="min-h-screen flex flex-col scanline select-none relative">
 
-    <!-- Header -->
     <header class="w-full bg-slate-950/90 border-b border-cyan-500/30 px-4 md:px-6 py-3.5 flex justify-between items-center backdrop-blur-md z-20 sticky top-0">
         <div class="flex items-center space-x-3">
             <div class="relative flex h-3.5 w-3.5">
@@ -92,13 +85,11 @@
         </div>
     </header>
 
-    <!-- Main Content -->
     <main class="flex-1 max-w-7xl w-full mx-auto p-3 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-5 z-10">
         
-        <!-- HUD & Visual Section -->
+        <!-- HUD Visual Section -->
         <section class="lg:col-span-7 flex flex-col items-center justify-between bg-slate-950/70 border border-cyan-500/30 rounded-2xl p-4 md:p-6 relative overflow-hidden neon-glow-cyan radar-grid">
             
-            <!-- Corner Decors -->
             <div class="w-full flex justify-between items-center text-[10px] font-orbitron text-cyan-500/70 mb-2">
                 <div>SYS.LOC: FUKUI_GAKUEN // LAT: 36.065</div>
                 <div class="flex items-center gap-2">
@@ -110,7 +101,7 @@
             <div class="relative w-full aspect-square max-w-[340px] md:max-w-[380px] flex items-center justify-center my-2">
                 <canvas id="hudCanvas" width="400" height="400" class="w-full h-full drop-shadow-[0_0_15px_rgba(0,240,255,0.4)]"></canvas>
 
-                <!-- Floating Live Vision Preview Overlay -->
+                <!-- Camera Preview Overlay -->
                 <div id="cameraPreviewContainer" class="absolute inset-0 bg-slate-950/90 rounded-full border-2 border-cyan-400 overflow-hidden hidden flex-col items-center justify-center p-2">
                     <video id="webcamVideo" autoplay playsinline class="w-full h-full object-cover rounded-full opacity-80"></video>
                     <button id="captureScanBtn" class="absolute bottom-4 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-orbitron font-bold text-xs px-4 py-1.5 rounded-full shadow-lg transition">
@@ -162,7 +153,7 @@
             </div>
         </section>
 
-        <!-- Console & Chat Section -->
+        <!-- Dialogue Console Section -->
         <section class="lg:col-span-5 flex flex-col bg-slate-950/70 border border-cyan-500/30 rounded-2xl p-4 h-[580px] shadow-2xl">
             <div class="flex items-center justify-between pb-3 border-b border-cyan-500/20 mb-3">
                 <h2 class="text-xs font-bold font-orbitron text-cyan-400 flex items-center gap-2 tracking-wider">
@@ -177,22 +168,21 @@
 
             <!-- Scrollable Log Container -->
             <div id="logContainer" class="flex-1 overflow-y-auto space-y-3.5 pr-1 font-sans text-xs md:text-sm">
-                <!-- Welcome Message -->
                 <div class="bg-cyan-950/30 border border-cyan-500/30 rounded-xl p-3 text-cyan-100">
                     <div class="flex items-center justify-between text-[11px] font-orbitron text-cyan-400 font-bold mb-1">
                         <span>F.R.I.D.A.Y.</span>
                         <span class="text-[9px] text-cyan-600">SYSTEM ONLINE</span>
                     </div>
                     <p class="text-slate-200 leading-relaxed">
-                        オンラインです、ボス。Gemini AIモデルの接続を確認しました。音声操作、画像解析、最新情報の検索、ホログラム生成に対応しています。
+                        オンラインです、ボス。Gemini AIモデルの接続準備が完了しました。音声操作、画像解析、最新情報の検索、ホログラム生成に対応しています。
                     </p>
                 </div>
             </div>
 
-            <!-- Hidden File Input for Image Analysis -->
+            <!-- Hidden File Input -->
             <input type="file" id="imageFileInput" accept="image/*" class="hidden">
 
-            <!-- Manual Text & Multimodal Form -->
+            <!-- Manual Text Form -->
             <form id="textForm" class="mt-3 flex gap-2 pt-3 border-t border-cyan-500/20">
                 <button type="button" id="uploadImgBtn" title="画像を添付してGemini解析" class="bg-slate-900 border border-cyan-500/30 hover:bg-cyan-950 text-cyan-400 px-3 rounded-xl transition flex items-center justify-center">
                     <i class="fa-solid fa-paperclip"></i>
@@ -247,24 +237,24 @@
             <div class="space-y-4 text-xs md:text-sm">
                 <div>
                     <label class="block font-orbitron text-cyan-300 mb-1">GEMINI API KEY</label>
-                    <input type="password" id="apiKeyInput" placeholder="Google AI StudioのAPIキー (空欄時はキャンバス自動適用)" class="w-full bg-slate-950 border border-cyan-500/30 rounded-xl px-3 py-2 text-cyan-100 focus:outline-none focus:border-cyan-400">
-                    <p class="text-[10px] text-slate-500 mt-1">※空欄でもシステム設定キーで試行します。</p>
+                    <input type="password" id="apiKeyInput" placeholder="Google AI StudioのAPIキー (AIzaSy...)" class="w-full bg-slate-950 border border-cyan-500/30 rounded-xl px-3 py-2 text-cyan-100 focus:outline-none focus:border-cyan-400">
+                    <p class="text-[10px] text-slate-500 mt-1">※APIキーはブラウザのローカルストレージに安全に保存されます。</p>
                 </div>
 
                 <div>
                     <label class="block font-orbitron text-cyan-300 mb-1">AI MODEL (思考エンジン)</label>
                     <select id="aiModelSelect" class="w-full bg-slate-950 border border-cyan-500/30 rounded-xl px-3 py-2 text-cyan-100 focus:outline-none focus:border-cyan-400">
-                        <option value="gemini-2.5-flash">Gemini 2.5 Flash (推奨・バランス型)</option>
-                        <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite (高速・制限が非常に緩い)</option>
-                        <option value="gemini-3-flash-preview">Gemini 3.0 Flash Preview (高機能)</option>
+                        <option value="gemini-2.5-flash">Gemini 2.5 Flash (推奨・標準)</option>
+                        <option value="gemini-2.5-pro">Gemini 2.5 Pro (高度思考・分析)</option>
+                        <option value="gemini-1.5-flash">Gemini 1.5 Flash (高速・軽量)</option>
                     </select>
                 </div>
 
                 <div>
                     <label class="block font-orbitron text-cyan-300 mb-1">TTS 音声エンジン選択</label>
                     <select id="ttsEngineSelect" class="w-full bg-slate-950 border border-cyan-500/30 rounded-xl px-3 py-2 text-cyan-100 focus:outline-none focus:border-cyan-400">
-                        <option value="gemini">Gemini 2.5 Neural TTS (高品質)</option>
-                        <option value="web">ブラウザ内蔵 SpeechSynthesis</option>
+                        <option value="web">ブラウザ内蔵 SpeechSynthesis (推奨)</option>
+                        <option value="gemini">Gemini Neural TTS (API制限に注意)</option>
                     </select>
                 </div>
 
@@ -297,35 +287,47 @@
         </div>
     </div>
 
-    <!-- Application Script Logic -->
     <script>
-        /* Safe Event Listener Binder Helper */
+        /* Safe Event Helper */
         function bind(id, event, callback) {
             const el = document.getElementById(id);
-            if (el) {
-                el.addEventListener(event, callback);
-            }
+            if (el) el.addEventListener(event, callback);
         }
 
-        /* State Variables & Configurations */
+        function getElVal(id) {
+            const el = document.getElementById(id);
+            return el ? el.value : '';
+        }
+
+        function setElVal(id, val) {
+            const el = document.getElementById(id);
+            if (el) el.value = val;
+        }
+
+        /* Initial State */
         let state = {
-            status: 'STANDBY', // STANDBY, LISTENING, THINKING, SPEAKING, SCANNING, GENERATING
+            status: 'STANDBY',
             apiKey: localStorage.getItem('friday_gemini_key') || '',
             aiModel: localStorage.getItem('friday_ai_model') || 'gemini-2.5-flash',
             useSearchGrounding: false,
-            ttsEngine: localStorage.getItem('friday_tts_engine') || 'gemini',
+            ttsEngine: localStorage.getItem('friday_tts_engine') || 'web',
             geminiVoice: localStorage.getItem('friday_gemini_voice') || 'Aoede',
             clapEnabled: true,
             clapThreshold: parseFloat(localStorage.getItem('friday_clap_sens')) || 0.20,
             vaultText: localStorage.getItem('friday_vault') || `【プロフィール】
 名前：大学生（福井市学園在住）
-【ごみ収集日】
+【ご机収集日】
 燃やせるごみ：火曜・金曜
 【生活ノート】
 研究とAIアシスタント構築に注力中。`
         };
 
-        // System Prompt defining the F.R.I.D.A.Y. Persona
+        // Ensure invalid legacy model names are converted to safe defaults
+        if (state.aiModel === 'gemini-2.5-flash-lite' || state.aiModel === 'gemini-3-flash-preview') {
+            state.aiModel = 'gemini-2.5-flash';
+            localStorage.setItem('friday_ai_model', state.aiModel);
+        }
+
         function getSystemPrompt() {
             return `あなたはF.R.I.D.A.Y.（フライデー）という名前の高度AIアシスタントです。
 - 知的で仕事が早く、非常に優秀な女性AIです。
@@ -344,7 +346,7 @@ ${state.vaultText}
 - Google検索する: EXECUTE:search:検索ワード`;
         }
 
-        // Canvas HUD Renderer
+        /* Canvas HUD Animation */
         const canvas = document.getElementById('hudCanvas');
         const ctx = canvas ? canvas.getContext('2d') : null;
         let angle = 0;
@@ -355,7 +357,6 @@ ${state.vaultText}
             const cx = canvas.width / 2;
             const cy = canvas.height / 2;
 
-            // Dynamic Status Color
             let color = '#00f0ff';
             if (state.status === 'LISTENING') color = '#ff3366';
             else if (state.status === 'THINKING') color = '#f59e0b';
@@ -365,28 +366,18 @@ ${state.vaultText}
 
             angle = (angle + 0.03) % (Math.PI * 2);
 
-            // Outer Outer Ring
             ctx.beginPath();
             ctx.arc(cx, cy, 155, angle, angle + Math.PI * 0.7);
             ctx.strokeStyle = color;
             ctx.lineWidth = 2;
             ctx.stroke();
 
-            // Outer Arc 1
             ctx.beginPath();
             ctx.arc(cx, cy, 140, angle, angle + Math.PI * 0.85);
             ctx.strokeStyle = color;
             ctx.lineWidth = 4;
             ctx.stroke();
 
-            // Outer Arc 2
-            ctx.beginPath();
-            ctx.arc(cx, cy, 140, angle + Math.PI, angle + Math.PI * 1.7);
-            ctx.strokeStyle = color;
-            ctx.lineWidth = 2;
-            ctx.stroke();
-
-            // Inner Ring Counter Rotation
             ctx.beginPath();
             ctx.arc(cx, cy, 100, -angle * 1.5, -angle * 1.5 + Math.PI * 1.3);
             ctx.strokeStyle = color;
@@ -395,7 +386,6 @@ ${state.vaultText}
             ctx.stroke();
             ctx.setLineDash([]);
 
-            // Center Core Pulsing
             const pulse = Math.sin(Date.now() / 200) * 4;
             ctx.beginPath();
             ctx.arc(cx, cy, 45 + pulse, 0, Math.PI * 2);
@@ -405,7 +395,6 @@ ${state.vaultText}
             ctx.fill();
             ctx.shadowBlur = 0;
 
-            // Core Text
             ctx.fillStyle = '#020617';
             ctx.font = 'bold 11px Orbitron';
             ctx.textAlign = 'center';
@@ -416,6 +405,7 @@ ${state.vaultText}
         }
         if (canvas) drawHUD();
 
+        /* Audio & Speech Recognition Setup */
         let audioCtx = null;
         let analyser = null;
 
@@ -435,13 +425,10 @@ ${state.vaultText}
                     if (state.clapEnabled && state.status === 'STANDBY') {
                         analyser.getByteFrequencyData(dataArray);
                         let sum = 0;
-                        for (let i = 0; i < bufferLength; i++) {
-                            sum += dataArray[i];
-                        }
+                        for (let i = 0; i < bufferLength; i++) sum += dataArray[i];
                         let average = sum / bufferLength / 255;
 
                         if (average > state.clapThreshold) {
-                            console.log('Clap detected! Level:', average);
                             startVoiceRecognition();
                         }
                     }
@@ -449,7 +436,7 @@ ${state.vaultText}
                 }
                 checkAudioSpike();
             } catch (err) {
-                console.warn('Microphone access for clap detection unverified:', err);
+                console.warn('Mic access unverified for clap trigger:', err);
             }
         }
 
@@ -461,54 +448,65 @@ ${state.vaultText}
             recognition.lang = 'ja-JP';
             recognition.interimResults = false;
 
-            recognition.onstart = () => {
-                updateStatus('LISTENING', 'どうぞ、ボス。話しかけてください...');
-            };
-
+            recognition.onstart = () => updateStatus('LISTENING', 'どうぞ、ボス。話しかけてください...');
             recognition.onresult = (event) => {
                 const text = event.results[0][0].transcript;
                 appendLog('USER', text);
                 handleUserQuery(text);
             };
-
-            recognition.onerror = (event) => {
-                console.error('Speech recognition error:', event.error);
-                updateStatus('STANDBY', '音声入力エラーが発生しました。');
-            };
-
+            recognition.onerror = () => updateStatus('STANDBY', '音声入力エラーが発生しました。');
             recognition.onend = () => {
-                if (state.status === 'LISTENING') {
-                    updateStatus('STANDBY', '[SPACE]キー または クラップ音で起動');
-                }
+                if (state.status === 'LISTENING') updateStatus('STANDBY', '[SPACE]キー または クラップ音で起動');
             };
         }
 
         function startVoiceRecognition() {
             if (!recognition) {
-                alert('お使いのブラウザはWeb Speech APIに対応していません。ChromeまたはEdgeをご使用ください。');
+                alert('Web Speech API非対応ブラウザです。ChromeまたはEdgeをご使用ください。');
                 return;
             }
             if (state.status !== 'STANDBY') return;
-            
             try {
-                if (audioCtx && audioCtx.state === 'suspended') {
-                    audioCtx.resume();
-                }
+                if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
                 recognition.start();
             } catch (e) {
                 console.warn(e);
             }
         }
 
+        /* API Fetch Helper with Detailed Error Reporting */
+        async function fetchWithRetry(url, options, retries = 2, backoff = 1000) {
+            try {
+                const res = await fetch(url, options);
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => ({}));
+                    const detail = errData.error?.message || `HTTP ${res.status}`;
+                    throw new Error(`[Google API ${res.status}] ${detail}`);
+                }
+                return res;
+            } catch (err) {
+                if (err.message.includes('403') || err.message.includes('404') || retries <= 0) {
+                    throw err;
+                }
+                await new Promise(r => setTimeout(r, backoff));
+                return fetchWithRetry(url, options, retries - 1, backoff * 2);
+            }
+        }
+
+        /* Main Query Handler */
         async function handleUserQuery(promptText, imageBase64 = null) {
+            if (!state.apiKey) {
+                appendLog('SYSTEM', '⚠️ APIキーが未設定です。画面右上の「CONFIG」ボタンから Google AI Studio の APIキーを保存してください。');
+                updateStatus('STANDBY', 'APIキーをCONFIGで設定してください');
+                openSettingsModal();
+                return;
+            }
+
             updateStatus('THINKING', 'Gemini AIで思考中...');
 
-            // Check if user requested image generation
-            if (!imageBase64 && (promptText.includes('画像') || promptText.includes('描いて') || promptText.includes('生成') || promptText.includes('ホログラム'))) {
-                if (promptText.includes('生成') || promptText.includes('描いて') || promptText.includes('画像')) {
-                    generateHologramImage(promptText);
-                    return;
-                }
+            if (!imageBase64 && (promptText.includes('画像') || promptText.includes('描いて') || promptText.includes('生成'))) {
+                generateHologramImage(promptText);
+                return;
             }
 
             try {
@@ -535,18 +533,35 @@ ${state.vaultText}
                     payload.tools = [{ "google_search": {} }];
                 }
 
-                const response = await fetchWithRetry(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
+                let response;
+                try {
+                    response = await fetchWithRetry(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                } catch (fetchErr) {
+                    // Fallback to standard model if 404
+                    if (fetchErr.message.includes('404')) {
+                        console.warn('Model 404, falling back to gemini-2.5-flash');
+                        state.aiModel = 'gemini-2.5-flash';
+                        localStorage.setItem('friday_ai_model', state.aiModel);
+                        const fallbackUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+                        response = await fetchWithRetry(fallbackUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                    } else {
+                        throw fetchErr;
+                    }
+                }
 
                 const result = await response.json();
                 const candidate = result.candidates?.[0];
 
                 if (candidate && candidate.content?.parts?.[0]?.text) {
                     let replyText = candidate.content.parts[0].text;
-                    
                     let citations = [];
                     const groundingMetadata = candidate.groundingMetadata;
                     if (groundingMetadata && groundingMetadata.groundingAttributions) {
@@ -559,25 +574,19 @@ ${state.vaultText}
                     appendLog('F.R.I.D.A.Y.', cleanReply, citations);
                     speakText(cleanReply);
                 } else {
-                    throw new Error('無効な応答データ構造です。');
+                    throw new Error('APIからの有効なテキスト応答がありませんでした。');
                 }
 
             } catch (err) {
-                console.error('Gemini API Fetch Error:', err);
-                let msg = err.message;
-                if (err.message.includes('403')) {
-                    msg = '⚠️ エラー 403 (Forbidden): APIキーが未設定または無効です。「CONFIG」ボタンから Google AI Studio の APIキーを設定してください。';
-                } else if (err.message.includes('429')) {
-                    msg = '⚠️ エラー 429 (Rate Limit): リクエスト制限に達しました。「CONFIG」で「Gemini 2.5 Flash-Lite」に変更してください。';
-                }
-                appendLog('SYSTEM', msg);
-                updateStatus('STANDBY', 'APIエラーが発生しました。CONFIGを確認してください。');
+                console.error('Gemini API Error:', err);
+                appendLog('SYSTEM', `⚠️ ${err.message}`);
+                updateStatus('STANDBY', 'APIエラーが発生しました。');
             }
         }
 
         async function generateHologramImage(promptText) {
             updateStatus('GENERATING', 'ホログラム画像を合成中...');
-            appendLog('SYSTEM', `🎨 ホログラム画像生成プロセスを開始: "${promptText}"`);
+            appendLog('SYSTEM', `🎨 画像生成プロセスを開始: "${promptText}"`);
 
             try {
                 const apiKey = state.apiKey;
@@ -585,11 +594,9 @@ ${state.vaultText}
 
                 const payload = {
                     contents: [{
-                        parts: [{ text: `A futuristic holographic blueprint or HUD scheme of: ${promptText}. High tech, neon cyan glowing accent, transparent aesthetic` }]
+                        parts: [{ text: `A futuristic holographic blueprint of: ${promptText}. Neon cyan glowing aesthetic` }]
                     }],
-                    generationConfig: {
-                        responseModalities: ['IMAGE']
-                    }
+                    generationConfig: { responseModalities: ['IMAGE'] }
                 };
 
                 const response = await fetchWithRetry(apiUrl, {
@@ -603,109 +610,58 @@ ${state.vaultText}
 
                 if (part && part.inlineData) {
                     const imageUrl = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
-                    appendImageLog('F.R.I.D.A.Y.', `ボス、ご要求のホログラム画像を合成しました。`, imageUrl);
+                    appendImageLog('F.R.I.D.A.Y.', `ボス、ご要求のホログラム画像を生成しました。`, imageUrl);
                     speakText('ボス、ホログラム画像の生成が完了しました。');
                 } else {
-                    throw new Error('画像の生成に失敗しました。');
+                    throw new Error('画像の生成データが取得できませんでした。');
                 }
             } catch (err) {
                 console.error('Image Gen Error:', err);
-                let msg = err.message;
-                if (err.message.includes('403')) {
-                    msg = '⚠️ 画像生成エラー (403): APIキーをご確認ください。';
-                }
-                appendLog('SYSTEM', msg);
-                updateStatus('STANDBY', '画像生成に失敗しました。');
+                appendLog('SYSTEM', `⚠️ 画像生成エラー: ${err.message}`);
+                updateStatus('STANDBY', '画像生成失敗');
             }
         }
 
-        function pcmToWav(pcm16, sampleRate) {
-            const numChannels = 1;
-            const byteRate = sampleRate * numChannels * 2;
-            const blockAlign = numChannels * 2;
-            const dataSize = pcm16.length * 2;
-            const buffer = new ArrayBuffer(44 + dataSize);
-            const view = new DataView(buffer);
+        function speakText(text) {
+            if (state.ttsEngine === 'gemini') {
+                // Try Gemini TTS, fallback gracefully on error
+                speakGeminiTTS(text).catch(() => speakBrowserSpeech(text));
+            } else {
+                speakBrowserSpeech(text);
+            }
+        }
 
-            const writeString = (v, offset, str) => {
-                for (let i = 0; i < str.length; i++) v.setUint8(offset + i, str.charCodeAt(i));
+        async function speakGeminiTTS(text) {
+            updateStatus('SPEAKING', 'Gemini Neural TTS 出力中...');
+            const apiKey = state.apiKey;
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+
+            const payload = {
+                contents: [{ parts: [{ text: `Say in a smart assistant voice: ${text}` }] }],
+                generationConfig: {
+                    responseModalities: ["AUDIO"],
+                    speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: state.geminiVoice } } }
+                }
             };
 
-            writeString(view, 0, 'RIFF');
-            view.setUint32(4, 36 + dataSize, true);
-            writeString(view, 8, 'WAVE');
-            writeString(view, 12, 'fmt ');
-            view.setUint32(16, 16, true);
-            view.setUint16(20, 1, true);
-            view.setUint16(22, numChannels, true);
-            view.setUint32(24, sampleRate, true);
-            view.setUint32(28, byteRate, true);
-            view.setUint16(32, blockAlign, true);
-            view.setUint16(34, 16, true);
-            writeString(view, 36, 'data');
-            view.setUint32(40, dataSize, true);
+            const response = await fetchWithRetry(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
 
-            let offset = 44;
-            for (let i = 0; i < pcm16.length; i++, offset += 2) {
-                view.setInt16(offset, pcm16[i], true);
+            const result = await response.json();
+            const part = result?.candidates?.[0]?.content?.parts?.[0];
+            const audioBase64 = part?.inlineData?.data;
+
+            if (audioBase64) {
+                const audio = new Audio(`data:audio/wav;base64,${audioBase64}`);
+                audio.onended = () => updateStatus('STANDBY', '[SPACE]キー または クラップ音で起動');
+                audio.onerror = () => speakBrowserSpeech(text);
+                audio.play();
+            } else {
+                throw new Error('No audio data returned');
             }
-            return new Blob([buffer], { type: 'audio/wav' });
-        }
-
-        async function speakText(text) {
-            if (state.ttsEngine === 'gemini') {
-                try {
-                    updateStatus('SPEAKING', 'Gemini AI 音声出力中...');
-                    const apiKey = state.apiKey;
-                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
-
-                    const payload = {
-                        contents: [{ parts: [{ text: `Say in a smart, friendly, precise AI assistant voice: ${text}` }] }],
-                        generationConfig: {
-                            responseModalities: ["AUDIO"],
-                            speechConfig: {
-                                voiceConfig: {
-                                    prebuiltVoiceConfig: { voiceName: state.geminiVoice }
-                                }
-                            }
-                        }
-                    };
-
-                    const response = await fetchWithRetry(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-
-                    const result = await response.json();
-                    const part = result?.candidates?.[0]?.content?.parts?.[0];
-                    const audioBase64 = part?.inlineData?.data;
-                    const mimeType = part?.inlineData?.mimeType || '';
-
-                    if (audioBase64) {
-                        const sampleRateMatch = mimeType.match(/rate=(\d+)/);
-                        const sampleRate = sampleRateMatch ? parseInt(sampleRateMatch[1], 10) : 24000;
-                        
-                        const binaryStr = atob(audioBase64);
-                        const len = binaryStr.length;
-                        const bytes = new Uint8Array(len);
-                        for (let i = 0; i < len; i++) bytes[i] = binaryStr.charCodeAt(i);
-                        
-                        const pcm16 = new Int16Array(bytes.buffer);
-                        const wavBlob = pcmToWav(pcm16, sampleRate);
-                        const audioUrl = URL.createObjectURL(wavBlob);
-                        
-                        const audio = new Audio(audioUrl);
-                        audio.onended = () => updateStatus('STANDBY', '[SPACE]キー または クラップ音で起動');
-                        audio.onerror = () => speakBrowserSpeech(text);
-                        audio.play();
-                        return;
-                    }
-                } catch (e) {
-                    console.warn('Gemini TTS failed, falling back to SpeechSynthesis:', e);
-                }
-            }
-            speakBrowserSpeech(text);
         }
 
         function speakBrowserSpeech(text) {
@@ -720,7 +676,7 @@ ${state.vaultText}
             utterance.rate = 1.1;
 
             const voices = window.speechSynthesis.getVoices();
-            const jpVoice = voices.find(v => v.lang.includes('ja') && (v.name.includes('Nanami') || v.name.includes('Kyoko') || v.name.includes('Google')));
+            const jpVoice = voices.find(v => v.lang.includes('ja'));
             if (jpVoice) utterance.voice = jpVoice;
 
             utterance.onstart = () => updateStatus('SPEAKING', text);
@@ -730,43 +686,15 @@ ${state.vaultText}
             window.speechSynthesis.speak(utterance);
         }
 
-        /* Exponential Backoff Fetch Helper */
-        async function fetchWithRetry(url, options, retries = 3, backoff = 1000) {
-            try {
-                const res = await fetch(url, options);
-                if (res.status === 403) {
-                    const errData = await res.json().catch(() => ({}));
-                    const detail = errData.error?.message || 'アクセス拒否 (403)';
-                    throw new Error(`403 Forbidden: ${detail}`);
-                }
-                if (res.status === 429) {
-                    const errData = await res.json().catch(() => ({}));
-                    const detail = errData.error?.message || 'レート制限 (429)';
-                    throw new Error(`429 Too Many Requests: ${detail}`);
-                }
-                if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
-                return res;
-            } catch (err) {
-                if (err.message.includes('403') || err.message.includes('429') || retries <= 0) {
-                    throw err;
-                }
-                await new Promise(r => setTimeout(r, backoff));
-                return fetchWithRetry(url, options, retries - 1, backoff * 2);
-            }
-        }
-
-        /* Command Parsing Utility */
         function parseAndExecuteCommands(text) {
             const lines = text.split('\n');
             const cleanLines = [];
 
             for (let line of lines) {
                 if (line.includes('EXECUTE:open_browser:')) {
-                    const url = line.split('EXECUTE:open_browser:')[1].trim();
-                    window.open(url, '_blank');
+                    window.open(line.split('EXECUTE:open_browser:')[1].trim(), '_blank');
                 } else if (line.includes('EXECUTE:search:')) {
-                    const query = line.split('EXECUTE:search:')[1].trim();
-                    window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank');
+                    window.open(`https://www.google.com/search?q=${encodeURIComponent(line.split('EXECUTE:search:')[1].trim())}`, '_blank');
                 } else {
                     cleanLines.push(line);
                 }
@@ -832,7 +760,7 @@ ${state.vaultText}
             if (subEl && subText) subEl.innerText = subText;
         }
 
-        /* Safe Event Listener Bindings */
+        /* Event Bindings */
         bind('micBtn', 'click', () => {
             if (state.status === 'STANDBY') startVoiceRecognition();
         });
@@ -859,9 +787,8 @@ ${state.vaultText}
         });
 
         bind('quickBriefingBtn', 'click', () => {
-            const briefingQuery = '本日の予定、重要ノートの確認、および最新ニュースを含む要約ブリーフィングを報告してください。';
             appendLog('USER', '⚡ 本日のデイリーブリーフィングを実行');
-            handleUserQuery(briefingQuery);
+            handleUserQuery('本日の予定、重要ノートの確認、および最新ニュースを含む要約ブリーフィングを報告してください。');
         });
 
         bind('genImageBtn', 'click', () => {
@@ -905,7 +832,7 @@ ${state.vaultText}
         });
 
         bind('imageFileInput', 'change', (e) => {
-            const file = e.target.files[0];
+            const file = e.target.files?.[0];
             if (!file) return;
             const reader = new FileReader();
             reader.onload = (evt) => {
@@ -935,18 +862,13 @@ ${state.vaultText}
         const settingsModal = document.getElementById('settingsModal');
 
         function openSettingsModal() {
-            const apiKeyInput = document.getElementById('apiKeyInput');
-            const aiModelSelect = document.getElementById('aiModelSelect');
-            const ttsEngineSelect = document.getElementById('ttsEngineSelect');
-            const geminiVoiceSelect = document.getElementById('geminiVoiceSelect');
-            const clapSensitivity = document.getElementById('clapSensitivity');
+            setElVal('apiKeyInput', state.apiKey);
+            setElVal('aiModelSelect', state.aiModel);
+            setElVal('ttsEngineSelect', state.ttsEngine);
+            setElVal('geminiVoiceSelect', state.geminiVoice);
+            setElVal('clapSensitivity', state.clapThreshold);
+            
             const clapSensVal = document.getElementById('clapSensVal');
-
-            if (apiKeyInput) apiKeyInput.value = state.apiKey;
-            if (aiModelSelect) aiModelSelect.value = state.aiModel;
-            if (ttsEngineSelect) ttsEngineSelect.value = state.ttsEngine;
-            if (geminiVoiceSelect) geminiVoiceSelect.value = state.geminiVoice;
-            if (clapSensitivity) clapSensitivity.value = state.clapThreshold;
             if (clapSensVal) clapSensVal.innerText = state.clapThreshold.toFixed(2);
             
             settingsModal?.classList.remove('hidden');
@@ -956,18 +878,11 @@ ${state.vaultText}
         bind('closeSettingsBtn', 'click', () => settingsModal?.classList.add('hidden'));
 
         bind('saveSettingsBtn', 'click', () => {
-            const apiKeyInput = document.getElementById('apiKeyInput');
-            const aiModelSelect = document.getElementById('aiModelSelect');
-            const ttsEngineSelect = document.getElementById('ttsEngineSelect');
-            const geminiVoiceSelect = document.getElementById('geminiVoiceSelect');
-            const clapSensitivity = document.getElementById('clapSensitivity');
-            const aiModelBadge = document.getElementById('aiModelBadge');
-
-            if (apiKeyInput) state.apiKey = apiKeyInput.value.trim();
-            if (aiModelSelect) state.aiModel = aiModelSelect.value;
-            if (ttsEngineSelect) state.ttsEngine = ttsEngineSelect.value;
-            if (geminiVoiceSelect) state.geminiVoice = geminiVoiceSelect.value;
-            if (clapSensitivity) state.clapThreshold = parseFloat(clapSensitivity.value);
+            state.apiKey = getElVal('apiKeyInput').trim();
+            state.aiModel = getElVal('aiModelSelect') || 'gemini-2.5-flash';
+            state.ttsEngine = getElVal('ttsEngineSelect') || 'web';
+            state.geminiVoice = getElVal('geminiVoiceSelect') || 'Aoede';
+            state.clapThreshold = parseFloat(getElVal('clapSensitivity')) || 0.20;
 
             localStorage.setItem('friday_gemini_key', state.apiKey);
             localStorage.setItem('friday_ai_model', state.aiModel);
@@ -975,10 +890,11 @@ ${state.vaultText}
             localStorage.setItem('friday_gemini_voice', state.geminiVoice);
             localStorage.setItem('friday_clap_sens', state.clapThreshold);
 
+            const aiModelBadge = document.getElementById('aiModelBadge');
             if (aiModelBadge) aiModelBadge.innerText = state.aiModel;
 
             settingsModal?.classList.add('hidden');
-            appendLog('SYSTEM', '設定およびGemini API構成を更新保存しました。');
+            appendLog('SYSTEM', '設定を保存しました。');
         });
 
         bind('clapSensitivity', 'input', (e) => {
@@ -987,16 +903,14 @@ ${state.vaultText}
         });
 
         bind('openVaultBtn', 'click', () => {
-            const vaultContent = document.getElementById('vaultContent');
-            if (vaultContent) vaultContent.value = state.vaultText;
+            setElVal('vaultContent', state.vaultText);
             vaultModal?.classList.remove('hidden');
         });
 
         bind('closeVaultBtn', 'click', () => vaultModal?.classList.add('hidden'));
 
         bind('saveVaultBtn', 'click', () => {
-            const vaultContent = document.getElementById('vaultContent');
-            if (vaultContent) state.vaultText = vaultContent.value;
+            state.vaultText = getElVal('vaultContent');
             localStorage.setItem('friday_vault', state.vaultText);
             
             const msg = document.getElementById('vaultSavedMsg');
@@ -1006,7 +920,7 @@ ${state.vaultText}
             }
         });
 
-        /* Keyboard Shortcut: Space Key Trigger */
+        /* Shortcuts */
         window.addEventListener('keydown', (e) => {
             if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
                 e.preventDefault();
@@ -1014,7 +928,6 @@ ${state.vaultText}
             }
         });
 
-        /* Initialize Audio Listener on User Interaction */
         window.addEventListener('click', () => {
             if (!audioCtx) initClapDetector();
         }, { once: true });
