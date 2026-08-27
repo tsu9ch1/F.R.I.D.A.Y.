@@ -21,7 +21,6 @@
         .font-orbitron {
             font-family: 'Orbitron', sans-serif;
         }
-        /* HUD Neon Glow Effects */
         .neon-glow-cyan {
             box-shadow: 0 0 20px rgba(0, 240, 255, 0.25), inset 0 0 15px rgba(0, 240, 255, 0.15);
         }
@@ -42,7 +41,7 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #00f0ffaa;
         }
-        /* Scanline Background Layer */
+        /* Scanline Overlay Effect */
         .scanline {
             background: linear-gradient(
                 to bottom,
@@ -68,7 +67,7 @@
                 <span class="relative inline-flex rounded-full h-3.5 w-3.5 bg-cyan-500"></span>
             </div>
             <h1 class="text-lg md:text-xl font-extrabold font-orbitron tracking-wider text-cyan-400 text-glow-cyan flex items-center gap-2">
-                F.R.I.D.A.Y. <span class="text-[10px] md:text-xs text-cyan-600 font-mono font-normal border border-cyan-800/80 px-2 py-0.5 rounded-full bg-cyan-950/50">GEMINI 3.0 CORE</span>
+                F.R.I.D.A.Y. <span class="text-[10px] md:text-xs text-cyan-600 font-mono font-normal border border-cyan-800/80 px-2 py-0.5 rounded-full bg-cyan-950/50">GEMINI CORE</span>
             </h1>
         </div>
 
@@ -87,21 +86,21 @@
 
     <main class="flex-1 max-w-7xl w-full mx-auto p-3 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-5 z-10">
         
-        <!-- HUD Visual Section -->
+        <!-- HUD Display Section -->
         <section class="lg:col-span-7 flex flex-col items-center justify-between bg-slate-950/70 border border-cyan-500/30 rounded-2xl p-4 md:p-6 relative overflow-hidden neon-glow-cyan radar-grid">
             
             <div class="w-full flex justify-between items-center text-[10px] font-orbitron text-cyan-500/70 mb-2">
                 <div>SYS.LOC: FUKUI_GAKUEN // LAT: 36.065</div>
                 <div class="flex items-center gap-2">
-                    <span id="aiModelBadge" class="text-cyan-400 bg-cyan-950/80 px-2 py-0.5 rounded border border-cyan-500/30">gemini-3-flash-preview</span>
+                    <span id="aiModelBadge" class="text-cyan-400 bg-cyan-950/80 px-2 py-0.5 rounded border border-cyan-500/30 font-mono">gemini-2.5-flash-lite</span>
                 </div>
             </div>
             
-            <!-- Central Hologram Canvas -->
+            <!-- Central Hologram Ring Canvas -->
             <div class="relative w-full aspect-square max-w-[340px] md:max-w-[380px] flex items-center justify-center my-2">
                 <canvas id="hudCanvas" width="400" height="400" class="w-full h-full drop-shadow-[0_0_15px_rgba(0,240,255,0.4)]"></canvas>
 
-                <!-- Camera Preview Overlay -->
+                <!-- Vision Camera Stream Overlay -->
                 <div id="cameraPreviewContainer" class="absolute inset-0 bg-slate-950/90 rounded-full border-2 border-cyan-400 overflow-hidden hidden flex-col items-center justify-center p-2">
                     <video id="webcamVideo" autoplay playsinline class="w-full h-full object-cover rounded-full opacity-80"></video>
                     <button id="captureScanBtn" class="absolute bottom-4 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-orbitron font-bold text-xs px-4 py-1.5 rounded-full shadow-lg transition">
@@ -110,7 +109,6 @@
                 </div>
             </div>
 
-            <!-- Status Indicator Text -->
             <div class="text-center space-y-1 mb-4">
                 <div id="hudStatusText" class="text-lg md:text-xl font-bold font-orbitron text-cyan-300 tracking-widest text-glow-cyan">
                     STANDBY
@@ -120,7 +118,7 @@
                 </div>
             </div>
 
-            <!-- AI Special Quick Actions Bar -->
+            <!-- Quick Action Toolbar -->
             <div class="w-full grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
                 <button id="quickBriefingBtn" class="py-2 px-3 rounded-xl border border-cyan-500/40 bg-cyan-950/40 hover:bg-cyan-500/20 text-cyan-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition">
                     <i class="fa-solid fa-newspaper text-cyan-400"></i> 本日の要約
@@ -153,7 +151,6 @@
             </div>
         </section>
 
-        <!-- Dialogue Console Section -->
         <section class="lg:col-span-5 flex flex-col bg-slate-950/70 border border-cyan-500/30 rounded-2xl p-4 h-[580px] shadow-2xl">
             <div class="flex items-center justify-between pb-3 border-b border-cyan-500/20 mb-3">
                 <h2 class="text-xs font-bold font-orbitron text-cyan-400 flex items-center gap-2 tracking-wider">
@@ -166,7 +163,7 @@
                 </div>
             </div>
 
-            <!-- Scrollable Log Container -->
+            <!-- Dialogue Scroll Container -->
             <div id="logContainer" class="flex-1 overflow-y-auto space-y-3.5 pr-1 font-sans text-xs md:text-sm">
                 <div class="bg-cyan-950/30 border border-cyan-500/30 rounded-xl p-3 text-cyan-100">
                     <div class="flex items-center justify-between text-[11px] font-orbitron text-cyan-400 font-bold mb-1">
@@ -174,15 +171,15 @@
                         <span class="text-[9px] text-cyan-600">SYSTEM ONLINE</span>
                     </div>
                     <p class="text-slate-200 leading-relaxed">
-                        オンラインです、ボス。Gemini 3 Flash AIモデルの接続準備が完了しました。音声操作、画像解析、最新情報の検索、ホログラム生成に対応しています。
+                        オンラインです、ボス。Gemini 2.5 Flash-Lite AIモデルの接続準備が完了しました。音声対話、画像解析、最新情報の検索に対応しています。
                     </p>
                 </div>
             </div>
 
-            <!-- Hidden File Input -->
+            <!-- File Input -->
             <input type="file" id="imageFileInput" accept="image/*" class="hidden">
 
-            <!-- Manual Text Form -->
+            <!-- Prompt Form -->
             <form id="textForm" class="mt-3 flex gap-2 pt-3 border-t border-cyan-500/20">
                 <button type="button" id="uploadImgBtn" title="画像を添付してGemini解析" class="bg-slate-900 border border-cyan-500/30 hover:bg-cyan-950 text-cyan-400 px-3 rounded-xl transition flex items-center justify-center">
                     <i class="fa-solid fa-paperclip"></i>
@@ -195,7 +192,6 @@
         </section>
     </main>
 
-    <!-- Memory Vault Modal -->
     <div id="vaultModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md hidden z-50 flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-cyan-500/40 rounded-2xl w-full max-w-2xl p-6 shadow-2xl relative">
             <button id="closeVaultBtn" class="absolute top-4 right-4 text-slate-400 hover:text-cyan-300 text-lg">
@@ -205,7 +201,7 @@
                 <i class="fa-solid fa-brain text-cyan-400"></i> VAULT MEMORY (ナレッジ・記憶データ)
             </h3>
             <p class="text-xs text-slate-400 mb-3">
-                フライデーが参照するあなたのプロフィール・ごみ収集日・生活スケジュールノート（Obsidian同期用）です。
+                フライデーが参照するあなたのプロフィール・ごみ収集日・生活スケジュールノートです。
             </p>
 
             <textarea id="vaultContent" rows="10" class="w-full bg-slate-950 border border-cyan-500/30 rounded-xl p-3 text-xs md:text-sm text-cyan-100 font-mono focus:outline-none focus:border-cyan-400" placeholder="【プロフィール】
@@ -224,7 +220,6 @@
         </div>
     </div>
 
-    <!-- Configuration Modal -->
     <div id="settingsModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md hidden z-50 flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-cyan-500/40 rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
             <button id="closeSettingsBtn" class="absolute top-4 right-4 text-slate-400 hover:text-cyan-300 text-lg">
@@ -238,13 +233,16 @@
                 <div>
                     <label class="block font-orbitron text-cyan-300 mb-1">GEMINI API KEY</label>
                     <input type="password" id="apiKeyInput" placeholder="Google AI StudioのAPIキー (AIzaSy...)" class="w-full bg-slate-950 border border-cyan-500/30 rounded-xl px-3 py-2 text-cyan-100 focus:outline-none focus:border-cyan-400">
-                    <p class="text-[10px] text-slate-500 mt-1">※空欄時はシステム組み込み用API処理が適用されます。</p>
+                    <p class="text-[10px] text-slate-500 mt-1">※Google AI Studioで作成したAPIキーを入力してください。</p>
                 </div>
 
                 <div>
                     <label class="block font-orbitron text-cyan-300 mb-1">AI MODEL (思考エンジン)</label>
                     <select id="aiModelSelect" class="w-full bg-slate-950 border border-cyan-500/30 rounded-xl px-3 py-2 text-cyan-100 focus:outline-none focus:border-cyan-400">
-                        <option value="gemini-3-flash-preview">Gemini 3 Flash (最新推奨エンジン)</option>
+                        <option value="gemini-2.5-flash-lite" selected>Gemini 2.5 Flash-Lite (高速・最推奨)</option>
+                        <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite (高機能Lite)</option>
+                        <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash-Lite</option>
+                        <option value="gemini-3-flash">Gemini 3 Flash (標準モデル)</option>
                     </select>
                 </div>
 
@@ -286,7 +284,7 @@
     </div>
 
     <script>
-        /* Safe Element Binding Utility */
+        /* DOM Helper Utilities */
         function bind(id, event, callback) {
             const el = document.getElementById(id);
             if (el) el.addEventListener(event, callback);
@@ -302,11 +300,11 @@
             if (el) el.value = val;
         }
 
-        /* State Initialization */
+        /* Application State */
         let state = {
             status: 'STANDBY',
             apiKey: localStorage.getItem('friday_gemini_key') || '',
-            aiModel: 'gemini-3-flash-preview',
+            aiModel: localStorage.getItem('friday_ai_model') || 'gemini-2.5-flash-lite',
             useSearchGrounding: false,
             ttsEngine: localStorage.getItem('friday_tts_engine') || 'web',
             geminiVoice: localStorage.getItem('friday_gemini_voice') || 'Aoede',
@@ -320,6 +318,12 @@
 研究とAIアシスタント構築に注力中。`
         };
 
+        function updateModelBadge() {
+            const badge = document.getElementById('aiModelBadge');
+            if (badge) badge.innerText = state.aiModel;
+        }
+
+        /* F.R.I.D.A.Y. Persona Prompt */
         function getSystemPrompt() {
             return `あなたはF.R.I.D.A.Y.（フライデー）という名前の高度AIアシスタントです。
 - 知的で仕事が早く、非常に優秀な女性AIです。
@@ -474,7 +478,7 @@ ${state.vaultText}
                 }
                 return res;
             } catch (err) {
-                if (err.message.includes('403') || retries <= 0) {
+                if (err.message.includes('403') || err.message.includes('404') || retries <= 0) {
                     throw err;
                 }
                 await new Promise(r => setTimeout(r, backoff));
@@ -492,7 +496,7 @@ ${state.vaultText}
 
             try {
                 const apiKey = state.apiKey;
-                const model = 'gemini-3-flash-preview';
+                const model = state.aiModel || 'gemini-2.5-flash-lite';
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
                 let parts = [{ text: promptText }];
@@ -514,11 +518,29 @@ ${state.vaultText}
                     payload.tools = [{ "google_search": {} }];
                 }
 
-                const response = await fetchWithRetry(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
+                let response;
+                try {
+                    response = await fetchWithRetry(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                } catch (fetchErr) {
+                    if (fetchErr.message.includes('404')) {
+                        console.warn('Model 404, falling back to verified gemini-2.5-flash-lite');
+                        state.aiModel = 'gemini-2.5-flash-lite';
+                        localStorage.setItem('friday_ai_model', state.aiModel);
+                        updateModelBadge();
+                        const fallbackUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`;
+                        response = await fetchWithRetry(fallbackUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                    } else {
+                        throw fetchErr;
+                    }
+                }
 
                 const result = await response.json();
                 const candidate = result.candidates?.[0];
@@ -543,7 +565,7 @@ ${state.vaultText}
             } catch (err) {
                 console.error('Gemini API Error:', err);
                 appendLog('SYSTEM', `⚠️ ${err.message}`);
-                updateStatus('STANDBY', 'APIエラーが発生しました。');
+                updateStatus('STANDBY', 'APIエラーが発生しました。CONFIGを確認してください。');
             }
         }
 
@@ -649,7 +671,7 @@ ${state.vaultText}
                 }
                 box.innerHTML = `<div class="text-[10px] font-orbitron text-cyan-400 font-bold mb-1 flex items-center justify-between">
                     <span>F.R.I.D.A.Y.</span>
-                    <span class="text-[9px] text-cyan-600">gemini-3-flash-preview</span>
+                    <span class="text-[9px] text-cyan-600 font-mono">${escapeHtml(state.aiModel)}</span>
                 </div>
                 <p class="text-cyan-100 leading-relaxed">${escapeHtml(text)}</p>${citationHtml}`;
             } else {
@@ -789,6 +811,7 @@ ${state.vaultText}
 
         function openSettingsModal() {
             setElVal('apiKeyInput', state.apiKey);
+            setElVal('aiModelSelect', state.aiModel);
             setElVal('ttsEngineSelect', state.ttsEngine);
             setElVal('geminiVoiceSelect', state.geminiVoice);
             setElVal('clapSensitivity', state.clapThreshold);
@@ -804,17 +827,20 @@ ${state.vaultText}
 
         bind('saveSettingsBtn', 'click', () => {
             state.apiKey = getElVal('apiKeyInput').trim();
+            state.aiModel = getElVal('aiModelSelect') || 'gemini-2.5-flash-lite';
             state.ttsEngine = getElVal('ttsEngineSelect') || 'web';
             state.geminiVoice = getElVal('geminiVoiceSelect') || 'Aoede';
             state.clapThreshold = parseFloat(getElVal('clapSensitivity')) || 0.20;
 
             localStorage.setItem('friday_gemini_key', state.apiKey);
+            localStorage.setItem('friday_ai_model', state.aiModel);
             localStorage.setItem('friday_tts_engine', state.ttsEngine);
             localStorage.setItem('friday_gemini_voice', state.geminiVoice);
             localStorage.setItem('friday_clap_sens', state.clapThreshold);
 
+            updateModelBadge();
             settingsModal?.classList.add('hidden');
-            appendLog('SYSTEM', '設定を保存しました。');
+            appendLog('SYSTEM', `設定を保存しました。(思考モデル: ${state.aiModel})`);
         });
 
         bind('clapSensitivity', 'input', (e) => {
@@ -849,6 +875,8 @@ ${state.vaultText}
         window.addEventListener('click', () => {
             if (!audioCtx) initClapDetector();
         }, { once: true });
+
+        updateModelBadge();
     </script>
 </body>
 </html>
