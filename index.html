@@ -67,6 +67,7 @@
 </head>
 <body class="min-h-screen flex flex-col scanline select-none relative">
 
+    <!-- Header -->
     <header class="w-full bg-slate-950/90 border-b border-cyan-500/30 px-4 md:px-6 py-3.5 flex justify-between items-center backdrop-blur-md z-20 sticky top-0">
         <div class="flex items-center space-x-3">
             <div class="relative flex h-3.5 w-3.5">
@@ -74,7 +75,7 @@
                 <span class="relative inline-flex rounded-full h-3.5 w-3.5 bg-cyan-500"></span>
             </div>
             <h1 class="text-lg md:text-xl font-extrabold font-orbitron tracking-wider text-cyan-400 text-glow-cyan flex items-center gap-2">
-                F.R.I.D.A.Y. <span class="text-[10px] md:text-xs text-cyan-600 font-mono font-normal border border-cyan-800/80 px-2 py-0.5 rounded-full bg-cyan-950/50">GEMINI 3.0 CORE</span>
+                F.R.I.D.A.Y. <span class="text-[10px] md:text-xs text-cyan-600 font-mono font-normal border border-cyan-800/80 px-2 py-0.5 rounded-full bg-cyan-950/50">GEMINI AI CORE</span>
             </h1>
         </div>
 
@@ -91,15 +92,17 @@
         </div>
     </header>
 
+    <!-- Main Content -->
     <main class="flex-1 max-w-7xl w-full mx-auto p-3 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-5 z-10">
         
+        <!-- HUD & Visual Section -->
         <section class="lg:col-span-7 flex flex-col items-center justify-between bg-slate-950/70 border border-cyan-500/30 rounded-2xl p-4 md:p-6 relative overflow-hidden neon-glow-cyan radar-grid">
             
             <!-- Corner Decors -->
             <div class="w-full flex justify-between items-center text-[10px] font-orbitron text-cyan-500/70 mb-2">
                 <div>SYS.LOC: FUKUI_GAKUEN // LAT: 36.065</div>
                 <div class="flex items-center gap-2">
-                    <span id="aiModelBadge" class="text-cyan-400 bg-cyan-950/80 px-2 py-0.5 rounded border border-cyan-500/30">gemini-3-flash-preview</span>
+                    <span id="aiModelBadge" class="text-cyan-400 bg-cyan-950/80 px-2 py-0.5 rounded border border-cyan-500/30">gemini-2.5-flash</span>
                 </div>
             </div>
             
@@ -159,6 +162,7 @@
             </div>
         </section>
 
+        <!-- Console & Chat Section -->
         <section class="lg:col-span-5 flex flex-col bg-slate-950/70 border border-cyan-500/30 rounded-2xl p-4 h-[580px] shadow-2xl">
             <div class="flex items-center justify-between pb-3 border-b border-cyan-500/20 mb-3">
                 <h2 class="text-xs font-bold font-orbitron text-cyan-400 flex items-center gap-2 tracking-wider">
@@ -180,7 +184,7 @@
                         <span class="text-[9px] text-cyan-600">SYSTEM ONLINE</span>
                     </div>
                     <p class="text-slate-200 leading-relaxed">
-                        オンラインです、ボス。Gemini 3.0 AIモデルの接続を確認しました。音声操作、画像解析、最新情報の検索、ホログラム生成に対応しています。
+                        オンラインです、ボス。Gemini AIモデルの接続を確認しました。音声操作、画像解析、最新情報の検索、ホログラム生成に対応しています。
                     </p>
                 </div>
             </div>
@@ -201,6 +205,7 @@
         </section>
     </main>
 
+    <!-- Memory Vault Modal -->
     <div id="vaultModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md hidden z-50 flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-cyan-500/40 rounded-2xl w-full max-w-2xl p-6 shadow-2xl relative">
             <button id="closeVaultBtn" class="absolute top-4 right-4 text-slate-400 hover:text-cyan-300 text-lg">
@@ -218,7 +223,7 @@
 【ごみ収集日】
 燃やせるごみ：火曜・金曜
 【生活ノート】
-研究とAIアプリ構築に注力中。"></textarea>
+研究とAIアシスタント構築に注力中。"></textarea>
 
             <div class="flex justify-between items-center mt-4">
                 <span id="vaultSavedMsg" class="text-xs text-emerald-400 hidden"><i class="fa-solid fa-check"></i> 記憶データを更新保存しました</span>
@@ -229,6 +234,7 @@
         </div>
     </div>
 
+    <!-- Configuration Modal -->
     <div id="settingsModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md hidden z-50 flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-cyan-500/40 rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
             <button id="closeSettingsBtn" class="absolute top-4 right-4 text-slate-400 hover:text-cyan-300 text-lg">
@@ -242,7 +248,16 @@
                 <div>
                     <label class="block font-orbitron text-cyan-300 mb-1">GEMINI API KEY</label>
                     <input type="password" id="apiKeyInput" placeholder="Google AI StudioのAPIキー (空欄時はキャンバス自動適用)" class="w-full bg-slate-950 border border-cyan-500/30 rounded-xl px-3 py-2 text-cyan-100 focus:outline-none focus:border-cyan-400">
-                    <p class="text-[10px] text-slate-500 mt-1">※空欄でもシステムに設定されたAPIキーで即座に試行します。</p>
+                    <p class="text-[10px] text-slate-500 mt-1">※空欄でもシステム設定キーで試行します。</p>
+                </div>
+
+                <div>
+                    <label class="block font-orbitron text-cyan-300 mb-1">AI MODEL (思考エンジン)</label>
+                    <select id="aiModelSelect" class="w-full bg-slate-950 border border-cyan-500/30 rounded-xl px-3 py-2 text-cyan-100 focus:outline-none focus:border-cyan-400">
+                        <option value="gemini-2.5-flash">Gemini 2.5 Flash (推奨・バランス型)</option>
+                        <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite (高速・制限が非常に緩い)</option>
+                        <option value="gemini-3-flash-preview">Gemini 3.0 Flash Preview (高機能)</option>
+                    </select>
                 </div>
 
                 <div>
@@ -282,11 +297,21 @@
         </div>
     </div>
 
+    <!-- Application Script Logic -->
     <script>
+        /* Safe Event Listener Binder Helper */
+        function bind(id, event, callback) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener(event, callback);
+            }
+        }
+
         /* State Variables & Configurations */
         let state = {
             status: 'STANDBY', // STANDBY, LISTENING, THINKING, SPEAKING, SCANNING, GENERATING
             apiKey: localStorage.getItem('friday_gemini_key') || '',
+            aiModel: localStorage.getItem('friday_ai_model') || 'gemini-2.5-flash',
             useSearchGrounding: false,
             ttsEngine: localStorage.getItem('friday_tts_engine') || 'gemini',
             geminiVoice: localStorage.getItem('friday_gemini_voice') || 'Aoede',
@@ -295,7 +320,7 @@
             vaultText: localStorage.getItem('friday_vault') || `【プロフィール】
 名前：大学生（福井市学園在住）
 【ごみ収集日】
-燃やせるごmi：火曜・金曜
+燃やせるごみ：火曜・金曜
 【生活ノート】
 研究とAIアシスタント構築に注力中。`
         };
@@ -321,10 +346,11 @@ ${state.vaultText}
 
         // Canvas HUD Renderer
         const canvas = document.getElementById('hudCanvas');
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas ? canvas.getContext('2d') : null;
         let angle = 0;
 
         function drawHUD() {
+            if (!ctx || !canvas) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             const cx = canvas.width / 2;
             const cy = canvas.height / 2;
@@ -388,7 +414,7 @@ ${state.vaultText}
 
             requestAnimationFrame(drawHUD);
         }
-        drawHUD();
+        if (canvas) drawHUD();
 
         let audioCtx = null;
         let analyser = null;
@@ -487,7 +513,8 @@ ${state.vaultText}
 
             try {
                 const apiKey = state.apiKey;
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+                const model = state.aiModel;
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
                 let parts = [{ text: promptText }];
                 if (imageBase64) {
@@ -504,7 +531,6 @@ ${state.vaultText}
                     systemInstruction: { parts: [{ text: getSystemPrompt() }] }
                 };
 
-                // Add Google Search Grounding if enabled
                 if (state.useSearchGrounding) {
                     payload.tools = [{ "google_search": {} }];
                 }
@@ -521,7 +547,6 @@ ${state.vaultText}
                 if (candidate && candidate.content?.parts?.[0]?.text) {
                     let replyText = candidate.content.parts[0].text;
                     
-                    // Extract citations from Grounding Metadata if present
                     let citations = [];
                     const groundingMetadata = candidate.groundingMetadata;
                     if (groundingMetadata && groundingMetadata.groundingAttributions) {
@@ -542,6 +567,8 @@ ${state.vaultText}
                 let msg = err.message;
                 if (err.message.includes('403')) {
                     msg = '⚠️ エラー 403 (Forbidden): APIキーが未設定または無効です。「CONFIG」ボタンから Google AI Studio の APIキーを設定してください。';
+                } else if (err.message.includes('429')) {
+                    msg = '⚠️ エラー 429 (Rate Limit): リクエスト制限に達しました。「CONFIG」で「Gemini 2.5 Flash-Lite」に変更してください。';
                 }
                 appendLog('SYSTEM', msg);
                 updateStatus('STANDBY', 'APIエラーが発生しました。CONFIGを確認してください。');
@@ -558,7 +585,7 @@ ${state.vaultText}
 
                 const payload = {
                     contents: [{
-                        parts: [{ text: `A futuristic holographic blueprint or HUD scheme of: ${promptText}. High tech, neon cyan glowing accent, transparent futuristic aesthetic` }]
+                        parts: [{ text: `A futuristic holographic blueprint or HUD scheme of: ${promptText}. High tech, neon cyan glowing accent, transparent aesthetic` }]
                     }],
                     generationConfig: {
                         responseModalities: ['IMAGE']
@@ -585,7 +612,7 @@ ${state.vaultText}
                 console.error('Image Gen Error:', err);
                 let msg = err.message;
                 if (err.message.includes('403')) {
-                    msg = '⚠️ 画像生成エラー (403): APIキーが無効か権限がありません。「CONFIG」でAPIキーを確認してください。';
+                    msg = '⚠️ 画像生成エラー (403): APIキーをご確認ください。';
                 }
                 appendLog('SYSTEM', msg);
                 updateStatus('STANDBY', '画像生成に失敗しました。');
@@ -609,7 +636,7 @@ ${state.vaultText}
             writeString(view, 8, 'WAVE');
             writeString(view, 12, 'fmt ');
             view.setUint32(16, 16, true);
-            view.setUint16(20, 1, true); // PCM format
+            view.setUint16(20, 1, true);
             view.setUint16(22, numChannels, true);
             view.setUint32(24, sampleRate, true);
             view.setUint32(28, byteRate, true);
@@ -675,11 +702,9 @@ ${state.vaultText}
                         return;
                     }
                 } catch (e) {
-                    console.warn('Gemini TTS failed, falling back to Web Speech Synthesis:', e);
-                    // 403等のエラー時は自動でブラウザ読み上げに切り替え
+                    console.warn('Gemini TTS failed, falling back to SpeechSynthesis:', e);
                 }
             }
-            // Fallback to browser SpeechSynthesis
             speakBrowserSpeech(text);
         }
 
@@ -714,11 +739,15 @@ ${state.vaultText}
                     const detail = errData.error?.message || 'アクセス拒否 (403)';
                     throw new Error(`403 Forbidden: ${detail}`);
                 }
+                if (res.status === 429) {
+                    const errData = await res.json().catch(() => ({}));
+                    const detail = errData.error?.message || 'レート制限 (429)';
+                    throw new Error(`429 Too Many Requests: ${detail}`);
+                }
                 if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
                 return res;
             } catch (err) {
-                // 403（権限エラー）の場合は再試行しても成功しないため即時スロー
-                if (err.message.includes('403') || retries <= 0) {
+                if (err.message.includes('403') || err.message.includes('429') || retries <= 0) {
                     throw err;
                 }
                 await new Promise(r => setTimeout(r, backoff));
@@ -747,6 +776,7 @@ ${state.vaultText}
 
         function appendLog(sender, text, citations = []) {
             const container = document.getElementById('logContainer');
+            if (!container) return;
             const box = document.createElement('div');
             
             if (sender === 'USER') {
@@ -764,7 +794,7 @@ ${state.vaultText}
                 }
                 box.innerHTML = `<div class="text-[10px] font-orbitron text-cyan-400 font-bold mb-1 flex items-center justify-between">
                     <span>F.R.I.D.A.Y.</span>
-                    <span class="text-[9px] text-cyan-600">GEMINI 3.0</span>
+                    <span class="text-[9px] text-cyan-600">${escapeHtml(state.aiModel)}</span>
                 </div>
                 <p class="text-cyan-100 leading-relaxed">${escapeHtml(text)}</p>${citationHtml}`;
             } else {
@@ -778,6 +808,7 @@ ${state.vaultText}
 
         function appendImageLog(sender, text, imageUrl) {
             const container = document.getElementById('logContainer');
+            if (!container) return;
             const box = document.createElement('div');
             box.className = 'bg-cyan-950/40 border border-purple-500/40 rounded-xl p-3 mr-4 space-y-2';
             box.innerHTML = `
@@ -790,65 +821,70 @@ ${state.vaultText}
         }
 
         function escapeHtml(str) {
-            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            return (str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
 
         function updateStatus(newStatus, subText = '') {
             state.status = newStatus;
-            document.getElementById('hudStatusText').innerText = newStatus;
-            if (subText) {
-                document.getElementById('hudSubText').innerText = subText;
-            }
+            const statusEl = document.getElementById('hudStatusText');
+            const subEl = document.getElementById('hudSubText');
+            if (statusEl) statusEl.innerText = newStatus;
+            if (subEl && subText) subEl.innerText = subText;
         }
 
-        document.getElementById('micBtn').addEventListener('click', () => {
+        /* Safe Event Listener Bindings */
+        bind('micBtn', 'click', () => {
             if (state.status === 'STANDBY') startVoiceRecognition();
         });
 
-        document.getElementById('stopSpeakBtn').addEventListener('click', () => {
-            window.speechSynthesis.cancel();
+        bind('stopSpeakBtn', 'click', () => {
+            window.speechSynthesis?.cancel();
             updateStatus('STANDBY', '消音処理を完了しました。');
         });
 
-        document.getElementById('clapToggleBtn').addEventListener('click', () => {
+        bind('clapToggleBtn', 'click', () => {
             state.clapEnabled = !state.clapEnabled;
-            document.getElementById('clapStatusText').innerText = state.clapEnabled ? 'クラップ: ON' : 'クラップ: OFF';
+            const statusText = document.getElementById('clapStatusText');
+            if (statusText) statusText.innerText = state.clapEnabled ? 'クラップ: ON' : 'クラップ: OFF';
         });
 
-        document.getElementById('toggleSearchBtn').addEventListener('click', () => {
+        bind('toggleSearchBtn', 'click', () => {
             state.useSearchGrounding = !state.useSearchGrounding;
             const btnText = document.getElementById('searchModeText');
-            btnText.innerText = state.useSearchGrounding ? 'ON' : 'OFF';
-            btnText.className = state.useSearchGrounding ? 'text-emerald-400 font-bold' : 'text-slate-400';
+            if (btnText) {
+                btnText.innerText = state.useSearchGrounding ? 'ON' : 'OFF';
+                btnText.className = state.useSearchGrounding ? 'text-emerald-400 font-bold' : 'text-slate-400';
+            }
             appendLog('SYSTEM', `Web検索グラウンディングを ${state.useSearchGrounding ? '有効' : '無効'} に設定しました。`);
         });
 
-        document.getElementById('quickBriefingBtn').addEventListener('click', () => {
+        bind('quickBriefingBtn', 'click', () => {
             const briefingQuery = '本日の予定、重要ノートの確認、および最新ニュースを含む要約ブリーフィングを報告してください。';
             appendLog('USER', '⚡ 本日のデイリーブリーフィングを実行');
             handleUserQuery(briefingQuery);
         });
 
-        document.getElementById('genImageBtn').addEventListener('click', () => {
-            const prompt = prompt('生成したいホログラム概念図・画像の指示を入力してください:', 'アイアンマンのアークリアクター設計図');
-            if (prompt) generateHologramImage(prompt);
+        bind('genImageBtn', 'click', () => {
+            const promptVal = prompt('生成したいホログラム概念図・画像の指示を入力してください:', 'アイアンマンのアークリアクター設計図');
+            if (promptVal) generateHologramImage(promptVal);
         });
 
         const cameraContainer = document.getElementById('cameraPreviewContainer');
         const videoEl = document.getElementById('webcamVideo');
 
-        document.getElementById('openCameraBtn').addEventListener('click', async () => {
+        bind('openCameraBtn', 'click', async () => {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                videoEl.srcObject = stream;
-                cameraContainer.classList.remove('hidden');
+                if (videoEl) videoEl.srcObject = stream;
+                if (cameraContainer) cameraContainer.classList.remove('hidden');
                 updateStatus('SCANNING', 'カメラ映像の解析準備完了');
             } catch (err) {
                 alert('カメラの起動に失敗しました: ' + err.message);
             }
         });
 
-        document.getElementById('captureScanBtn').addEventListener('click', () => {
+        bind('captureScanBtn', 'click', () => {
+            if (!videoEl) return;
             const tempCanvas = document.createElement('canvas');
             tempCanvas.width = videoEl.videoWidth || 640;
             tempCanvas.height = videoEl.videoHeight || 480;
@@ -856,21 +892,19 @@ ${state.vaultText}
             ctx2d.drawImage(videoEl, 0, 0);
             const base64Img = tempCanvas.toDataURL('image/jpeg');
 
-            // Close camera
             const stream = videoEl.srcObject;
             if (stream) stream.getTracks().forEach(t => t.stop());
-            cameraContainer.classList.add('hidden');
+            if (cameraContainer) cameraContainer.classList.add('hidden');
 
             appendLog('USER', '📷 カメラ画像の解析要求');
             handleUserQuery('この画像を詳細に分析してレポートしてください。', base64Img);
         });
 
-        // File upload image handler
-        document.getElementById('uploadImgBtn').addEventListener('click', () => {
-            document.getElementById('imageFileInput').click();
+        bind('uploadImgBtn', 'click', () => {
+            document.getElementById('imageFileInput')?.click();
         });
 
-        document.getElementById('imageFileInput').addEventListener('change', (e) => {
+        bind('imageFileInput', 'change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
             const reader = new FileReader();
@@ -881,9 +915,10 @@ ${state.vaultText}
             reader.readAsDataURL(file);
         });
 
-        document.getElementById('textForm').addEventListener('submit', (e) => {
+        bind('textForm', 'submit', (e) => {
             e.preventDefault();
             const input = document.getElementById('userInput');
+            if (!input) return;
             const text = input.value.trim();
             if (!text) return;
             input.value = '';
@@ -891,58 +926,84 @@ ${state.vaultText}
             handleUserQuery(text);
         });
 
-        document.getElementById('clearLogBtn').addEventListener('click', () => {
-            document.getElementById('logContainer').innerHTML = '';
+        bind('clearLogBtn', 'click', () => {
+            const container = document.getElementById('logContainer');
+            if (container) container.innerHTML = '';
         });
 
         const vaultModal = document.getElementById('vaultModal');
         const settingsModal = document.getElementById('settingsModal');
 
         function openSettingsModal() {
-            document.getElementById('apiKeyInput').value = state.apiKey;
-            document.getElementById('ttsEngineSelect').value = state.ttsEngine;
-            document.getElementById('geminiVoiceSelect').value = state.geminiVoice;
-            document.getElementById('clapSensitivity').value = state.clapThreshold;
-            document.getElementById('clapSensVal').innerText = state.clapThreshold.toFixed(2);
-            settingsModal.classList.remove('hidden');
+            const apiKeyInput = document.getElementById('apiKeyInput');
+            const aiModelSelect = document.getElementById('aiModelSelect');
+            const ttsEngineSelect = document.getElementById('ttsEngineSelect');
+            const geminiVoiceSelect = document.getElementById('geminiVoiceSelect');
+            const clapSensitivity = document.getElementById('clapSensitivity');
+            const clapSensVal = document.getElementById('clapSensVal');
+
+            if (apiKeyInput) apiKeyInput.value = state.apiKey;
+            if (aiModelSelect) aiModelSelect.value = state.aiModel;
+            if (ttsEngineSelect) ttsEngineSelect.value = state.ttsEngine;
+            if (geminiVoiceSelect) geminiVoiceSelect.value = state.geminiVoice;
+            if (clapSensitivity) clapSensitivity.value = state.clapThreshold;
+            if (clapSensVal) clapSensVal.innerText = state.clapThreshold.toFixed(2);
+            
+            settingsModal?.classList.remove('hidden');
         }
 
-        document.getElementById('openSettingsBtn').addEventListener('click', openSettingsModal);
-        document.getElementById('closeSettingsBtn').addEventListener('click', () => settingsModal.classList.add('hidden'));
+        bind('openSettingsBtn', 'click', openSettingsModal);
+        bind('closeSettingsBtn', 'click', () => settingsModal?.classList.add('hidden'));
 
-        document.getElementById('saveSettingsBtn').addEventListener('click', () => {
-            state.apiKey = document.getElementById('apiKeyInput').value.trim();
-            state.ttsEngine = document.getElementById('ttsEngineSelect').value;
-            state.geminiVoice = document.getElementById('geminiVoiceSelect').value;
-            state.clapThreshold = parseFloat(document.getElementById('clapSensitivity').value);
+        bind('saveSettingsBtn', 'click', () => {
+            const apiKeyInput = document.getElementById('apiKeyInput');
+            const aiModelSelect = document.getElementById('aiModelSelect');
+            const ttsEngineSelect = document.getElementById('ttsEngineSelect');
+            const geminiVoiceSelect = document.getElementById('geminiVoiceSelect');
+            const clapSensitivity = document.getElementById('clapSensitivity');
+            const aiModelBadge = document.getElementById('aiModelBadge');
+
+            if (apiKeyInput) state.apiKey = apiKeyInput.value.trim();
+            if (aiModelSelect) state.aiModel = aiModelSelect.value;
+            if (ttsEngineSelect) state.ttsEngine = ttsEngineSelect.value;
+            if (geminiVoiceSelect) state.geminiVoice = geminiVoiceSelect.value;
+            if (clapSensitivity) state.clapThreshold = parseFloat(clapSensitivity.value);
 
             localStorage.setItem('friday_gemini_key', state.apiKey);
+            localStorage.setItem('friday_ai_model', state.aiModel);
             localStorage.setItem('friday_tts_engine', state.ttsEngine);
             localStorage.setItem('friday_gemini_voice', state.geminiVoice);
             localStorage.setItem('friday_clap_sens', state.clapThreshold);
 
-            settingsModal.classList.add('hidden');
+            if (aiModelBadge) aiModelBadge.innerText = state.aiModel;
+
+            settingsModal?.classList.add('hidden');
             appendLog('SYSTEM', '設定およびGemini API構成を更新保存しました。');
         });
 
-        document.getElementById('clapSensitivity').addEventListener('input', (e) => {
-            document.getElementById('clapSensVal').innerText = parseFloat(e.target.value).toFixed(2);
+        bind('clapSensitivity', 'input', (e) => {
+            const valSpan = document.getElementById('clapSensVal');
+            if (valSpan) valSpan.innerText = parseFloat(e.target.value).toFixed(2);
         });
 
-        document.getElementById('openVaultBtn').addEventListener('click', () => {
-            document.getElementById('vaultContent').value = state.vaultText;
-            vaultModal.classList.remove('hidden');
+        bind('openVaultBtn', 'click', () => {
+            const vaultContent = document.getElementById('vaultContent');
+            if (vaultContent) vaultContent.value = state.vaultText;
+            vaultModal?.classList.remove('hidden');
         });
 
-        document.getElementById('closeVaultBtn').addEventListener('click', () => vaultModal.classList.add('hidden'));
+        bind('closeVaultBtn', 'click', () => vaultModal?.classList.add('hidden'));
 
-        document.getElementById('saveVaultBtn').addEventListener('click', () => {
-            state.vaultText = document.getElementById('vaultContent').value;
+        bind('saveVaultBtn', 'click', () => {
+            const vaultContent = document.getElementById('vaultContent');
+            if (vaultContent) state.vaultText = vaultContent.value;
             localStorage.setItem('friday_vault', state.vaultText);
             
             const msg = document.getElementById('vaultSavedMsg');
-            msg.classList.remove('hidden');
-            setTimeout(() => msg.classList.add('hidden'), 2000);
+            if (msg) {
+                msg.classList.remove('hidden');
+                setTimeout(() => msg.classList.add('hidden'), 2000);
+            }
         });
 
         /* Keyboard Shortcut: Space Key Trigger */
