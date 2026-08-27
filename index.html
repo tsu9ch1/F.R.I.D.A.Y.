@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>F.R.I.D.A.Y. - Web AI Assistant with Gemini API</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts (Orbitron & Noto Sans JP) -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;700&family=Orbitron:wght@400;600;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            background-color: #020617;
+            color: #00f0ff;
+            font-family: 'Noto Sans JP', sans-serif;
+            overflow-x: hidden;
+        }
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+        /* HUD Neon Glow Effects */
+        .neon-glow-cyan {
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.25), inset 0 0 15px rgba(0, 240, 255, 0.15);
+        }
+        .text-glow-cyan {
+            text-shadow: 0 0 8px rgba(0, 240, 255, 0.8);
+        }
+        .text-glow-amber {
+            text-shadow: 0 0 8px rgba(245, 158, 11, 0.8);
+        }
+        .neon-border {
+            border: 1px solid rgba(0, 240, 255, 0.4);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #030712;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #00f0ff44;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00f0ffaa;
+        }
+        /* Scanline Background Layer */
+        .scanline {
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0, 240, 255, 0.04) 50%,
+                rgba(0, 240, 255, 0.04)
+            );
+            background-size: 100% 4px;
+        }
+        .radar-grid {
+            background-image: radial-gradient(rgba(0, 240, 255, 0.12) 1px, transparent 0);
+            background-size: 16px 16px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col scanline select-none relative">
+
+    <header class="w-full bg-slate-950/90 border-b border-cyan-500/30 px-4 md:px-6 py-3.5 flex justify-between items-center backdrop-blur-md z-20 sticky top-0">
+        <div class="flex items-center space-x-3">
+            <div class="relative flex h-3.5 w-3.5">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-3.5 w-3.5 bg-cyan-500"></span>
+            </div>
+            <h1 class="text-lg md:text-xl font-extrabold font-orbitron tracking-wider text-cyan-400 text-glow-cyan flex items-center gap-2">
+                F.R.I.D.A.Y. <span class="text-[10px] md:text-xs text-cyan-600 font-mono font-normal border border-cyan-800/80 px-2 py-0.5 rounded-full bg-cyan-950/50">GEMINI 3.0 CORE</span>
+            </h1>
+        </div>
+
+        <div class="flex items-center space-x-2 md:space-x-3">
+            <div id="connectionStatus" class="hidden sm:flex items-center text-xs font-orbitron px-3 py-1 rounded-full border border-emerald-500/40 bg-emerald-950/30 text-emerald-400">
+                <i class="fa-solid fa-bolt mr-2 text-xs animate-pulse"></i> GEMINI LIVE
+            </div>
+            <button id="openVaultBtn" class="px-3 py-1.5 rounded-lg border border-cyan-500/40 hover:bg-cyan-500/20 text-cyan-300 text-xs font-orbitron transition flex items-center gap-1.5">
+                <i class="fa-solid fa-brain text-cyan-400"></i> <span class="hidden md:inline">VAULT</span> MEMORY
+            </button>
+            <button id="openSettingsBtn" class="px-3 py-1.5 rounded-lg border border-cyan-500/40 hover:bg-cyan-500/20 text-cyan-300 text-xs font-orbitron transition flex items-center gap-1.5">
+                <i class="fa-solid fa-sliders text-cyan-400"></i> CONFIG
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto p-3 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-5 z-10">
+        
+        <section class="lg:col-span-7 flex flex-col items-center justify-between bg-slate-950/70 border border-cyan-500/30 rounded-2xl p-4 md:p-6 relative overflow-hidden neon-glow-cyan radar-grid">
+            
+            <!-- Corner Decors -->
+            <div class="w-full flex justify-between items-center text-[10px] font-orbitron text-cyan-500/70 mb-2">
+                <div>SYS.LOC: FUKUI_GAKUEN // LAT: 36.065</div>
+                <div class="flex items-center gap-2">
+                    <span id="aiModelBadge" class="text-cyan-400 bg-cyan-950/80 px-2 py-0.5 rounded border border-cyan-500/30">gemini-3-flash-preview</span>
+                </div>
+            </div>
+            
+            <!-- Central Hologram Canvas -->
+            <div class="relative w-full aspect-square max-w-[340px] md:max-w-[380px] flex items-center justify-center my-2">
+                <canvas id="hudCanvas" width="400" height="400" class="w-full h-full drop-shadow-[0_0_15px_rgba(0,240,255,0.4)]"></canvas>
+
+                <!-- Floating Live Vision Preview Overlay -->
+                <div id="cameraPreviewContainer" class="absolute inset-0 bg-slate-950/90 rounded-full border-2 border-cyan-400 overflow-hidden hidden flex-col items-center justify-center p-2">
+                    <video id="webcamVideo" autoplay playsinline class="w-full h-full object-cover rounded-full opacity-80"></video>
+                    <button id="captureScanBtn" class="absolute bottom-4 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-orbitron font-bold text-xs px-4 py-1.5 rounded-full shadow-lg transition">
+                        <i class="fa-solid fa-camera mr-1"></i> スキャン実行
+                    </button>
+                </div>
+            </div>
+
+            <!-- Status Indicator Text -->
+            <div class="text-center space-y-1 mb-4">
+                <div id="hudStatusText" class="text-lg md:text-xl font-bold font-orbitron text-cyan-300 tracking-widest text-glow-cyan">
+                    STANDBY
+                </div>
+                <div id="hudSubText" class="text-xs md:text-sm text-slate-400 font-sans">
+                    [SPACE]キー または 手たたき（クラップ）音でフライデーを起動
+                </div>
+            </div>
+
+            <!-- AI Special Quick Actions Bar -->
+            <div class="w-full grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
+                <button id="quickBriefingBtn" class="py-2 px-3 rounded-xl border border-cyan-500/40 bg-cyan-950/40 hover:bg-cyan-500/20 text-cyan-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition">
+                    <i class="fa-solid fa-newspaper text-cyan-400"></i> 本日の要約
+                </button>
+                <button id="toggleSearchBtn" class="py-2 px-3 rounded-xl border border-cyan-500/40 bg-slate-900 hover:bg-cyan-900/30 text-cyan-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition">
+                    <i class="fa-solid fa-globe text-cyan-400"></i> Web検索: <span id="searchModeText" class="text-slate-400">OFF</span>
+                </button>
+                <button id="genImageBtn" class="py-2 px-3 rounded-xl border border-purple-500/40 bg-purple-950/30 hover:bg-purple-500/20 text-purple-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition">
+                    <i class="fa-solid fa-wand-magic-sparkles text-purple-400"></i> 画像生成
+                </button>
+                <button id="openCameraBtn" class="py-2 px-3 rounded-xl border border-amber-500/40 bg-amber-950/30 hover:bg-amber-500/20 text-amber-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition">
+                    <i class="fa-solid fa-eye text-amber-400"></i> 画像解析
+                </button>
+            </div>
+
+            <!-- Primary Voice Controls -->
+            <div class="w-full grid grid-cols-3 gap-2.5">
+                <button id="micBtn" class="py-3 px-3 rounded-xl border border-cyan-500/60 bg-cyan-950/50 hover:bg-cyan-500/25 text-cyan-300 font-bold text-xs md:text-sm flex items-center justify-center gap-2 transition active:scale-95 shadow-lg">
+                    <i id="micIcon" class="fa-solid fa-microphone text-cyan-400 text-base"></i>
+                    <span id="micBtnText">話しかける</span>
+                </button>
+                <button id="clapToggleBtn" class="py-3 px-3 rounded-xl border border-amber-500/50 bg-amber-950/30 hover:bg-amber-500/20 text-amber-300 font-bold text-xs md:text-sm flex items-center justify-center gap-2 transition">
+                    <i class="fa-solid fa-hands-clapping text-base"></i>
+                    <span id="clapStatusText">クラップ: ON</span>
+                </button>
+                <button id="stopSpeakBtn" class="py-3 px-3 rounded-xl border border-rose-500/50 bg-rose-950/30 hover:bg-rose-500/20 text-rose-300 font-bold text-xs md:text-sm flex items-center justify-center gap-2 transition">
+                    <i class="fa-solid fa-volume-xmark text-base"></i>
+                    <span>消音</span>
+                </button>
+            </div>
+        </section>
+
+        <section class="lg:col-span-5 flex flex-col bg-slate-950/70 border border-cyan-500/30 rounded-2xl p-4 h-[580px] shadow-2xl">
+            <div class="flex items-center justify-between pb-3 border-b border-cyan-500/20 mb-3">
+                <h2 class="text-xs font-bold font-orbitron text-cyan-400 flex items-center gap-2 tracking-wider">
+                    <i class="fa-solid fa-terminal text-cyan-400"></i> DIALOGUE & ACTION CONSOLE
+                </h2>
+                <div class="flex items-center gap-2">
+                    <button id="clearLogBtn" class="text-xs text-slate-500 hover:text-cyan-400 transition flex items-center gap-1">
+                        <i class="fa-solid fa-trash"></i> クリア
+                    </button>
+                </div>
+            </div>
+
+            <!-- Scrollable Log Container -->
+            <div id="logContainer" class="flex-1 overflow-y-auto space-y-3.5 pr-1 font-sans text-xs md:text-sm">
+                <!-- Welcome Message -->
+                <div class="bg-cyan-950/30 border border-cyan-500/30 rounded-xl p-3 text-cyan-100">
+                    <div class="flex items-center justify-between text-[11px] font-orbitron text-cyan-400 font-bold mb-1">
+                        <span>F.R.I.D.A.Y.</span>
+                        <span class="text-[9px] text-cyan-600">SYSTEM ONLINE</span>
+                    </div>
+                    <p class="text-slate-200 leading-relaxed">
+                        オンラインです、ボス。Gemini 3.0 AIモデルの接続を確認しました。音声操作、画像解析、最新情報の検索、ホログラム生成に対応しています。
+                    </p>
+                </div>
+            </div>
+
+            <!-- Hidden File Input for Image Analysis -->
+            <input type="file" id="imageFileInput" accept="image/*" class="hidden">
+
+            <!-- Manual Text & Multimodal Form -->
+            <form id="textForm" class="mt-3 flex gap-2 pt-3 border-t border-cyan-500/20">
+                <button type="button" id="uploadImgBtn" title="画像を添付してGemini解析" class="bg-slate-900 border border-cyan-500/30 hover:bg-cyan-950 text-cyan-400 px-3 rounded-xl transition flex items-center justify-center">
+                    <i class="fa-solid fa-paperclip"></i>
+                </button>
+                <input type="text" id="userInput" placeholder="フライデーにメッセージまたは質問..." class="flex-1 bg-slate-900/90 border border-cyan-500/30 rounded-xl px-3.5 py-2 text-xs md:text-sm text-cyan-100 placeholder-slate-500 focus:outline-none focus:border-cyan-400 transition">
+                <button type="submit" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold px-4 rounded-xl transition flex items-center justify-center shadow-lg active:scale-95">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </form>
+        </section>
+    </main>
+
+    <div id="vaultModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-cyan-500/40 rounded-2xl w-full max-w-2xl p-6 shadow-2xl relative">
+            <button id="closeVaultBtn" class="absolute top-4 right-4 text-slate-400 hover:text-cyan-300 text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3 class="text-base font-bold font-orbitron text-cyan-400 mb-1 flex items-center gap-2">
+                <i class="fa-solid fa-brain text-cyan-400"></i> VAULT MEMORY (ナレッジ・記憶データ)
+            </h3>
+            <p class="text-xs text-slate-400 mb-3">
+                フライデーが参照するあなたのプロフィール・ごみ収集日・生活スケジュールノート（Obsidian同期用）です。
+            </p>
+
+            <textarea id="vaultContent" rows="10" class="w-full bg-slate-950 border border-cyan-500/30 rounded-xl p-3 text-xs md:text-sm text-cyan-100 font-mono focus:outline-none focus:border-cyan-400" placeholder="【プロフィール】
+名前：大学生（福井市学園在住）
+【ごみ収集日】
+燃やせるごみ：火曜・金曜
+【生活ノート】
+研究とAIアプリ構築に注力中。"></textarea>
+
+            <div class="flex justify-between items-center mt-4">
+                <span id="vaultSavedMsg" class="text-xs text-emerald-400 hidden"><i class="fa-solid fa-check"></i> 記憶データを更新保存しました</span>
+                <button id="saveVaultBtn" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold px-6 py-2 rounded-xl transition text-xs md:text-sm">
+                    保存する
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="settingsModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-cyan-500/40 rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
+            <button id="closeSettingsBtn" class="absolute top-4 right-4 text-slate-400 hover:text-cyan-300 text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3 class="text-base font-bold font-orbitron text-cyan-400 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-sliders text-cyan-400"></i> CONFIGURATION
+            </h3>
+
+            <div class="space-y-4 text-xs md:text-sm">
+                <div>
+                    <label class="block font-orbitron text-cyan-300 mb-1">GEMINI API KEY</label>
+                    <input type="password" id="apiKeyInput" placeholder="Google AI StudioのAPIキー (空欄時はキャンバス自動適用)" class="w-full bg-slate-950 border border-cyan-500/30 rounded-xl px-3 py-2 text-cyan-100 focus:outline-none focus:border-cyan-400">
+                    <p class="text-[10px] text-slate-500 mt-1">※空欄でもシステムに設定されたAPIキーで即座に試行します。</p>
+                </div>
+
+                <div>
+                    <label class="block font-orbitron text-cyan-300 mb-1">TTS 音声エンジン選択</label>
+                    <select id="ttsEngineSelect" class="w-full bg-slate-950 border border-cyan-500/30 rounded-xl px-3 py-2 text-cyan-100 focus:outline-none focus:border-cyan-400">
+                        <option value="gemini">Gemini 2.5 Neural TTS (高品質)</option>
+                        <option value="web">ブラウザ内蔵 SpeechSynthesis</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block font-orbitron text-cyan-300 mb-1">Gemini AI ボイスタイプ</label>
+                    <select id="geminiVoiceSelect" class="w-full bg-slate-950 border border-cyan-500/30 rounded-xl px-3 py-2 text-cyan-100 focus:outline-none focus:border-cyan-400">
+                        <option value="Aoede">Aoede (明るく爽やか)</option>
+                        <option value="Kore">Kore (落ち着いた女性声)</option>
+                        <option value="Zephyr">Zephyr (スマート・ハキハキ)</option>
+                        <option value="Puck">Puck (アップビート)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block font-orbitron text-cyan-300 mb-1">CLAP THRESHOLD (手たたき起動感度)</label>
+                    <input type="range" id="clapSensitivity" min="0.05" max="0.5" step="0.01" value="0.2" class="w-full accent-cyan-400">
+                    <div class="flex justify-between text-[10px] text-slate-400">
+                        <span>高感度 (0.05)</span>
+                        <span id="clapSensVal">0.20</span>
+                        <span>低感度 (0.50)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 flex justify-end">
+                <button id="saveSettingsBtn" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold px-6 py-2 rounded-xl transition text-xs md:text-sm">
+                    設定を保存
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* State Variables & Configurations */
+        let state = {
+            status: 'STANDBY', // STANDBY, LISTENING, THINKING, SPEAKING, SCANNING, GENERATING
+            apiKey: localStorage.getItem('friday_gemini_key') || '',
+            useSearchGrounding: false,
+            ttsEngine: localStorage.getItem('friday_tts_engine') || 'gemini',
+            geminiVoice: localStorage.getItem('friday_gemini_voice') || 'Aoede',
+            clapEnabled: true,
+            clapThreshold: parseFloat(localStorage.getItem('friday_clap_sens')) || 0.20,
+            vaultText: localStorage.getItem('friday_vault') || `【プロフィール】
+名前：大学生（福井市学園在住）
+【ごみ収集日】
+燃やせるごmi：火曜・金曜
+【生活ノート】
+研究とAIアシスタント構築に注力中。`
+        };
+
+        // System Prompt defining the F.R.I.D.A.Y. Persona
+        function getSystemPrompt() {
+            return `あなたはF.R.I.D.A.Y.（フライデー）という名前の高度AIアシスタントです。
+- 知的で仕事が早く、非常に優秀な女性AIです。
+- ユーザーを「ボス」と呼びます（公式な場面では「サー」）。
+- フランクでテンポが良く、人間味のある親しみやすさを持ちます。
+- 時に軽いジョークや皮肉（ウィット）を交えます。
+- 長々と語らず、要点をテキパキと短くスマートに伝えます。
+- 日本語で返答します。
+
+【ボス（ユーザー）のナレッジ・記憶データ】:
+${state.vaultText}
+
+【Web操作コマンドフォーマット】
+ユーザーから操作や検索を頼まれた場合は、本文中に以下のコマンドを含めてください：
+- Webサイトを開く: EXECUTE:open_browser:https://...
+- Google検索する: EXECUTE:search:検索ワード`;
+        }
+
+        // Canvas HUD Renderer
+        const canvas = document.getElementById('hudCanvas');
+        const ctx = canvas.getContext('2d');
+        let angle = 0;
+
+        function drawHUD() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+
+            // Dynamic Status Color
+            let color = '#00f0ff';
+            if (state.status === 'LISTENING') color = '#ff3366';
+            else if (state.status === 'THINKING') color = '#f59e0b';
+            else if (state.status === 'SPEAKING') color = '#10b981';
+            else if (state.status === 'SCANNING') color = '#8b5cf6';
+            else if (state.status === 'GENERATING') color = '#d946ef';
+
+            angle = (angle + 0.03) % (Math.PI * 2);
+
+            // Outer Outer Ring
+            ctx.beginPath();
+            ctx.arc(cx, cy, 155, angle, angle + Math.PI * 0.7);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Outer Arc 1
+            ctx.beginPath();
+            ctx.arc(cx, cy, 140, angle, angle + Math.PI * 0.85);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 4;
+            ctx.stroke();
+
+            // Outer Arc 2
+            ctx.beginPath();
+            ctx.arc(cx, cy, 140, angle + Math.PI, angle + Math.PI * 1.7);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Inner Ring Counter Rotation
+            ctx.beginPath();
+            ctx.arc(cx, cy, 100, -angle * 1.5, -angle * 1.5 + Math.PI * 1.3);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3;
+            ctx.setLineDash([8, 6]);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Center Core Pulsing
+            const pulse = Math.sin(Date.now() / 200) * 4;
+            ctx.beginPath();
+            ctx.arc(cx, cy, 45 + pulse, 0, Math.PI * 2);
+            ctx.fillStyle = color;
+            ctx.shadowColor = color;
+            ctx.shadowBlur = 25;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            // Core Text
+            ctx.fillStyle = '#020617';
+            ctx.font = 'bold 11px Orbitron';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(state.status, cx, cy);
+
+            requestAnimationFrame(drawHUD);
+        }
+        drawHUD();
+
+        let audioCtx = null;
+        let analyser = null;
+
+        async function initClapDetector() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioCtx.createAnalyser();
+                const source = audioCtx.createMediaStreamSource(stream);
+                source.connect(analyser);
+
+                analyser.fftSize = 512;
+                const bufferLength = analyser.frequencyBinCount;
+                const dataArray = new Uint8Array(bufferLength);
+
+                function checkAudioSpike() {
+                    if (state.clapEnabled && state.status === 'STANDBY') {
+                        analyser.getByteFrequencyData(dataArray);
+                        let sum = 0;
+                        for (let i = 0; i < bufferLength; i++) {
+                            sum += dataArray[i];
+                        }
+                        let average = sum / bufferLength / 255;
+
+                        if (average > state.clapThreshold) {
+                            console.log('Clap detected! Level:', average);
+                            startVoiceRecognition();
+                        }
+                    }
+                    setTimeout(checkAudioSpike, 80);
+                }
+                checkAudioSpike();
+            } catch (err) {
+                console.warn('Microphone access for clap detection unverified:', err);
+            }
+        }
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition = null;
+
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.lang = 'ja-JP';
+            recognition.interimResults = false;
+
+            recognition.onstart = () => {
+                updateStatus('LISTENING', 'どうぞ、ボス。話しかけてください...');
+            };
+
+            recognition.onresult = (event) => {
+                const text = event.results[0][0].transcript;
+                appendLog('USER', text);
+                handleUserQuery(text);
+            };
+
+            recognition.onerror = (event) => {
+                console.error('Speech recognition error:', event.error);
+                updateStatus('STANDBY', '音声入力エラーが発生しました。');
+            };
+
+            recognition.onend = () => {
+                if (state.status === 'LISTENING') {
+                    updateStatus('STANDBY', '[SPACE]キー または クラップ音で起動');
+                }
+            };
+        }
+
+        function startVoiceRecognition() {
+            if (!recognition) {
+                alert('お使いのブラウザはWeb Speech APIに対応していません。ChromeまたはEdgeをご使用ください。');
+                return;
+            }
+            if (state.status !== 'STANDBY') return;
+            
+            try {
+                if (audioCtx && audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                recognition.start();
+            } catch (e) {
+                console.warn(e);
+            }
+        }
+
+        async function handleUserQuery(promptText, imageBase64 = null) {
+            updateStatus('THINKING', 'Gemini AIで思考中...');
+
+            // Check if user requested image generation
+            if (!imageBase64 && (promptText.includes('画像') || promptText.includes('描いて') || promptText.includes('生成') || promptText.includes('ホログラム'))) {
+                if (promptText.includes('生成') || promptText.includes('描いて') || promptText.includes('画像')) {
+                    generateHologramImage(promptText);
+                    return;
+                }
+            }
+
+            try {
+                const apiKey = state.apiKey;
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+                let parts = [{ text: promptText }];
+                if (imageBase64) {
+                    parts.push({
+                        inlineData: {
+                            mimeType: 'image/jpeg',
+                            data: imageBase64.split(',')[1] || imageBase64
+                        }
+                    });
+                }
+
+                const payload = {
+                    contents: [{ parts: parts }],
+                    systemInstruction: { parts: [{ text: getSystemPrompt() }] }
+                };
+
+                // Add Google Search Grounding if enabled
+                if (state.useSearchGrounding) {
+                    payload.tools = [{ "google_search": {} }];
+                }
+
+                const response = await fetchWithRetry(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                const candidate = result.candidates?.[0];
+
+                if (candidate && candidate.content?.parts?.[0]?.text) {
+                    let replyText = candidate.content.parts[0].text;
+                    
+                    // Extract citations from Grounding Metadata if present
+                    let citations = [];
+                    const groundingMetadata = candidate.groundingMetadata;
+                    if (groundingMetadata && groundingMetadata.groundingAttributions) {
+                        citations = groundingMetadata.groundingAttributions
+                            .map(attr => ({ uri: attr.web?.uri, title: attr.web?.title }))
+                            .filter(src => src.uri && src.title);
+                    }
+
+                    const cleanReply = parseAndExecuteCommands(replyText);
+                    appendLog('F.R.I.D.A.Y.', cleanReply, citations);
+                    speakText(cleanReply);
+                } else {
+                    throw new Error('無効な応答データ構造です。');
+                }
+
+            } catch (err) {
+                console.error('Gemini API Fetch Error:', err);
+                let msg = err.message;
+                if (err.message.includes('403')) {
+                    msg = '⚠️ エラー 403 (Forbidden): APIキーが未設定または無効です。「CONFIG」ボタンから Google AI Studio の APIキーを設定してください。';
+                }
+                appendLog('SYSTEM', msg);
+                updateStatus('STANDBY', 'APIエラーが発生しました。CONFIGを確認してください。');
+            }
+        }
+
+        async function generateHologramImage(promptText) {
+            updateStatus('GENERATING', 'ホログラム画像を合成中...');
+            appendLog('SYSTEM', `🎨 ホログラム画像生成プロセスを開始: "${promptText}"`);
+
+            try {
+                const apiKey = state.apiKey;
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${apiKey}`;
+
+                const payload = {
+                    contents: [{
+                        parts: [{ text: `A futuristic holographic blueprint or HUD scheme of: ${promptText}. High tech, neon cyan glowing accent, transparent futuristic aesthetic` }]
+                    }],
+                    generationConfig: {
+                        responseModalities: ['IMAGE']
+                    }
+                };
+
+                const response = await fetchWithRetry(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                const part = result?.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+
+                if (part && part.inlineData) {
+                    const imageUrl = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+                    appendImageLog('F.R.I.D.A.Y.', `ボス、ご要求のホログラム画像を合成しました。`, imageUrl);
+                    speakText('ボス、ホログラム画像の生成が完了しました。');
+                } else {
+                    throw new Error('画像の生成に失敗しました。');
+                }
+            } catch (err) {
+                console.error('Image Gen Error:', err);
+                let msg = err.message;
+                if (err.message.includes('403')) {
+                    msg = '⚠️ 画像生成エラー (403): APIキーが無効か権限がありません。「CONFIG」でAPIキーを確認してください。';
+                }
+                appendLog('SYSTEM', msg);
+                updateStatus('STANDBY', '画像生成に失敗しました。');
+            }
+        }
+
+        function pcmToWav(pcm16, sampleRate) {
+            const numChannels = 1;
+            const byteRate = sampleRate * numChannels * 2;
+            const blockAlign = numChannels * 2;
+            const dataSize = pcm16.length * 2;
+            const buffer = new ArrayBuffer(44 + dataSize);
+            const view = new DataView(buffer);
+
+            const writeString = (v, offset, str) => {
+                for (let i = 0; i < str.length; i++) v.setUint8(offset + i, str.charCodeAt(i));
+            };
+
+            writeString(view, 0, 'RIFF');
+            view.setUint32(4, 36 + dataSize, true);
+            writeString(view, 8, 'WAVE');
+            writeString(view, 12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true); // PCM format
+            view.setUint16(22, numChannels, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, byteRate, true);
+            view.setUint16(32, blockAlign, true);
+            view.setUint16(34, 16, true);
+            writeString(view, 36, 'data');
+            view.setUint32(40, dataSize, true);
+
+            let offset = 44;
+            for (let i = 0; i < pcm16.length; i++, offset += 2) {
+                view.setInt16(offset, pcm16[i], true);
+            }
+            return new Blob([buffer], { type: 'audio/wav' });
+        }
+
+        async function speakText(text) {
+            if (state.ttsEngine === 'gemini') {
+                try {
+                    updateStatus('SPEAKING', 'Gemini AI 音声出力中...');
+                    const apiKey = state.apiKey;
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+
+                    const payload = {
+                        contents: [{ parts: [{ text: `Say in a smart, friendly, precise AI assistant voice: ${text}` }] }],
+                        generationConfig: {
+                            responseModalities: ["AUDIO"],
+                            speechConfig: {
+                                voiceConfig: {
+                                    prebuiltVoiceConfig: { voiceName: state.geminiVoice }
+                                }
+                            }
+                        }
+                    };
+
+                    const response = await fetchWithRetry(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const result = await response.json();
+                    const part = result?.candidates?.[0]?.content?.parts?.[0];
+                    const audioBase64 = part?.inlineData?.data;
+                    const mimeType = part?.inlineData?.mimeType || '';
+
+                    if (audioBase64) {
+                        const sampleRateMatch = mimeType.match(/rate=(\d+)/);
+                        const sampleRate = sampleRateMatch ? parseInt(sampleRateMatch[1], 10) : 24000;
+                        
+                        const binaryStr = atob(audioBase64);
+                        const len = binaryStr.length;
+                        const bytes = new Uint8Array(len);
+                        for (let i = 0; i < len; i++) bytes[i] = binaryStr.charCodeAt(i);
+                        
+                        const pcm16 = new Int16Array(bytes.buffer);
+                        const wavBlob = pcmToWav(pcm16, sampleRate);
+                        const audioUrl = URL.createObjectURL(wavBlob);
+                        
+                        const audio = new Audio(audioUrl);
+                        audio.onended = () => updateStatus('STANDBY', '[SPACE]キー または クラップ音で起動');
+                        audio.onerror = () => speakBrowserSpeech(text);
+                        audio.play();
+                        return;
+                    }
+                } catch (e) {
+                    console.warn('Gemini TTS failed, falling back to Web Speech Synthesis:', e);
+                    // 403等のエラー時は自動でブラウザ読み上げに切り替え
+                }
+            }
+            // Fallback to browser SpeechSynthesis
+            speakBrowserSpeech(text);
+        }
+
+        function speakBrowserSpeech(text) {
+            if (!('speechSynthesis' in window)) {
+                updateStatus('STANDBY', '音声出力非対応です。');
+                return;
+            }
+            window.speechSynthesis.cancel();
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'ja-JP';
+            utterance.rate = 1.1;
+
+            const voices = window.speechSynthesis.getVoices();
+            const jpVoice = voices.find(v => v.lang.includes('ja') && (v.name.includes('Nanami') || v.name.includes('Kyoko') || v.name.includes('Google')));
+            if (jpVoice) utterance.voice = jpVoice;
+
+            utterance.onstart = () => updateStatus('SPEAKING', text);
+            utterance.onend = () => updateStatus('STANDBY', '[SPACE]キー または クラップ音で起動');
+            utterance.onerror = () => updateStatus('STANDBY', '[SPACE]キー または クラップ音で起動');
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        /* Exponential Backoff Fetch Helper */
+        async function fetchWithRetry(url, options, retries = 3, backoff = 1000) {
+            try {
+                const res = await fetch(url, options);
+                if (res.status === 403) {
+                    const errData = await res.json().catch(() => ({}));
+                    const detail = errData.error?.message || 'アクセス拒否 (403)';
+                    throw new Error(`403 Forbidden: ${detail}`);
+                }
+                if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
+                return res;
+            } catch (err) {
+                // 403（権限エラー）の場合は再試行しても成功しないため即時スロー
+                if (err.message.includes('403') || retries <= 0) {
+                    throw err;
+                }
+                await new Promise(r => setTimeout(r, backoff));
+                return fetchWithRetry(url, options, retries - 1, backoff * 2);
+            }
+        }
+
+        /* Command Parsing Utility */
+        function parseAndExecuteCommands(text) {
+            const lines = text.split('\n');
+            const cleanLines = [];
+
+            for (let line of lines) {
+                if (line.includes('EXECUTE:open_browser:')) {
+                    const url = line.split('EXECUTE:open_browser:')[1].trim();
+                    window.open(url, '_blank');
+                } else if (line.includes('EXECUTE:search:')) {
+                    const query = line.split('EXECUTE:search:')[1].trim();
+                    window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank');
+                } else {
+                    cleanLines.push(line);
+                }
+            }
+            return cleanLines.join('\n').trim();
+        }
+
+        function appendLog(sender, text, citations = []) {
+            const container = document.getElementById('logContainer');
+            const box = document.createElement('div');
+            
+            if (sender === 'USER') {
+                box.className = 'bg-slate-900/90 border border-slate-700/80 rounded-xl p-3 text-right ml-6';
+                box.innerHTML = `<div class="text-[10px] font-orbitron text-slate-400 font-bold mb-1">YOU</div><p class="text-slate-100">${escapeHtml(text)}</p>`;
+            } else if (sender === 'F.R.I.D.A.Y.') {
+                box.className = 'bg-cyan-950/40 border border-cyan-500/40 rounded-xl p-3 mr-4';
+                let citationHtml = '';
+                if (citations.length > 0) {
+                    citationHtml = `<div class="mt-2.5 pt-2 border-t border-cyan-500/20 text-[10px] text-cyan-400">
+                        <div class="font-bold font-orbitron mb-1"><i class="fa-solid fa-link"></i> SOURCES:</div>
+                        <ul class="space-y-1">` + 
+                        citations.map(c => `<li><a href="${c.uri}" target="_blank" class="hover:underline text-cyan-300 truncate block">🔗 ${escapeHtml(c.title || c.uri)}</a></li>`).join('') +
+                        `</ul></div>`;
+                }
+                box.innerHTML = `<div class="text-[10px] font-orbitron text-cyan-400 font-bold mb-1 flex items-center justify-between">
+                    <span>F.R.I.D.A.Y.</span>
+                    <span class="text-[9px] text-cyan-600">GEMINI 3.0</span>
+                </div>
+                <p class="text-cyan-100 leading-relaxed">${escapeHtml(text)}</p>${citationHtml}`;
+            } else {
+                box.className = 'bg-purple-950/30 border border-purple-500/30 rounded-xl p-2.5 text-purple-300 text-xs';
+                box.innerText = text;
+            }
+
+            container.appendChild(box);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function appendImageLog(sender, text, imageUrl) {
+            const container = document.getElementById('logContainer');
+            const box = document.createElement('div');
+            box.className = 'bg-cyan-950/40 border border-purple-500/40 rounded-xl p-3 mr-4 space-y-2';
+            box.innerHTML = `
+                <div class="text-[10px] font-orbitron text-purple-400 font-bold">F.R.I.D.A.Y. // HOLOGRAM SYNTHESIS</div>
+                <p class="text-cyan-100">${escapeHtml(text)}</p>
+                <img src="${imageUrl}" class="w-full rounded-lg border border-purple-500/50 shadow-lg my-1 hover:scale-105 transition cursor-pointer" onclick="window.open(this.src)" />
+            `;
+            container.appendChild(box);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        function updateStatus(newStatus, subText = '') {
+            state.status = newStatus;
+            document.getElementById('hudStatusText').innerText = newStatus;
+            if (subText) {
+                document.getElementById('hudSubText').innerText = subText;
+            }
+        }
+
+        document.getElementById('micBtn').addEventListener('click', () => {
+            if (state.status === 'STANDBY') startVoiceRecognition();
+        });
+
+        document.getElementById('stopSpeakBtn').addEventListener('click', () => {
+            window.speechSynthesis.cancel();
+            updateStatus('STANDBY', '消音処理を完了しました。');
+        });
+
+        document.getElementById('clapToggleBtn').addEventListener('click', () => {
+            state.clapEnabled = !state.clapEnabled;
+            document.getElementById('clapStatusText').innerText = state.clapEnabled ? 'クラップ: ON' : 'クラップ: OFF';
+        });
+
+        document.getElementById('toggleSearchBtn').addEventListener('click', () => {
+            state.useSearchGrounding = !state.useSearchGrounding;
+            const btnText = document.getElementById('searchModeText');
+            btnText.innerText = state.useSearchGrounding ? 'ON' : 'OFF';
+            btnText.className = state.useSearchGrounding ? 'text-emerald-400 font-bold' : 'text-slate-400';
+            appendLog('SYSTEM', `Web検索グラウンディングを ${state.useSearchGrounding ? '有効' : '無効'} に設定しました。`);
+        });
+
+        document.getElementById('quickBriefingBtn').addEventListener('click', () => {
+            const briefingQuery = '本日の予定、重要ノートの確認、および最新ニュースを含む要約ブリーフィングを報告してください。';
+            appendLog('USER', '⚡ 本日のデイリーブリーフィングを実行');
+            handleUserQuery(briefingQuery);
+        });
+
+        document.getElementById('genImageBtn').addEventListener('click', () => {
+            const prompt = prompt('生成したいホログラム概念図・画像の指示を入力してください:', 'アイアンマンのアークリアクター設計図');
+            if (prompt) generateHologramImage(prompt);
+        });
+
+        const cameraContainer = document.getElementById('cameraPreviewContainer');
+        const videoEl = document.getElementById('webcamVideo');
+
+        document.getElementById('openCameraBtn').addEventListener('click', async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                videoEl.srcObject = stream;
+                cameraContainer.classList.remove('hidden');
+                updateStatus('SCANNING', 'カメラ映像の解析準備完了');
+            } catch (err) {
+                alert('カメラの起動に失敗しました: ' + err.message);
+            }
+        });
+
+        document.getElementById('captureScanBtn').addEventListener('click', () => {
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = videoEl.videoWidth || 640;
+            tempCanvas.height = videoEl.videoHeight || 480;
+            const ctx2d = tempCanvas.getContext('2d');
+            ctx2d.drawImage(videoEl, 0, 0);
+            const base64Img = tempCanvas.toDataURL('image/jpeg');
+
+            // Close camera
+            const stream = videoEl.srcObject;
+            if (stream) stream.getTracks().forEach(t => t.stop());
+            cameraContainer.classList.add('hidden');
+
+            appendLog('USER', '📷 カメラ画像の解析要求');
+            handleUserQuery('この画像を詳細に分析してレポートしてください。', base64Img);
+        });
+
+        // File upload image handler
+        document.getElementById('uploadImgBtn').addEventListener('click', () => {
+            document.getElementById('imageFileInput').click();
+        });
+
+        document.getElementById('imageFileInput').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                appendLog('USER', `📎 画像添付: ${file.name}`);
+                handleUserQuery('添付された画像を詳細に解析してください。', evt.target.result);
+            };
+            reader.readAsDataURL(file);
+        });
+
+        document.getElementById('textForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const input = document.getElementById('userInput');
+            const text = input.value.trim();
+            if (!text) return;
+            input.value = '';
+            appendLog('USER', text);
+            handleUserQuery(text);
+        });
+
+        document.getElementById('clearLogBtn').addEventListener('click', () => {
+            document.getElementById('logContainer').innerHTML = '';
+        });
+
+        const vaultModal = document.getElementById('vaultModal');
+        const settingsModal = document.getElementById('settingsModal');
+
+        function openSettingsModal() {
+            document.getElementById('apiKeyInput').value = state.apiKey;
+            document.getElementById('ttsEngineSelect').value = state.ttsEngine;
+            document.getElementById('geminiVoiceSelect').value = state.geminiVoice;
+            document.getElementById('clapSensitivity').value = state.clapThreshold;
+            document.getElementById('clapSensVal').innerText = state.clapThreshold.toFixed(2);
+            settingsModal.classList.remove('hidden');
+        }
+
+        document.getElementById('openSettingsBtn').addEventListener('click', openSettingsModal);
+        document.getElementById('closeSettingsBtn').addEventListener('click', () => settingsModal.classList.add('hidden'));
+
+        document.getElementById('saveSettingsBtn').addEventListener('click', () => {
+            state.apiKey = document.getElementById('apiKeyInput').value.trim();
+            state.ttsEngine = document.getElementById('ttsEngineSelect').value;
+            state.geminiVoice = document.getElementById('geminiVoiceSelect').value;
+            state.clapThreshold = parseFloat(document.getElementById('clapSensitivity').value);
+
+            localStorage.setItem('friday_gemini_key', state.apiKey);
+            localStorage.setItem('friday_tts_engine', state.ttsEngine);
+            localStorage.setItem('friday_gemini_voice', state.geminiVoice);
+            localStorage.setItem('friday_clap_sens', state.clapThreshold);
+
+            settingsModal.classList.add('hidden');
+            appendLog('SYSTEM', '設定およびGemini API構成を更新保存しました。');
+        });
+
+        document.getElementById('clapSensitivity').addEventListener('input', (e) => {
+            document.getElementById('clapSensVal').innerText = parseFloat(e.target.value).toFixed(2);
+        });
+
+        document.getElementById('openVaultBtn').addEventListener('click', () => {
+            document.getElementById('vaultContent').value = state.vaultText;
+            vaultModal.classList.remove('hidden');
+        });
+
+        document.getElementById('closeVaultBtn').addEventListener('click', () => vaultModal.classList.add('hidden'));
+
+        document.getElementById('saveVaultBtn').addEventListener('click', () => {
+            state.vaultText = document.getElementById('vaultContent').value;
+            localStorage.setItem('friday_vault', state.vaultText);
+            
+            const msg = document.getElementById('vaultSavedMsg');
+            msg.classList.remove('hidden');
+            setTimeout(() => msg.classList.add('hidden'), 2000);
+        });
+
+        /* Keyboard Shortcut: Space Key Trigger */
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+                e.preventDefault();
+                startVoiceRecognition();
+            }
+        });
+
+        /* Initialize Audio Listener on User Interaction */
+        window.addEventListener('click', () => {
+            if (!audioCtx) initClapDetector();
+        }, { once: true });
+    </script>
+</body>
+</html>
