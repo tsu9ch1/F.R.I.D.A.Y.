@@ -316,7 +316,7 @@
             clapThreshold: parseFloat(localStorage.getItem('friday_clap_sens')) || 0.20,
             vaultText: localStorage.getItem('friday_vault') || `【プロフィール】
 名前：大学生（福井市学園在住）
-【ご机収集日】
+【ごみ収集日】
 燃やせるごみ：火曜・金曜
 【生活ノート】
 研究とAIアシスタント構築に注力中。`
@@ -624,7 +624,6 @@ ${state.vaultText}
 
         function speakText(text) {
             if (state.ttsEngine === 'gemini') {
-                // Try Gemini TTS, fallback gracefully on error
                 speakGeminiTTS(text).catch(() => speakBrowserSpeech(text));
             } else {
                 speakBrowserSpeech(text);
