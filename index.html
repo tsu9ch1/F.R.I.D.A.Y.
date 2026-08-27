@@ -127,7 +127,7 @@
                     <i class="fa-solid fa-newspaper text-orange-400"></i> 本日の要約
                 </button>
                 <button id="toggleSearchBtn" class="py-2 px-3 rounded-xl border border-orange-500/40 bg-slate-900 hover:bg-orange-900/30 text-orange-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition">
-                    <i class="fa-solid fa-globe text-orange-400"></i> Web検索: <span id="searchModeText" class="text-slate-400">OFF</span>
+                    <i class="fa-solid fa-globe text-orange-400"></i> Web検索: <span id="searchModeText" class="text-emerald-400 font-bold">ON</span>
                 </button>
                 <button id="genImageBtn" class="py-2 px-3 rounded-xl border border-amber-500/40 bg-amber-950/30 hover:bg-amber-500/20 text-amber-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition">
                     <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i> 画像生成
@@ -242,7 +242,7 @@
                 <div>
                     <label class="block font-orbitron text-orange-300 mb-1">TTS 音声エンジン選択</label>
                     <select id="ttsEngineSelect" class="w-full bg-slate-950 border border-orange-500/30 rounded-xl px-3 py-2 text-orange-100 focus:outline-none focus:border-orange-400">
-                        <option value="web">ブラウザ内蔵 SpeechSynthesis (推奨・API節約)</option>
+                        <option value="web" selected>ブラウザ内蔵 SpeechSynthesis (推奨・女性高音高速)</option>
                         <option value="gemini">Gemini Neural TTS (高音質)</option>
                     </select>
                 </div>
@@ -297,12 +297,12 @@
             return (str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
 
-        /* Application State */
+        /* Application State (Web Search Defaults to ON) */
         let state = {
             status: 'STANDBY',
             apiKey: localStorage.getItem('friday_gemini_key') || '',
             aiModel: localStorage.getItem('friday_ai_model') || 'gemini-3.5-flash-lite',
-            useSearchGrounding: false,
+            useSearchGrounding: localStorage.getItem('friday_search_mode') !== null ? (localStorage.getItem('friday_search_mode') === 'true') : true,
             ttsEngine: localStorage.getItem('friday_tts_engine') || 'web',
             geminiVoice: localStorage.getItem('friday_gemini_voice') || 'Aoede',
             clapEnabled: true,
@@ -325,6 +325,14 @@
         function updateModelBadge() {
             const badge = document.getElementById('aiModelBadge');
             if (badge) badge.innerText = state.aiModel;
+        }
+
+        function updateSearchButtonUI() {
+            const btnText = document.getElementById('searchModeText');
+            if (btnText) {
+                btnText.innerText = state.useSearchGrounding ? 'ON' : 'OFF';
+                btnText.className = state.useSearchGrounding ? 'text-emerald-400 font-bold' : 'text-slate-400';
+            }
         }
 
         function updateStatus(newStatus, subText = '') {
@@ -490,7 +498,7 @@ ${state.vaultText}
                         <span class="text-[9px] text-orange-600">SYSTEM ONLINE</span>
                     </div>
                     <p class="text-slate-200 leading-relaxed">
-                        オンラインです、ボス。Gemini 3.5 Flash-Lite AIモデルの接続準備が完了しました。音声対話、画像解析、最新情報の検索に対応しています。
+                        準備はいつでもできていますよ、ボス。今日はどこから手をつけますか？
                     </p>
                 `;
                 container.appendChild(defaultMsg);
@@ -670,11 +678,23 @@ ${state.vaultText}
 
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'ja-JP';
-            utterance.rate = 1.1;
+            utterance.rate = 1.35; // 高速（テキパキとテンポ良く）
+            utterance.pitch = 1.30; // 高めの明瞭な女性声トーン
 
             const voices = window.speechSynthesis.getVoices();
-            const jpVoice = voices.find(v => v.lang.includes('ja'));
-            if (jpVoice) utterance.voice = jpVoice;
+            // 日本語の女性音声（Google 日本語, Nanami, Haruka, Kyoko, Ayumi等）を優先選択
+            const jpVoices = voices.filter(v => v.lang.includes('ja') || v.lang.includes('JA'));
+            const preferredVoice = jpVoices.find(v => 
+                v.name.includes('Nanami') ||
+                v.name.includes('Haruka') ||
+                v.name.includes('Ayumi') ||
+                v.name.includes('Kyoko') ||
+                v.name.includes('Google 日本語') ||
+                v.name.includes('Female') ||
+                v.name.includes('女性')
+            ) || jpVoices[0];
+
+            if (preferredVoice) utterance.voice = preferredVoice;
 
             utterance.onstart = () => updateStatus('SPEAKING', text);
             utterance.onend = () => updateStatus('STANDBY', '[SPACE]キー または クラップ音で起動');
@@ -784,11 +804,8 @@ ${state.vaultText}
 
         bind('toggleSearchBtn', 'click', () => {
             state.useSearchGrounding = !state.useSearchGrounding;
-            const btnText = document.getElementById('searchModeText');
-            if (btnText) {
-                btnText.innerText = state.useSearchGrounding ? 'ON' : 'OFF';
-                btnText.className = state.useSearchGrounding ? 'text-emerald-400 font-bold' : 'text-slate-400';
-            }
+            localStorage.setItem('friday_search_mode', state.useSearchGrounding);
+            updateSearchButtonUI();
             appendLog('SYSTEM', `Web検索グラウンディングを ${state.useSearchGrounding ? '有効' : '無効'} に設定しました。`);
         });
 
@@ -936,6 +953,7 @@ ${state.vaultText}
         }, { once: true });
 
         updateModelBadge();
+        updateSearchButtonUI();
         restoreChatHistory();
     </script>
 </body>
