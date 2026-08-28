@@ -60,7 +60,7 @@
 </head>
 <body class="h-screen w-screen flex flex-col scanline bg-black overflow-hidden relative">
 
-    <!-- Background Canvas for Sci-Fi Visual Effects -->
+    <!-- Background Canvas for Visual Effects -->
     <canvas id="bgCanvas" class="absolute inset-0 w-full h-full pointer-events-none z-0"></canvas>
 
     <header class="w-full bg-black/80 border-b border-orange-500/20 px-4 md:px-6 py-2 flex justify-between items-center shrink-0 z-30">
@@ -76,7 +76,7 @@
 
         <!-- Realtime Digital Clock & Date Display (Stacked HUD Style) -->
         <div class="hidden sm:flex flex-col items-end font-orbitron text-orange-400 bg-black/90 border border-orange-500/30 px-3 py-1 rounded-lg shadow-[0_0_10px_rgba(255,140,0,0.15)]">
-            <div id="liveClockTime" class="text-sm md:text-base font-black tracking-widest text-glow-orange leading-none mb-0.5">--:--:--</div>
+            <div id="liveClockTime" class="text-sm md:text-base font-black tracking-widest text-glow-orange leading-none mb-0.5">--:--:-- JST</div>
             <div id="liveClockDate" class="text-[9px] text-orange-500/80 font-bold tracking-wider">----.--.-- (---)</div>
         </div>
 
@@ -110,7 +110,7 @@
         <!-- Central Hologram Ring Section (~40% Viewport Scale) -->
         <section class="w-full flex-1 p-1 flex flex-col items-center justify-center relative overflow-hidden my-1 shrink-0">
             
-            <!-- Obsidian Agent & Knowledge Graph Overlay Canvas -->
+            <!-- Knowledge Graph Overlay Canvas -->
             <div id="obsidianGraphContainer" class="absolute inset-0 pointer-events-none flex items-center justify-center transition-opacity duration-500 opacity-80">
                 <canvas id="graphCanvas" width="800" height="400" class="w-full h-full object-contain"></canvas>
             </div>
@@ -127,14 +127,11 @@
                 </span>
             </div>
 
-            <!-- Sentence-by-Sentence Sequential Text Display -->
+            <!-- 20-Character Sequential Speech Text Display Container -->
             <div class="w-full max-w-2xl bg-black/90 border border-orange-500/30 rounded-xl px-4 py-2.5 shadow-2xl relative min-h-[48px] max-h-[54px] flex items-center justify-center shrink-0 overflow-hidden z-10">
                 <p id="fridaySpeechText" class="text-xs md:text-sm text-orange-100 font-medium leading-none tracking-wide text-center transition-all duration-300 w-full px-2">
                     準備はいつでもできていますよ、ボス。今日はどこから手をつけますか？
                 </p>
-                <div id="citationContainer" class="hidden absolute -top-5 right-2 text-[9px] text-orange-400 bg-black px-2 py-0.5 rounded border border-orange-500/30">
-                    <span id="citationLinks" class="space-x-2"></span>
-                </div>
             </div>
 
             <!-- Control Buttons Row -->
@@ -314,27 +311,6 @@
             }
         }
 
-        /* Top-level Google Authentication Handler */
-        window.handleGoogleLogin = function(e) {
-            if (e) e.preventDefault();
-            const btn = document.getElementById('googleLoginBtn');
-            if (btn) {
-                btn.innerHTML = `<i class="fa-solid fa-circle-notch animate-spin text-orange-400"></i> SECURITY CLEARANCE GRANTED...`;
-            }
-            safeSetStorage('friday_auth', 'true');
-            if (typeof state !== 'undefined') state.authenticated = true;
-
-            const authOverlay = document.getElementById('authOverlay');
-            if (authOverlay) {
-                authOverlay.style.transition = 'opacity 0.3s ease';
-                authOverlay.style.opacity = '0';
-                setTimeout(() => {
-                    authOverlay.style.display = 'none';
-                    authOverlay.classList.add('hidden');
-                }, 300);
-            }
-        };
-
         function bind(id, event, callback) {
             const el = document.getElementById(id);
             if (el) el.addEventListener(event, callback);
@@ -373,7 +349,7 @@
             tasks: JSON.parse(safeGetStorage('friday_tasks') || '[]')
         };
 
-        /* Background Canvas Visual Effects */
+        /* Background Particle Effect Canvas */
         const bgCanvas = document.getElementById('bgCanvas');
         const bgCtx = bgCanvas ? bgCanvas.getContext('2d') : null;
         let particles = [];
@@ -430,7 +406,6 @@
         }
         drawBgCanvas();
 
-        /* JARVIS HUD Hologram Canvas (Recreating Reference Design) */
         const hudCanvas = document.getElementById('hudCanvas');
         const hudCtx = hudCanvas ? hudCanvas.getContext('2d') : null;
         let hudAngle = 0;
@@ -442,7 +417,6 @@
             const cy = hudCanvas.height / 2;
 
             // Color selection based on state
-            let primaryColor = '#ff8c00';
             let strokeColor = 'rgba(255, 140, 0, 0.85)';
             if (state.status === 'LISTENING') strokeColor = 'rgba(250, 204, 21, 0.9)'; // Yellow
             else if (state.status === 'ERROR') strokeColor = 'rgba(239, 68, 68, 0.9)'; // Red
@@ -450,49 +424,6 @@
             else if (state.status === 'EXECUTING_WORKFLOW') strokeColor = 'rgba(168, 85, 247, 0.9)';
 
             let speed = 0.02;
-            if (state.status === 'THINKING' || state.status === 'EXECUTING_WORKFLOW') speed = 0.06;
-
-            hudAngle = (hudAngle + speed) % (Math.PI * 2);
-
-            // 1. Outer Corner Brackets ┌ ┐ └ ┘
-            const bracketSize = 16;
-            const bracketDist = 165;
-            hudCtx.strokeStyle = strokeColor;
-            hudCtx.lineWidth = 2;
-
-            // Top-Left ┌
-            hudCtx.beginPath();
-            hudCtx.moveTo(cx - bracketDist, cy - bracketDist + bracketSize);
-            hudCtx.lineTo(cx - bracketDist, cy - bracketDist);
-            hudCtx.lineTo(cx - bracketDist + bracketSize, cy - bracketDist);
-            hudCtx.stroke();
-
-            // Top-Right ┐
-            hudCtx.beginPath();
-            hudCtx.moveTo(cx + bracketDist - bracketSize, cy - bracketDist);
-            hudCtx.lineTo(cx + bracketDist, cy - bracketDist);
-            hudCtx.lineTo(cx + bracketDist, cy - bracketDist + bracketSize);
-            hudCtx.stroke();
-
-            // Bottom-Left └
-            hudCtx.beginPath();
-            hudCtx.moveTo(cx - bracketDist, cy + bracketDist - bracketSize);
-            hudCtx.lineTo(cx - bracketDist, cy + bracketDist);
-            hudCtx.lineTo(cx - bracketDist + bracketSize, cy + bracketDist);
-            hudCtx.stroke();
-
-            // Bottom-Right ┘
-            hudCtx.beginPath();
-            hudCtx.moveTo(cx + bracketDist - bracketSize, cy + bracketDist);
-            hudCtx.lineTo(cx + bracketDist, cy + bracketDist);
-            hudCtx.lineTo(cx + bracketDist, cy + bracketDist - bracketSize);
-            hudCtx.stroke();
-
-            // 2. Outer Rotating Segment Arc with Solid Highlight Arc
-            hudCtx.beginPath();
-            hudCtx.arc(cx, cy, 140, hudAngle, hudAngle + Math.PI * 1.6);
-            hudCtx.strokeStyle = strokeColor;
-            speed = 0.02;
             if (state.status === 'THINKING' || state.status === 'EXECUTING_WORKFLOW') speed = 0.06;
 
             hudAngle = (hudAngle + speed) % (Math.PI * 2);
@@ -556,7 +487,6 @@
         }
         if (hudCanvas) drawHUD();
 
-        /* Dynamic Interactive Physics Graph Visualizer */
         const graphCanvas = document.getElementById('graphCanvas');
         const graphCtx = graphCanvas ? graphCanvas.getContext('2d') : null;
 
@@ -586,19 +516,14 @@
                 return;
             }
 
-            // Physics Repulsion & Position Updates
             for (let i = 0; i < graphNodes.length; i++) {
                 let n1 = graphNodes[i];
-
-                // Continuous slight motion
                 n1.x += n1.vx;
                 n1.y += n1.vy;
 
-                // Wall bounces
                 if (n1.x < 50 || n1.x > graphCanvas.width - 50) n1.vx *= -1;
                 if (n1.y < 40 || n1.y > graphCanvas.height - 40) n1.vy *= -1;
 
-                // Repulsion logic between close nodes
                 for (let j = i + 1; j < graphNodes.length; j++) {
                     let n2 = graphNodes[j];
                     let dx = n2.x - n1.x;
@@ -619,7 +544,6 @@
                 }
             }
 
-            // Draw Vivid Links
             graphLinks.forEach(link => {
                 const source = graphNodes.find(n => n.id === link.from);
                 const target = graphNodes.find(n => n.id === link.to);
@@ -633,7 +557,6 @@
                 }
             });
 
-            // Draw Vivid Nodes
             graphNodes.forEach(node => {
                 const pulse = Math.sin(Date.now() / 250 + node.x) * 1.5;
                 graphCtx.beginPath();
@@ -654,7 +577,6 @@
         }
         drawGraph();
 
-        /* Audio Clap Detector */
         let audioCtx = null;
         let analyser = null;
 
@@ -840,7 +762,7 @@ ${state.vaultResearchText}`;
                         renderTasks();
                     }
 
-                    // Execute speech & sequential text display with +0.2s delay (900ms total)
+                    // Delay speech & 20-character chunk text display by 1.4s (1400ms)
                     speakAndAnimateText(replyText);
                 } else {
                     throw new Error('無効な応答データです。');
@@ -960,11 +882,6 @@ ${state.vaultResearchText}`;
             `).join('');
         }
 
-        // Live Clock Updates
-        setInterval(() => {
-            const now = new Date();
-            const clockStr = now.toLocaleString('ja-JP', {
-                timeZone: 'Asia/Tokyo',
         // Live Clock Updates (Stacked Digital Layout)
         setInterval(() => {
             const now = new Date();
@@ -981,7 +898,7 @@ ${state.vaultResearchText}`;
             if (mobileClock) mobileClock.innerText = now.toLocaleTimeString('ja-JP');
         }, 1000);
 
-        // Navigation Bindings
+        // Navigation & Modal Bindings
         bind('toggleGraphBtn', 'click', () => {
             state.showGraphVisualizer = !state.showGraphVisualizer;
             const container = document.getElementById('obsidianGraphContainer');
