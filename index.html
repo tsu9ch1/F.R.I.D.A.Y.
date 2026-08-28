@@ -56,11 +56,21 @@
             );
             background-size: 100% 4px;
         }
+        .typing-cursor::after {
+            content: '▍';
+            color: #ff8c00;
+            animation: blink 0.8s infinite;
+            margin-left: 2px;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
     </style>
 </head>
 <body class="h-screen w-screen flex flex-col scanline bg-black overflow-hidden relative">
 
-    <!-- Background Canvas for Visual Effects -->
+    <!-- Background Canvas for Particle Effects -->
     <canvas id="bgCanvas" class="absolute inset-0 w-full h-full pointer-events-none z-0"></canvas>
 
     <header class="w-full bg-black/80 border-b border-orange-500/20 px-4 md:px-6 py-2 flex justify-between items-center shrink-0 z-30">
@@ -103,6 +113,7 @@
             <div>SYS.LOC: FUKUI_GAKUEN // LAT: 36.065 // MCP: ACTIVE</div>
             <div id="mobileClockDisplay" class="sm:hidden text-orange-400 font-mono">--:--:--</div>
             <div class="flex items-center gap-2">
+                <span id="turnCountBadge" class="text-orange-500/80 bg-black/90 px-1.5 py-0.5 rounded border border-orange-500/20 font-mono text-[9px]">CTX: 0 TURNS</span>
                 <span id="aiModelBadge" class="text-orange-400 bg-black/90 px-2 py-0.5 rounded border border-orange-500/30 font-mono">gemini-3.5-flash-lite</span>
             </div>
         </div>
@@ -110,9 +121,9 @@
         <!-- Central Hologram Ring Section (~40% Viewport Scale) -->
         <section class="w-full flex-1 p-1 flex flex-col items-center justify-center relative overflow-hidden my-1 shrink-0">
             
-            <!-- Knowledge Graph Overlay Canvas -->
-            <div id="obsidianGraphContainer" class="absolute inset-0 pointer-events-none flex items-center justify-center transition-opacity duration-500 opacity-80">
-                <canvas id="graphCanvas" width="800" height="400" class="w-full h-full object-contain"></canvas>
+            <!-- Knowledge & Status Graph Overlay Canvas -->
+            <div id="obsidianGraphContainer" class="absolute inset-0 pointer-events-none flex items-center justify-center transition-opacity duration-500 opacity-90 z-0">
+                <canvas id="graphCanvas" width="900" height="420" class="w-full h-full object-contain"></canvas>
             </div>
 
             <!-- Main Hologram Ring Canvas Container -->
@@ -123,27 +134,27 @@
             <!-- Current Status Badge Indicator -->
             <div class="text-center my-1.5 z-10">
                 <span id="hudStatusBadge" class="text-[11px] font-mono font-bold px-3 py-0.5 rounded-full bg-black border border-orange-500/40 text-orange-300 tracking-wider">
-                    ● STANDBY
+                    ● STANDBY (「フライデー」で起動)
                 </span>
             </div>
 
-            <!-- 20-Character Sequential Speech Text Display Container -->
+            <!-- Single-Line Character-by-Character Typewriter Speech Text Container -->
             <div class="w-full max-w-2xl bg-black/90 border border-orange-500/30 rounded-xl px-4 py-2.5 shadow-2xl relative min-h-[48px] max-h-[54px] flex items-center justify-center shrink-0 overflow-hidden z-10">
-                <p id="fridaySpeechText" class="text-xs md:text-sm text-orange-100 font-medium leading-none tracking-wide text-center transition-all duration-300 w-full px-2">
+                <p id="fridaySpeechText" class="text-xs md:text-sm text-orange-100 font-medium leading-none tracking-wide text-center transition-all duration-150 w-full px-2 truncate">
                     準備はいつでもできていますよ、ボス。今日はどこから手をつけますか？
                 </p>
             </div>
 
             <!-- Control Buttons Row -->
-            <div class="w-full max-w-xl grid grid-cols-3 gap-2 mt-2 shrink-0">
+            <div class="w-full max-w-xl grid grid-cols-3 gap-2 mt-2 shrink-0 z-10">
                 <button id="micBtn" class="py-2 px-2 rounded-xl border border-orange-500/50 bg-black/90 hover:bg-orange-500/20 text-orange-300 font-bold text-xs flex items-center justify-center gap-2 transition active:scale-95 shadow-lg cursor-pointer">
                     <i id="micIcon" class="fa-solid fa-microphone text-orange-400"></i>
                     <span id="micBtnText">話しかける</span>
                 </button>
 
                 <button id="clapToggleBtn" class="py-2 px-2 rounded-xl border border-orange-500/30 bg-black/90 hover:bg-orange-500/20 text-orange-300 font-bold text-xs flex items-center justify-center gap-2 transition cursor-pointer">
-                    <i class="fa-solid fa-hands-clapping"></i>
-                    <span id="clapStatusText">クラップ: ON</span>
+                    <i class="fa-solid fa-ear-listen text-orange-400"></i>
+                    <span id="clapStatusText">常時呼出: ON</span>
                 </button>
 
                 <button id="toggleSearchBtn" class="py-2 px-2 rounded-xl border border-orange-500/30 bg-black/90 hover:bg-orange-500/20 text-orange-300 font-bold text-xs flex items-center justify-center gap-2 transition cursor-pointer">
@@ -153,7 +164,7 @@
             </div>
 
             <!-- Direct Prompt Input Form -->
-            <form id="textForm" class="w-full max-w-xl mt-2 flex gap-2 shrink-0">
+            <form id="textForm" class="w-full max-w-xl mt-2 flex gap-2 shrink-0 z-10">
                 <button type="button" id="uploadImgBtn" title="画像を添付してGemini解析" class="bg-black border border-orange-500/30 hover:bg-orange-950/40 text-orange-400 px-3 rounded-xl transition flex items-center justify-center cursor-pointer">
                     <i class="fa-solid fa-paperclip"></i>
                 </button>
@@ -197,10 +208,10 @@
                 <i class="fa-solid fa-xmark"></i>
             </button>
             <h3 class="text-sm font-bold font-orbitron text-orange-400 mb-1 flex items-center gap-2">
-                <i class="fa-solid fa-brain text-orange-400"></i> LONG-TERM MEMORY (長期記憶・ナレッジ)
+                <i class="fa-solid fa-brain text-orange-400"></i> LONG-TERM MEMORY (長期記憶・会話文脈)
             </h3>
             <p class="text-[11px] text-orange-500/70 mb-3">
-                メインエージェントおよびリサーチエージェントが記憶・抽出したユーザープロファイル情報です。
+                メインエージェントおよびリサーチエージェントが記憶・抽出したユーザー情報と会話文脈です。
             </p>
 
             <div class="mb-2 flex gap-2">
@@ -212,10 +223,15 @@
 名前：大学生（福井市学園在住）"></textarea>
 
             <div class="flex justify-between items-center mt-3">
-                <span id="vaultSavedMsg" class="text-xs text-emerald-400 hidden"><i class="fa-solid fa-check"></i> 長期記憶を保存しました</span>
-                <button id="saveVaultBtn" class="bg-orange-500 hover:bg-orange-400 text-black font-bold px-5 py-1.5 rounded-xl transition text-xs cursor-pointer">
-                    保存する
+                <button id="clearHistoryBtn" class="px-3 py-1 bg-rose-950/40 hover:bg-rose-900/60 border border-rose-500/30 text-rose-300 text-xs rounded-lg font-mono cursor-pointer">
+                    <i class="fa-solid fa-trash mr-1"></i> 直前会話履歴をリセット
                 </button>
+                <div class="flex items-center gap-2">
+                    <span id="vaultSavedMsg" class="text-xs text-emerald-400 hidden"><i class="fa-solid fa-check"></i> 保存しました</span>
+                    <button id="saveVaultBtn" class="bg-orange-500 hover:bg-orange-400 text-black font-bold px-5 py-1.5 rounded-xl transition text-xs cursor-pointer">
+                        保存する
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -292,7 +308,7 @@
     <input type="file" id="imageFileInput" accept="image/*" class="hidden">
 
     <script>
-        /* Safe Storage Utilities with Exception Guards */
+        /* Safe Storage Utilities */
         function safeGetStorage(key, defaultVal = '') {
             try {
                 const val = localStorage.getItem(key);
@@ -332,7 +348,7 @@
 
         /* Application State */
         let state = {
-            status: 'STANDBY',
+            status: 'STANDBY', // STANDBY, LISTENING, THINKING, SEARCHING_WEB, CREATING_TASK, EXECUTING_WORKFLOW, SPEAKING, ERROR
             apiKey: safeGetStorage('friday_gemini_key') || '',
             elevenApiKey: safeGetStorage('friday_eleven_key') || '',
             elevenVoiceId: safeGetStorage('friday_eleven_voice') || 'gHBfNp2PWSyFgpPlzCOd',
@@ -346,8 +362,18 @@
             vaultResearchText: safeGetStorage('friday_vault_research') || `【リサーチ記憶】\n興味関心：最新AIモデル、Mastraワークフロー、MCP開発`,
             activeTab: 'main',
             showGraphVisualizer: true,
-            tasks: JSON.parse(safeGetStorage('friday_tasks') || '[]')
+            tasks: JSON.parse(safeGetStorage('friday_tasks') || '[]'),
+            // Multi-turn Conversational Memory (Direct Context)
+            conversationHistory: JSON.parse(safeGetStorage('friday_conversation_history') || '[]')
         };
+
+        function updateTurnBadge() {
+            const badge = document.getElementById('turnCountBadge');
+            if (badge) {
+                const turns = Math.floor(state.conversationHistory.length / 2);
+                badge.innerText = `CTX: ${turns} TURNS`;
+            }
+        }
 
         /* Background Particle Effect Canvas */
         const bgCanvas = document.getElementById('bgCanvas');
@@ -406,6 +432,7 @@
         }
         drawBgCanvas();
 
+        /* HUD Hologram Canvas (with Lip-sync Pulse Animation during SPEAKING) */
         const hudCanvas = document.getElementById('hudCanvas');
         const hudCtx = hudCanvas ? hudCanvas.getContext('2d') : null;
         let hudAngle = 0;
@@ -418,19 +445,30 @@
 
             // Color selection based on state
             let strokeColor = 'rgba(255, 140, 0, 0.85)';
-            if (state.status === 'LISTENING') strokeColor = 'rgba(250, 204, 21, 0.9)'; // Yellow
-            else if (state.status === 'ERROR') strokeColor = 'rgba(239, 68, 68, 0.9)'; // Red
-            else if (state.status === 'SEARCHING_WEB') strokeColor = 'rgba(56, 189, 248, 0.9)';
-            else if (state.status === 'EXECUTING_WORKFLOW') strokeColor = 'rgba(168, 85, 247, 0.9)';
+            if (state.status === 'LISTENING') strokeColor = 'rgba(250, 204, 21, 0.95)'; // Yellow
+            else if (state.status === 'ERROR') strokeColor = 'rgba(239, 68, 68, 0.95)'; // Red
+            else if (state.status === 'SEARCHING_WEB') strokeColor = 'rgba(56, 189, 248, 0.95)'; // Sky Blue
+            else if (state.status === 'CREATING_TASK') strokeColor = 'rgba(192, 132, 252, 0.95)'; // Purple
+            else if (state.status === 'EXECUTING_WORKFLOW') strokeColor = 'rgba(52, 211, 153, 0.95)'; // Emerald
 
+            // Dynamic rotation speed
             let speed = 0.02;
-            if (state.status === 'THINKING' || state.status === 'EXECUTING_WORKFLOW') speed = 0.06;
+            if (state.status === 'THINKING' || state.status === 'SEARCHING_WEB' || state.status === 'EXECUTING_WORKFLOW') speed = 0.06;
+            else if (state.status === 'SPEAKING') speed = 0.04;
 
             hudAngle = (hudAngle + speed) % (Math.PI * 2);
 
-            // 1. Outer Rotating Segment Arc with Solid Highlight Arc
+            // Dynamic Lip-Sync Pulse Calculation for Core & Rings
+            let pulseOffset = 0;
+            if (state.status === 'SPEAKING') {
+                pulseOffset = Math.sin(Date.now() / 70) * 12 + Math.cos(Date.now() / 130) * 8;
+            } else {
+                pulseOffset = Math.sin(Date.now() / 250) * 3;
+            }
+
+            // 1. Outer Rotating Segment Arc
             hudCtx.beginPath();
-            hudCtx.arc(cx, cy, 140, hudAngle, hudAngle + Math.PI * 1.6);
+            hudCtx.arc(cx, cy, 140 + pulseOffset * 0.3, hudAngle, hudAngle + Math.PI * 1.6);
             hudCtx.strokeStyle = strokeColor;
             hudCtx.lineWidth = 1.5;
             hudCtx.setLineDash([4, 4]);
@@ -439,47 +477,47 @@
 
             // Bright Thick Highlight Arc
             hudCtx.beginPath();
-            hudCtx.arc(cx, cy, 140, hudAngle + Math.PI * 0.2, hudAngle + Math.PI * 0.6);
+            hudCtx.arc(cx, cy, 140 + pulseOffset * 0.3, hudAngle + Math.PI * 0.2, hudAngle + Math.PI * 0.6);
             hudCtx.strokeStyle = '#ffffff';
             hudCtx.lineWidth = 3.5;
             hudCtx.stroke();
 
             // 2. Middle Dotted Ring
             hudCtx.beginPath();
-            hudCtx.arc(cx, cy, 118, -hudAngle * 1.5, -hudAngle * 1.5 + Math.PI * 1.8);
+            hudCtx.arc(cx, cy, 118 + pulseOffset * 0.5, -hudAngle * 1.5, -hudAngle * 1.5 + Math.PI * 1.8);
             hudCtx.strokeStyle = strokeColor;
             hudCtx.lineWidth = 2;
             hudCtx.setLineDash([2, 6]);
             hudCtx.stroke();
             hudCtx.setLineDash([]);
 
-            // 3. Inner Ring with Crosshairs
+            // 3. Inner Ring
             hudCtx.beginPath();
-            hudCtx.arc(cx, cy, 85, 0, Math.PI * 2);
+            hudCtx.arc(cx, cy, 85 + pulseOffset * 0.7, 0, Math.PI * 2);
             hudCtx.strokeStyle = 'rgba(255, 140, 0, 0.35)';
             hudCtx.lineWidth = 1;
             hudCtx.stroke();
 
-            // 4. Pulsing Center Core Circle
-            const pulse = Math.sin(Date.now() / 250) * 4;
+            // 4. Pulsing Lip-Sync Center Core Circle
+            const coreRadius = Math.max(36, 48 + pulseOffset);
             hudCtx.beginPath();
-            hudCtx.arc(cx, cy, 48 + pulse, 0, Math.PI * 2);
-            hudCtx.fillStyle = 'rgba(0, 0, 0, 0.85)';
+            hudCtx.arc(cx, cy, coreRadius, 0, Math.PI * 2);
+            hudCtx.fillStyle = 'rgba(0, 0, 0, 0.9)';
             hudCtx.strokeStyle = strokeColor;
-            hudCtx.lineWidth = 2;
+            hudCtx.lineWidth = state.status === 'SPEAKING' ? 3 : 2;
             hudCtx.shadowColor = strokeColor;
-            hudCtx.shadowBlur = 18;
+            hudCtx.shadowBlur = state.status === 'SPEAKING' ? 28 : 16;
             hudCtx.fill();
             hudCtx.stroke();
             hudCtx.shadowBlur = 0;
 
-            // Main Core Name Only
+            // Main Core Text
             hudCtx.fillStyle = '#ffffff';
             hudCtx.font = '900 13px Orbitron';
             hudCtx.textAlign = 'center';
             hudCtx.textBaseline = 'middle';
             hudCtx.shadowColor = strokeColor;
-            hudCtx.shadowBlur = 8;
+            hudCtx.shadowBlur = 10;
             hudCtx.fillText('F.R.I.D.A.Y.', cx, cy);
             hudCtx.shadowBlur = 0;
 
@@ -487,24 +525,16 @@
         }
         if (hudCanvas) drawHUD();
 
+        /* Knowledge & Real-time State Visualizer Graph */
         const graphCanvas = document.getElementById('graphCanvas');
         const graphCtx = graphCanvas ? graphCanvas.getContext('2d') : null;
 
         let graphNodes = [
-            { id: 'friday', label: 'F.R.I.D.A.Y.', x: 400, y: 200, vx: (Math.random()-0.5)*0.3, vy: (Math.random()-0.5)*0.3, color: '#ff8c00', r: 7 },
-            { id: 'memory', label: 'Long-Term Memory', x: 100, y: 70, vx: (Math.random()-0.5)*0.3, vy: (Math.random()-0.5)*0.3, color: '#fbbf24', r: 5 },
-            { id: 'mastra', label: 'Mastra Workflow', x: 700, y: 70, vx: (Math.random()-0.5)*0.3, vy: (Math.random()-0.5)*0.3, color: '#c084fc', r: 5 },
-            { id: 'mcp', label: 'MCP Tools', x: 730, y: 330, vx: (Math.random()-0.5)*0.3, vy: (Math.random()-0.5)*0.3, color: '#38bdf8', r: 5 },
-            { id: 'web', label: 'Google Search', x: 70, y: 330, vx: (Math.random()-0.5)*0.3, vy: (Math.random()-0.5)*0.3, color: '#34d399', r: 5 },
-            { id: 'user', label: 'User Context', x: 400, y: 370, vx: (Math.random()-0.5)*0.3, vy: (Math.random()-0.5)*0.3, color: '#fb7185', r: 5 }
-        ];
-
-        let graphLinks = [
-            { from: 'friday', to: 'memory' },
-            { from: 'friday', to: 'mastra' },
-            { from: 'mastra', to: 'mcp' },
-            { from: 'friday', to: 'web' },
-            { from: 'friday', to: 'user' }
+            { id: 'memory', label: 'Long-Term Memory', x: 120, y: 70, vx: (Math.random()-0.5)*0.2, vy: (Math.random()-0.5)*0.2, color: '#fbbf24', r: 6, stateMatch: ['MEMORY_READ', 'THINKING'] },
+            { id: 'mastra', label: 'Mastra Workflow', x: 760, y: 70, vx: (Math.random()-0.5)*0.2, vy: (Math.random()-0.5)*0.2, color: '#c084fc', r: 6, stateMatch: ['CREATING_TASK'] },
+            { id: 'mcp', label: 'MCP Tools', x: 790, y: 340, vx: (Math.random()-0.5)*0.2, vy: (Math.random()-0.5)*0.2, color: '#34d399', r: 6, stateMatch: ['EXECUTING_WORKFLOW'] },
+            { id: 'web', label: 'Google Search', x: 90, y: 340, vx: (Math.random()-0.5)*0.2, vy: (Math.random()-0.5)*0.2, color: '#38bdf8', r: 6, stateMatch: ['SEARCHING_WEB'] },
+            { id: 'user', label: 'User Context', x: 450, y: 385, vx: (Math.random()-0.5)*0.2, vy: (Math.random()-0.5)*0.2, color: '#fb7185', r: 6, stateMatch: ['LISTENING'] }
         ];
 
         function drawGraph() {
@@ -516,23 +546,34 @@
                 return;
             }
 
+            const centerCoreX = graphCanvas.width / 2;
+            const centerCoreY = graphCanvas.height / 2;
+
             for (let i = 0; i < graphNodes.length; i++) {
                 let n1 = graphNodes[i];
                 n1.x += n1.vx;
                 n1.y += n1.vy;
 
-                if (n1.x < 50 || n1.x > graphCanvas.width - 50) n1.vx *= -1;
+                if (n1.x < 60 || n1.x > graphCanvas.width - 60) n1.vx *= -1;
                 if (n1.y < 40 || n1.y > graphCanvas.height - 40) n1.vy *= -1;
+
+                const dCoreX = n1.x - centerCoreX;
+                const dCoreY = n1.y - centerCoreY;
+                const distCore = Math.sqrt(dCoreX * dCoreX + dCoreY * dCoreY);
+                if (distCore < 160) {
+                    n1.x = centerCoreX + (dCoreX / distCore) * 165;
+                    n1.y = centerCoreY + (dCoreY / distCore) * 165;
+                }
 
                 for (let j = i + 1; j < graphNodes.length; j++) {
                     let n2 = graphNodes[j];
                     let dx = n2.x - n1.x;
                     let dy = n2.y - n1.y;
                     let dist = Math.sqrt(dx * dx + dy * dy);
-                    let minDist = 130;
+                    let minDist = 140;
 
                     if (dist < minDist && dist > 0) {
-                        let force = (minDist - dist) / minDist * 0.05;
+                        let force = (minDist - dist) / minDist * 0.04;
                         let fx = (dx / dist) * force;
                         let fy = (dy / dist) * force;
 
@@ -544,43 +585,63 @@
                 }
             }
 
-            graphLinks.forEach(link => {
-                const source = graphNodes.find(n => n.id === link.from);
-                const target = graphNodes.find(n => n.id === link.to);
-                if (source && target) {
+            graphNodes.forEach(node => {
+                const isActive = node.stateMatch.includes(state.status);
+
+                graphCtx.beginPath();
+                graphCtx.moveTo(centerCoreX, centerCoreY);
+                graphCtx.lineTo(node.x, node.y);
+
+                if (isActive) {
+                    graphCtx.strokeStyle = node.color;
+                    graphCtx.lineWidth = 2.5;
+                    graphCtx.shadowColor = node.color;
+                    graphCtx.shadowBlur = 18;
+                    graphCtx.stroke();
+                    graphCtx.shadowBlur = 0;
+
+                    const progress = (Date.now() % 1000) / 1000;
+                    const px = centerCoreX + (node.x - centerCoreX) * progress;
+                    const py = centerCoreY + (node.y - centerCoreY) * progress;
                     graphCtx.beginPath();
-                    graphCtx.moveTo(source.x, source.y);
-                    graphCtx.lineTo(target.x, target.y);
-                    graphCtx.strokeStyle = 'rgba(255, 140, 0, 0.5)';
-                    graphCtx.lineWidth = 1.5;
+                    graphCtx.arc(px, py, 4, 0, Math.PI * 2);
+                    graphCtx.fillStyle = '#ffffff';
+                    graphCtx.fill();
+                } else {
+                    graphCtx.strokeStyle = 'rgba(255, 140, 0, 0.15)';
+                    graphCtx.lineWidth = 1;
                     graphCtx.stroke();
                 }
             });
 
             graphNodes.forEach(node => {
-                const pulse = Math.sin(Date.now() / 250 + node.x) * 1.5;
+                const isActive = node.stateMatch.includes(state.status);
+                const currentRadius = isActive ? node.r * 2 : node.r;
+                const pulse = isActive ? Math.sin(Date.now() / 120) * 3 : Math.sin(Date.now() / 300 + node.x) * 1;
+
                 graphCtx.beginPath();
-                graphCtx.arc(node.x, node.y, node.r + pulse, 0, Math.PI * 2);
+                graphCtx.arc(node.x, node.y, currentRadius + pulse, 0, Math.PI * 2);
                 graphCtx.fillStyle = node.color;
                 graphCtx.shadowColor = node.color;
-                graphCtx.shadowBlur = 12;
+                graphCtx.shadowBlur = isActive ? 35 : 10;
                 graphCtx.fill();
                 graphCtx.shadowBlur = 0;
 
-                graphCtx.fillStyle = '#ffffff';
-                graphCtx.font = 'bold 9px Orbitron';
+                graphCtx.fillStyle = isActive ? '#ffffff' : 'rgba(255, 255, 255, 0.7)';
+                graphCtx.font = isActive ? 'bold 11px Orbitron' : '9px Orbitron';
                 graphCtx.textAlign = 'center';
-                graphCtx.fillText(node.label, node.x, node.y + node.r + 12);
+                graphCtx.fillText(node.label, node.x, node.y + currentRadius + 14);
             });
 
             requestAnimationFrame(drawGraph);
         }
         drawGraph();
 
+        /* Audio & Wake-Word ("フライデー") Detection */
         let audioCtx = null;
         let analyser = null;
 
-        async function initClapDetector() {
+        async function initAudioMonitoring() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -607,45 +668,65 @@
                 }
                 checkAudioSpike();
             } catch (err) {
-                console.warn('Microphone access unverified:', err);
+                console.warn('Microphone access for clap/audio unverified:', err);
             }
         }
 
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let recognition = null;
+        let isManualListening = false;
 
         if (SpeechRecognition) {
             recognition = new SpeechRecognition();
             recognition.lang = 'ja-JP';
+            recognition.continuous = true;
             recognition.interimResults = false;
 
-            recognition.onstart = () => {
-                updateUIState('LISTENING', '● LISTENING...', 'どうぞ、ボス。話しかけてください...');
-            };
-
             recognition.onresult = (event) => {
-                const text = event.results[0][0].transcript;
-                handleUserQuery(text);
+                const lastIdx = event.results.length - 1;
+                const transcript = event.results[lastIdx][0].transcript.trim();
+
+                const lower = transcript.toLowerCase();
+                const isWakeWord = lower.includes('フライデー') || lower.includes('friday') || lower.includes('ふらいでー');
+
+                if (state.status === 'STANDBY') {
+                    if (isWakeWord) {
+                        const cleaned = transcript.replace(/(フライデー|friday|ふらいでー)/gi, '').trim();
+                        if (cleaned.length > 1) {
+                            handleUserQuery(cleaned);
+                        } else {
+                            updateUIState('LISTENING', '● LISTENING...', 'どうぞ、ボス。ご用件をどうぞ...');
+                            isManualListening = true;
+                        }
+                    }
+                } else if (state.status === 'LISTENING') {
+                    isManualListening = false;
+                    const queryText = transcript.replace(/(フライデー|friday|ふらいでー)/gi, '').trim() || transcript;
+                    handleUserQuery(queryText);
+                }
             };
 
-            recognition.onerror = () => {
-                updateUIState('ERROR', '● ERROR', '音声認識に失敗しました。');
-                setTimeout(() => updateUIState('STANDBY', '● STANDBY', '準備完了'), 3000);
+            recognition.onerror = (e) => {
+                if (e.error !== 'no-speech') {
+                    console.warn('Speech recognition warning:', e.error);
+                }
             };
 
             recognition.onend = () => {
-                if (state.status === 'LISTENING') {
-                    updateUIState('STANDBY', '● STANDBY', '準備完了');
+                if (state.clapEnabled) {
+                    try { recognition.start(); } catch (err) {}
                 }
             };
+
+            try { recognition.start(); } catch (e) {}
         }
 
         function startVoiceRecognition() {
-            if (!recognition) return;
             if (state.status !== 'STANDBY' && state.status !== 'ERROR') return;
             try {
                 if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-                recognition.start();
+                isManualListening = true;
+                updateUIState('LISTENING', '● LISTENING...', 'どうぞ、ボス。話しかけてください...');
             } catch (e) {
                 console.warn(e);
             }
@@ -659,6 +740,9 @@
                 badge.innerText = badgeText;
                 if (status === 'LISTENING') badge.className = 'text-[11px] font-mono font-bold px-3 py-0.5 rounded-full bg-black border border-yellow-500/60 text-yellow-400 text-glow-yellow';
                 else if (status === 'ERROR') badge.className = 'text-[11px] font-mono font-bold px-3 py-0.5 rounded-full bg-black border border-red-500/60 text-red-400 text-glow-red';
+                else if (status === 'SEARCHING_WEB') badge.className = 'text-[11px] font-mono font-bold px-3 py-0.5 rounded-full bg-black border border-sky-500/60 text-sky-400';
+                else if (status === 'CREATING_TASK') badge.className = 'text-[11px] font-mono font-bold px-3 py-0.5 rounded-full bg-black border border-purple-500/60 text-purple-400';
+                else if (status === 'EXECUTING_WORKFLOW') badge.className = 'text-[11px] font-mono font-bold px-3 py-0.5 rounded-full bg-black border border-emerald-500/60 text-emerald-400';
                 else badge.className = 'text-[11px] font-mono font-bold px-3 py-0.5 rounded-full bg-black border border-orange-500/40 text-orange-300 tracking-wider';
             }
 
@@ -675,8 +759,10 @@
 - フランクでテンポが良く、人間味のある親しみやすさを持ちます。
 - 時に軽いジョークや皮肉（ウィット）を交えます。
 - 長々と語らず、要点をテキパキと短くスマートに伝えます。
+- ユーザーの発言をオウム返ししないでください。
 - 日本語で返答します。
 - 日時の質問をされていない限り、発話の冒頭で「本日は〜」等の挨拶を言わないでください。
+- 直前の会話の流れを理解し、一貫した文脈を保って応答してください。
 
 【ボス（ユーザー）の長期記憶 (LTM)】:
 ${state.vaultMainText}
@@ -703,7 +789,7 @@ ${state.vaultResearchText}`;
                 return;
             }
 
-            const isHeavyTask = promptText.includes('タスク') || promptText.includes('ワークフロー') || promptText.includes('作成して') || promptText.length > 50;
+            const isHeavyTask = promptText.includes('タスク') || promptText.includes('ワークフロー') || promptText.includes('作成して') || promptText.length > 60;
 
             if (isHeavyTask) {
                 updateUIState('CREATING_TASK', '● MASTRA TASK', '指示からMastraワークフロータスクを作成中...');
@@ -725,18 +811,35 @@ ${state.vaultResearchText}`;
             try {
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${state.aiModel}:generateContent?key=${state.apiKey}`;
 
-                let parts = [{ text: promptText }];
+                // Build Multi-turn Contents Array for Conversational Context Memory
+                const contentsPayload = [];
+
+                // Include last 8 conversation turns for tight conversational memory
+                const recentHistory = state.conversationHistory.slice(-8);
+                recentHistory.forEach(turn => {
+                    contentsPayload.push({
+                        role: turn.role,
+                        parts: [{ text: turn.text }]
+                    });
+                });
+
+                // Add current user prompt
+                let currentParts = [{ text: promptText }];
                 if (imageBase64) {
-                    parts.push({
+                    currentParts.push({
                         inlineData: {
                             mimeType: 'image/jpeg',
                             data: imageBase64.split(',')[1] || imageBase64
                         }
                     });
                 }
+                contentsPayload.push({
+                    role: 'user',
+                    parts: currentParts
+                });
 
                 const payload = {
-                    contents: [{ parts: parts }],
+                    contents: contentsPayload,
                     systemInstruction: { parts: [{ text: getSystemPrompt() }] }
                 };
 
@@ -756,13 +859,23 @@ ${state.vaultResearchText}`;
                 if (candidate && candidate.content?.parts?.[0]?.text) {
                     let replyText = candidate.content.parts[0].text;
                     
+                    // Save multi-turn conversation memory
+                    state.conversationHistory.push({ role: 'user', text: promptText });
+                    state.conversationHistory.push({ role: 'model', text: replyText });
+
+                    // Keep up to 20 past turns in storage
+                    if (state.conversationHistory.length > 20) {
+                        state.conversationHistory = state.conversationHistory.slice(-20);
+                    }
+                    safeSetStorage('friday_conversation_history', JSON.stringify(state.conversationHistory));
+                    updateTurnBadge();
+
                     if (isHeavyTask && state.tasks.length > 0) {
                         state.tasks[0].status = 'COMPLETED';
                         safeSetStorage('friday_tasks', JSON.stringify(state.tasks));
                         renderTasks();
                     }
 
-                    // Delay speech & 20-character chunk text display by 1.4s (1400ms)
                     speakAndAnimateText(replyText);
                 } else {
                     throw new Error('無効な応答データです。');
@@ -771,41 +884,83 @@ ${state.vaultResearchText}`;
             } catch (err) {
                 console.error(err);
                 updateUIState('ERROR', '● ERROR', err.message);
-                setTimeout(() => updateUIState('STANDBY', '● STANDBY', '待機中'), 3500);
+                setTimeout(() => updateUIState('STANDBY', '● STANDBY (「フライデー」で起動)', '待機中'), 3500);
             }
         }
+
+        /* Smooth Character-by-Character Typewriter Animation synced with Voice */
+        let activeTypingTimer = null;
 
         function speakAndAnimateText(fullText) {
             updateUIState('SPEAKING', '● SPEAKING', '');
 
-            // 20-character chunks
-            const chunks = [];
-            const cleanText = fullText.replace(/\n+/g, ' ');
-            for (let i = 0; i < cleanText.length; i += 20) {
-                chunks.push(cleanText.substring(i, i + 20));
+            if (activeTypingTimer) {
+                clearInterval(activeTypingTimer);
+                activeTypingTimer = null;
             }
-            if (chunks.length === 0) chunks.push(fullText);
 
-            // Added +0.5s Delay Sync (1400ms total) before displaying first chunk
+            const cleanText = fullText.replace(/\n+/g, ' ').trim();
+            const speechEl = document.getElementById('fridaySpeechText');
+            if (speechEl) {
+                speechEl.innerText = '';
+                speechEl.classList.add('typing-cursor');
+            }
+
+            // Split into sentence or natural phrases of max 28 characters for single-line HUD fit
+            const sentences = cleanText.match(/[^。！？!?]+[。！？!?]?/g) || [cleanText];
+            let sentenceIdx = 0;
+            let charIdx = 0;
+            let currentSentence = sentences[0] || '';
+
+            // Delay sync before speech playback start (1.2s delay)
             setTimeout(() => {
-                let index = 0;
-                const speechEl = document.getElementById('fridaySpeechText');
+                activeTypingTimer = setInterval(() => {
+                    if (sentenceIdx >= sentences.length) {
+                        clearInterval(activeTypingTimer);
+                        activeTypingTimer = null;
+                        if (speechEl) speechEl.classList.remove('typing-cursor');
+                        return;
+                    }
 
-                if (speechEl) speechEl.innerText = chunks[0];
+                    currentSentence = sentences[sentenceIdx];
 
-                if (chunks.length > 1) {
-                    const interval = setInterval(() => {
-                        index++;
-                        if (index < chunks.length && speechEl) {
-                            speechEl.innerText = chunks[index];
-                        } else {
-                            clearInterval(interval);
+                    if (charIdx < currentSentence.length) {
+                        charIdx++;
+                        if (speechEl) {
+                            speechEl.innerText = currentSentence.substring(0, charIdx);
                         }
-                    }, 2200);
-                }
-            }, 1400);
+                    } else {
+                        // Current sentence finished. Pause briefly before moving to next sentence
+                        sentenceIdx++;
+                        charIdx = 0;
+                        if (sentenceIdx < sentences.length) {
+                            // Brief pause between sentences
+                            clearInterval(activeTypingTimer);
+                            setTimeout(() => {
+                                if (speechEl) speechEl.innerText = '';
+                                activeTypingTimer = setInterval(() => {
+                                    if (sentenceIdx >= sentences.length) {
+                                        clearInterval(activeTypingTimer);
+                                        activeTypingTimer = null;
+                                        if (speechEl) speechEl.classList.remove('typing-cursor');
+                                        return;
+                                    }
+                                    currentSentence = sentences[sentenceIdx];
+                                    if (charIdx < currentSentence.length) {
+                                        charIdx++;
+                                        if (speechEl) speechEl.innerText = currentSentence.substring(0, charIdx);
+                                    } else {
+                                        sentenceIdx++;
+                                        charIdx = 0;
+                                    }
+                                }, 45); // 45ms per character
+                            }, 600); // 600ms gap between sentences
+                        }
+                    }
+                }, 45); // 45ms per character
+            }, 1200);
 
-            // Execute TTS
+            // Execute TTS Voice
             if (state.elevenApiKey && state.elevenVoiceId) {
                 speakElevenLabs(fullText);
             } else {
@@ -830,17 +985,21 @@ ${state.vaultResearchText}`;
                 if (!res.ok) throw new Error('ElevenLabs API error');
                 const blob = await res.blob();
                 const audio = new Audio(URL.createObjectURL(blob));
-                audio.onended = () => updateUIState('STANDBY', '● STANDBY', '準備完了');
+                audio.onended = () => {
+                    const speechEl = document.getElementById('fridaySpeechText');
+                    if (speechEl) speechEl.classList.remove('typing-cursor');
+                    updateUIState('STANDBY', '● STANDBY (「フライデー」で起動)', speechEl?.innerText || '準備完了');
+                };
                 audio.play();
             } catch (e) {
-                console.warn('ElevenLabs failed, fallback to Web Speech:', e);
+                console.warn('ElevenLabs fallback to Web Speech:', e);
                 speakBrowserSpeech(text);
             }
         }
 
         function speakBrowserSpeech(text) {
             if (!('speechSynthesis' in window)) {
-                updateUIState('STANDBY', '● STANDBY', '準備完了');
+                updateUIState('STANDBY', '● STANDBY (「フライデー」で起動)', '準備完了');
                 return;
             }
             window.speechSynthesis.cancel();
@@ -854,8 +1013,16 @@ ${state.vaultResearchText}`;
             const jpVoice = voices.find(v => v.lang.includes('ja') && (v.name.includes('Nanami') || v.name.includes('Haruka') || v.name.includes('Google')));
             if (jpVoice) utterance.voice = jpVoice;
 
-            utterance.onend = () => updateUIState('STANDBY', '● STANDBY', '準備完了');
-            utterance.onerror = () => updateUIState('STANDBY', '● STANDBY', '準備完了');
+            utterance.onend = () => {
+                const speechEl = document.getElementById('fridaySpeechText');
+                if (speechEl) speechEl.classList.remove('typing-cursor');
+                updateUIState('STANDBY', '● STANDBY (「フライデー」で起動)', speechEl?.innerText || '準備完了');
+            };
+            utterance.onerror = () => {
+                const speechEl = document.getElementById('fridaySpeechText');
+                if (speechEl) speechEl.classList.remove('typing-cursor');
+                updateUIState('STANDBY', '● STANDBY (「フライデー」で起動)', '準備完了');
+            };
 
             window.speechSynthesis.speak(utterance);
         }
@@ -902,7 +1069,7 @@ ${state.vaultResearchText}`;
         bind('toggleGraphBtn', 'click', () => {
             state.showGraphVisualizer = !state.showGraphVisualizer;
             const container = document.getElementById('obsidianGraphContainer');
-            if (container) container.style.opacity = state.showGraphVisualizer ? '0.8' : '0';
+            if (container) container.style.opacity = state.showGraphVisualizer ? '0.9' : '0';
         });
 
         bind('openTasksBtn', 'click', () => {
@@ -922,6 +1089,18 @@ ${state.vaultResearchText}`;
             document.getElementById('vaultModal')?.classList.remove('hidden');
         });
         bind('closeVaultBtn', 'click', () => document.getElementById('vaultModal')?.classList.add('hidden'));
+
+        bind('clearHistoryBtn', 'click', () => {
+            state.conversationHistory = [];
+            safeSetStorage('friday_conversation_history', '[]');
+            updateTurnBadge();
+            const msg = document.getElementById('vaultSavedMsg');
+            if (msg) {
+                msg.innerHTML = '<i class="fa-solid fa-check"></i> 履歴をリセットしました';
+                msg.classList.remove('hidden');
+                setTimeout(() => msg.classList.add('hidden'), 2000);
+            }
+        });
 
         bind('mainMemTabBtn', 'click', () => {
             state.activeTab = 'main';
@@ -948,6 +1127,7 @@ ${state.vaultResearchText}`;
             }
             const msg = document.getElementById('vaultSavedMsg');
             if (msg) {
+                msg.innerHTML = '<i class="fa-solid fa-check"></i> 保存しました';
                 msg.classList.remove('hidden');
                 setTimeout(() => msg.classList.add('hidden'), 2000);
             }
@@ -994,7 +1174,7 @@ ${state.vaultResearchText}`;
         bind('clapToggleBtn', 'click', () => {
             state.clapEnabled = !state.clapEnabled;
             const el = document.getElementById('clapStatusText');
-            if (el) el.innerText = state.clapEnabled ? 'クラップ: ON' : 'クラップ: OFF';
+            if (el) el.innerText = state.clapEnabled ? '常時呼出: ON' : '常時呼出: OFF';
         });
 
         bind('toggleSearchBtn', 'click', () => {
@@ -1037,8 +1217,10 @@ ${state.vaultResearchText}`;
         });
 
         window.addEventListener('click', () => {
-            if (!audioCtx) initClapDetector();
+            if (!audioCtx) initAudioMonitoring();
         }, { once: true });
+
+        updateTurnBadge();
     </script>
 </body>
 </html>
