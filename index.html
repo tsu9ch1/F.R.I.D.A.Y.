@@ -530,12 +530,12 @@
         const graphCanvas = document.getElementById('graphCanvas');
         const graphCtx = graphCanvas ? graphCanvas.getContext('2d') : null;
         let graphNodes = [
-            { id: 'friday', label: 'F.R.I.D.A.Y.', x: 400, y: 200, color: '#ff8c00', r: 18 },
-            { id: 'memory', label: 'Long-Term Memory', x: 250, y: 120, color: '#f59e0b', r: 12 },
-            { id: 'mastra', label: 'Mastra Workflow', x: 550, y: 130, color: '#a855f7', r: 14 },
-            { id: 'mcp', label: 'MCP Tools', x: 580, y: 280, color: '#38bdf8', r: 12 },
-            { id: 'web', label: 'Google Search', x: 230, y: 270, color: '#10b981', r: 12 },
-            { id: 'user', label: 'User Context', x: 400, y: 320, color: '#f43f5e', r: 11 }
+            { id: 'friday', label: 'F.R.I.D.A.Y.', x: 400, y: 200, color: '#ff8c00', r: 10 },
+            { id: 'memory', label: 'Long-Term Memory', x: 120, y: 60, color: '#f59e0b', r: 6 },
+            { id: 'mastra', label: 'Mastra Workflow', x: 680, y: 60, color: '#a855f7', r: 6 },
+            { id: 'mcp', label: 'MCP Tools', x: 720, y: 340, color: '#38bdf8', r: 6 },
+            { id: 'web', label: 'Google Search', x: 80, y: 340, color: '#10b981', r: 6 },
+            { id: 'user', label: 'User Context', x: 400, y: 375, color: '#f43f5e', r: 5 }
         ];
         let graphLinks = [
             { from: 'friday', to: 'memory' },
@@ -795,26 +795,30 @@ ${state.vaultResearchText}`;
         function speakAndAnimateText(fullText) {
             updateUIState('SPEAKING', '● SPEAKING', '');
 
-            // Split into sentences without truncation
-            const sentences = fullText.split(/(?<=[。！？\n])/).filter(s => s.trim().length > 0);
-            if (sentences.length === 0) sentences.push(fullText);
+            // Split into 20-character chunks to prevent truncation
+            const chunks = [];
+            const cleanText = fullText.replace(/\n+/g, ' ');
+            for (let i = 0; i < cleanText.length; i += 20) {
+                chunks.push(cleanText.substring(i, i + 20));
+            }
+            if (chunks.length === 0) chunks.push(fullText);
 
-            // 0.7-Second Delay Sync before displaying first sentence
+            // 0.7-Second Delay Sync before displaying first chunk
             setTimeout(() => {
                 let index = 0;
                 const speechEl = document.getElementById('fridaySpeechText');
 
-                if (speechEl) speechEl.innerText = sentences[0];
+                if (speechEl) speechEl.innerText = chunks[0];
 
-                if (sentences.length > 1) {
+                if (chunks.length > 1) {
                     const interval = setInterval(() => {
                         index++;
-                        if (index < sentences.length && speechEl) {
-                            speechEl.innerText = sentences[index];
+                        if (index < chunks.length && speechEl) {
+                            speechEl.innerText = chunks[index];
                         } else {
                             clearInterval(interval);
                         }
-                    }, 2800);
+                    }, 2200);
                 }
             }, 700);
 
