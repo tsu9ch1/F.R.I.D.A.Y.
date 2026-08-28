@@ -30,17 +30,17 @@
             font-family: 'Share Tech Mono', 'Noto Sans JP', monospace;
         }
         .text-glow-orange {
-            text-shadow: 0 0 10px rgba(255, 140, 0, 0.85);
+            text-shadow: 0 0 8px rgba(255, 140, 0, 0.85);
         }
         .text-glow-yellow {
-            text-shadow: 0 0 10px rgba(250, 204, 21, 0.85);
+            text-shadow: 0 0 8px rgba(250, 204, 21, 0.85);
         }
         .text-glow-red {
-            text-shadow: 0 0 10px rgba(239, 68, 68, 0.85);
+            text-shadow: 0 0 8px rgba(239, 68, 68, 0.85);
         }
         ::-webkit-scrollbar {
-            width: 3px;
-            height: 3px;
+            width: 2px;
+            height: 2px;
         }
         ::-webkit-scrollbar-track {
             background: #000000;
@@ -54,8 +54,8 @@
                 to bottom,
                 rgba(0,0,0,0),
                 rgba(0,0,0,0) 50%,
-                rgba(255, 140, 0, 0.02) 50%,
-                rgba(255, 140, 0, 0.02)
+                rgba(255, 140, 0, 0.015) 50%,
+                rgba(255, 140, 0, 0.015)
             );
             background-size: 100% 4px;
         }
@@ -69,11 +69,11 @@
             0%, 100% { opacity: 1; }
             50% { opacity: 0; }
         }
-        /* 10 Chars x 7 Lines Terminal Grid Styling */
+        /* 20 Chars x 7 Lines Precise Terminal Grid Styling */
         .terminal-grid-box {
             font-family: 'Share Tech Mono', 'Courier New', monospace;
-            line-height: 1.4;
-            letter-spacing: 0.05em;
+            line-height: 1.35;
+            letter-spacing: 0.02em;
             word-break: break-all;
             white-space: pre-wrap;
         }
@@ -84,92 +84,94 @@
     <!-- Background Canvas for Particle Effects -->
     <canvas id="bgCanvas" class="absolute inset-0 w-full h-full pointer-events-none z-0"></canvas>
 
-    <header class="w-full bg-black/90 border-b border-orange-500/20 px-4 py-2 flex justify-between items-center shrink-0 z-30">
-        <div class="flex items-center space-x-3">
-            <div class="relative flex h-2.5 w-2.5">
+    <!-- Top Compact Header Bar -->
+    <header class="w-full bg-black/90 border-b border-orange-500/20 px-3 md:px-5 py-1.5 flex justify-between items-center shrink-0 z-30">
+        <div class="flex items-center space-x-2.5">
+            <div class="relative flex h-2 w-2">
                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-orange-500"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
             </div>
-            <h1 class="text-base md:text-lg font-black font-orbitron tracking-widest text-orange-400 text-glow-orange flex items-center gap-2">
-                F.R.I.D.A.Y. <span class="text-[9px] text-orange-500 font-mono font-normal border border-orange-800/60 px-2 py-0.5 rounded-full bg-black">MASTRA // MCP CORE</span>
+            <h1 class="text-sm md:text-base font-black font-orbitron tracking-widest text-orange-400 text-glow-orange flex items-center gap-1.5">
+                F.R.I.D.A.Y. <span class="text-[8px] text-orange-500 font-mono font-normal border border-orange-800/60 px-1.5 py-0.2 rounded-full bg-black">MASTRA // MCP CORE</span>
             </h1>
         </div>
 
-        <div class="flex items-center space-x-2">
-            <button id="toggleGraphBtn" class="px-2.5 py-1 rounded-lg border border-orange-500/30 hover:bg-orange-500/20 text-orange-300 text-xs font-orbitron transition flex items-center gap-1.5 cursor-pointer">
+        <div class="flex items-center space-x-1.5">
+            <button id="toggleGraphBtn" class="px-2 py-0.5 rounded border border-orange-500/30 hover:bg-orange-500/20 text-orange-300 text-[10px] font-orbitron transition flex items-center gap-1 cursor-pointer">
                 <i class="fa-solid fa-circle-nodes text-orange-400"></i> GRAPH
             </button>
-            <button id="openTasksBtn" class="px-2.5 py-1 rounded-lg border border-orange-500/30 hover:bg-orange-500/20 text-orange-300 text-xs font-orbitron transition flex items-center gap-1.5 cursor-pointer">
+            <button id="openTasksBtn" class="px-2 py-0.5 rounded border border-orange-500/30 hover:bg-orange-500/20 text-orange-300 text-[10px] font-orbitron transition flex items-center gap-1 cursor-pointer">
                 <i class="fa-solid fa-list-check text-orange-400"></i> WORKFLOW
             </button>
-            <button id="openVaultBtn" class="px-2.5 py-1 rounded-lg border border-orange-500/30 hover:bg-orange-500/20 text-orange-300 text-xs font-orbitron transition flex items-center gap-1.5 cursor-pointer">
+            <button id="openVaultBtn" class="px-2 py-0.5 rounded border border-orange-500/30 hover:bg-orange-500/20 text-orange-300 text-[10px] font-orbitron transition flex items-center gap-1 cursor-pointer">
                 <i class="fa-solid fa-brain text-orange-400"></i> MEMORY
             </button>
-            <button id="openSettingsBtn" class="px-2.5 py-1 rounded-lg border border-orange-500/30 hover:bg-orange-500/20 text-orange-300 text-xs font-orbitron transition flex items-center gap-1.5 cursor-pointer">
+            <button id="openSettingsBtn" class="px-2 py-0.5 rounded border border-orange-500/30 hover:bg-orange-500/20 text-orange-300 text-[10px] font-orbitron transition flex items-center gap-1 cursor-pointer">
                 <i class="fa-solid fa-sliders text-orange-400"></i> CONFIG
             </button>
         </div>
     </header>
 
-    <main class="flex-1 w-full mx-auto p-2 md:p-3 grid grid-cols-12 gap-3 z-10 overflow-hidden relative">
+    <!-- Main Workspace Grid (Dense & Compact) -->
+    <main class="flex-1 max-w-6xl w-full mx-auto p-1.5 md:p-2.5 grid grid-cols-12 gap-2 z-10 overflow-hidden relative">
         
-        <!-- ================= LEFT SIDEBAR CONTROLS ================= -->
-        <section class="col-span-12 md:col-span-3 flex flex-col justify-between space-y-3 z-20">
+        <!-- ================= LEFT SIDEBAR CONTROLS (TIGHT & COMPACT) ================= -->
+        <section class="col-span-12 md:col-span-3 flex flex-col justify-between space-y-1.5 z-20">
             
             <!-- System Telemetry & Status Badge -->
-            <div class="bg-black/80 border border-orange-500/30 rounded-xl p-3 shadow-lg">
-                <div class="text-[10px] font-orbitron text-orange-500/70 mb-1 flex items-center justify-between">
+            <div class="bg-black/85 border border-orange-500/25 rounded-lg p-2 shadow-sm">
+                <div class="text-[9px] font-orbitron text-orange-500/70 mb-0.5 flex items-center justify-between">
                     <span>SYS.LOC: FUKUI_GAKUEN</span>
-                    <span id="turnCountBadge" class="text-orange-400 bg-orange-950/40 px-1.5 py-0.5 rounded border border-orange-500/30 font-mono">CTX: 0 TURNS</span>
+                    <span id="turnCountBadge" class="text-orange-400 bg-orange-950/40 px-1 py-0.2 rounded border border-orange-500/30 font-mono text-[8px]">CTX: 0 TURNS</span>
                 </div>
-                <div class="text-[10px] font-orbitron text-orange-500/70 flex justify-between items-center">
+                <div class="text-[9px] font-orbitron text-orange-500/70 flex justify-between items-center">
                     <span>AI MODEL:</span>
-                    <span id="aiModelBadge" class="text-orange-300 font-mono font-bold">gemini-3.5-flash-lite</span>
+                    <span id="aiModelBadge" class="text-orange-300 font-mono font-bold text-[9px]">gemini-3.5-flash-lite</span>
                 </div>
-                <div class="mt-2 text-center">
-                    <span id="hudStatusBadge" class="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-black border border-orange-500/40 text-orange-300 tracking-wider block">
+                <div class="mt-1.5 text-center">
+                    <span id="hudStatusBadge" class="text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-black border border-orange-500/40 text-orange-300 tracking-wider block">
                         ● STANDBY (「フライデー」で起動)
                     </span>
                 </div>
             </div>
 
             <!-- Voice & Mode Action Controls -->
-            <div class="bg-black/80 border border-orange-500/30 rounded-xl p-3 shadow-lg space-y-2">
-                <div class="text-[10px] font-orbitron text-orange-400/80 font-bold tracking-wider mb-2 border-b border-orange-500/20 pb-1">
-                    <i class="fa-solid fa-sliders text-orange-400 mr-1"></i> CONTROL PANEL
+            <div class="bg-black/85 border border-orange-500/25 rounded-lg p-2 shadow-sm space-y-1">
+                <div class="text-[9px] font-orbitron text-orange-400/80 font-bold tracking-wider mb-1 border-b border-orange-500/20 pb-0.5 flex items-center justify-between">
+                    <span><i class="fa-solid fa-sliders text-orange-400 mr-1"></i> CONTROL PANEL</span>
                 </div>
 
-                <button id="micBtn" class="w-full py-2.5 px-3 rounded-xl border border-orange-500/50 bg-black hover:bg-orange-500/20 text-orange-300 font-bold text-xs flex items-center justify-center gap-2 transition active:scale-95 shadow-md cursor-pointer">
-                    <i id="micIcon" class="fa-solid fa-microphone text-orange-400 text-sm"></i>
+                <button id="micBtn" class="w-full py-1.5 px-2 rounded-lg border border-orange-500/50 bg-black hover:bg-orange-500/20 text-orange-300 font-bold text-[11px] flex items-center justify-center gap-1.5 transition active:scale-95 shadow-sm cursor-pointer">
+                    <i id="micIcon" class="fa-solid fa-microphone text-orange-400 text-xs"></i>
                     <span id="micBtnText">話しかける</span>
                 </button>
 
-                <button id="clapToggleBtn" class="w-full py-2.5 px-3 rounded-xl border border-orange-500/30 bg-black hover:bg-orange-500/20 text-orange-300 font-bold text-xs flex items-center justify-center gap-2 transition cursor-pointer">
-                    <i class="fa-solid fa-ear-listen text-orange-400 text-sm"></i>
+                <button id="clapToggleBtn" class="w-full py-1.5 px-2 rounded-lg border border-orange-500/30 bg-black hover:bg-orange-500/20 text-orange-300 font-bold text-[11px] flex items-center justify-center gap-1.5 transition cursor-pointer">
+                    <i class="fa-solid fa-ear-listen text-orange-400 text-xs"></i>
                     <span id="clapStatusText">常時呼出: ON</span>
                 </button>
 
-                <button id="toggleSearchBtn" class="w-full py-2.5 px-3 rounded-xl border border-orange-500/30 bg-black hover:bg-orange-500/20 text-orange-300 font-bold text-xs flex items-center justify-center gap-2 transition cursor-pointer">
-                    <i class="fa-solid fa-globe text-orange-400 text-sm"></i>
+                <button id="toggleSearchBtn" class="w-full py-1.5 px-2 rounded-lg border border-orange-500/30 bg-black hover:bg-orange-500/20 text-orange-300 font-bold text-[11px] flex items-center justify-center gap-1.5 transition cursor-pointer">
+                    <i class="fa-solid fa-globe text-orange-400 text-xs"></i>
                     <span>検索モード: <span id="searchModeText" class="text-emerald-400 font-bold">ON</span></span>
                 </button>
             </div>
 
-            <!-- Direct Text Prompt & Multimodal Input Form -->
-            <div class="bg-black/80 border border-orange-500/30 rounded-xl p-3 shadow-lg flex-1 flex flex-col justify-end">
-                <div class="text-[10px] font-orbitron text-orange-400/80 font-bold tracking-wider mb-2 border-b border-orange-500/20 pb-1">
+            <!-- Direct Text Prompt Input Form -->
+            <div class="bg-black/85 border border-orange-500/25 rounded-lg p-2 shadow-sm flex flex-col justify-end">
+                <div class="text-[9px] font-orbitron text-orange-400/80 font-bold tracking-wider mb-1 border-b border-orange-500/20 pb-0.5">
                     <i class="fa-solid fa-terminal text-orange-400 mr-1"></i> DIRECT COMMAND
                 </div>
                 
-                <form id="textForm" class="flex flex-col gap-2">
-                    <div class="flex gap-1.5">
-                        <button type="button" id="uploadImgBtn" title="画像を添付してGemini解析" class="bg-black border border-orange-500/30 hover:bg-orange-950/40 text-orange-400 p-2 rounded-xl transition flex items-center justify-center cursor-pointer">
+                <form id="textForm" class="flex flex-col gap-1.5">
+                    <div class="flex gap-1">
+                        <button type="button" id="uploadImgBtn" title="画像を添付してGemini解析" class="bg-black border border-orange-500/30 hover:bg-orange-950/40 text-orange-400 p-1.5 rounded-lg transition flex items-center justify-center cursor-pointer text-xs">
                             <i class="fa-solid fa-paperclip"></i>
                         </button>
-                        <input type="text" id="userInput" placeholder="指示・メッセージを入力..." class="flex-1 bg-black border border-orange-500/30 rounded-xl px-3 py-1.5 text-xs text-orange-100 placeholder-orange-700/60 focus:outline-none focus:border-orange-400 transition">
+                        <input type="text" id="userInput" placeholder="指示・質問を入力..." class="flex-1 bg-black border border-orange-500/30 rounded-lg px-2.5 py-1 text-[11px] text-orange-100 placeholder-orange-700/60 focus:outline-none focus:border-orange-400 transition">
                     </div>
-                    <button type="submit" class="w-full bg-orange-500 hover:bg-orange-400 text-black font-bold py-2 rounded-xl transition flex items-center justify-center gap-2 shadow-lg active:scale-95 cursor-pointer text-xs">
-                        <i class="fa-solid fa-paper-plane"></i>
+                    <button type="submit" class="w-full bg-orange-500 hover:bg-orange-400 text-black font-bold py-1.5 rounded-lg transition flex items-center justify-center gap-1.5 shadow active:scale-95 cursor-pointer text-[11px]">
+                        <i class="fa-solid fa-paper-plane text-xs"></i>
                         <span>メッセージ送信</span>
                     </button>
                 </form>
@@ -181,67 +183,59 @@
             
             <!-- Knowledge & Status Graph Overlay Canvas -->
             <div id="obsidianGraphContainer" class="absolute inset-0 pointer-events-none flex items-center justify-center transition-opacity duration-500 opacity-90 z-0">
-                <canvas id="graphCanvas" width="600" height="420" class="w-full h-full object-contain"></canvas>
+                <canvas id="graphCanvas" width="600" height="380" class="w-full h-full object-contain"></canvas>
             </div>
 
             <!-- Main Hologram Ring Canvas Container -->
-            <div class="relative w-full aspect-square max-w-[260px] md:max-w-[310px] flex items-center justify-center my-auto z-10">
-                <canvas id="hudCanvas" width="400" height="400" class="w-full h-full drop-shadow-[0_0_25px_rgba(255,140,0,0.5)]"></canvas>
+            <div class="relative w-full aspect-square max-w-[240px] md:max-w-[290px] flex items-center justify-center my-auto z-10">
+                <canvas id="hudCanvas" width="400" height="400" class="w-full h-full drop-shadow-[0_0_20px_rgba(255,140,0,0.45)]"></canvas>
             </div>
         </section>
 
-        <!-- ================= RIGHT SIDEBAR (CLOCK, WEATHER, SPEECH OUTPUT) ================= -->
-        <section class="col-span-12 md:col-span-4 flex flex-col space-y-3 z-20">
+        <!-- ================= RIGHT SIDEBAR (CLOCK, WEATHER, 20x7 SPEECH OUTPUT) ================= -->
+        <section class="col-span-12 md:col-span-4 flex flex-col space-y-1.5 z-20">
             
             <!-- 1. Top Right Digital Clock & Date Display -->
-            <div class="bg-black/90 border border-orange-500/40 rounded-xl p-3 shadow-xl flex flex-col items-end">
-                <div id="liveClockTime" class="text-xl md:text-2xl font-black font-orbitron tracking-widest text-orange-400 text-glow-orange leading-none mb-1">--:--:-- JST</div>
-                <div id="liveClockDate" class="text-xs font-orbitron text-orange-500/80 font-bold tracking-wider">----.--.-- (---)</div>
+            <div class="bg-black/80 border border-orange-500/20 rounded-lg p-2 shadow-md flex flex-col items-end">
+                <div id="liveClockTime" class="text-lg md:text-xl font-black font-orbitron tracking-widest text-orange-400 text-glow-orange leading-none mb-0.5">--:--:-- JST</div>
+                <div id="liveClockDate" class="text-[10px] font-orbitron text-orange-500/80 font-bold tracking-wider">----.--.-- (---)</div>
             </div>
 
-            <!-- 2. Fukui City Weather Widget (WEATHER · FUKUI) -->
-            <div class="bg-black/90 border border-orange-500/30 rounded-xl p-3 shadow-lg">
-                <div class="text-[10px] font-orbitron text-orange-400 font-bold border-b border-orange-500/20 pb-1 mb-2 flex items-center justify-between">
-                    <span><i class="fa-solid fa-cloud-sun text-orange-400 mr-1"></i> WEATHER · FUKUI</span>
-                    <span id="weatherTempNow" class="text-orange-300 font-mono">現在 --°C</span>
+            <!-- 2. Fukui City Weather Widget (Clean Borderless Rows) -->
+            <div class="bg-black/80 border border-orange-500/20 rounded-lg p-2 shadow-sm font-mono text-[11px]">
+                <div class="font-orbitron text-orange-400 font-bold border-b border-orange-500/20 pb-1 mb-1.5 flex items-center justify-between text-[10px] tracking-wider">
+                    <span>WEATHER · FUKUI</span>
+                    <span id="weatherTempNow" class="text-orange-300">現在 --°C</span>
                 </div>
 
-                <div class="space-y-2 text-xs font-mono">
-                    <!-- Today Weather -->
-                    <div class="flex items-center justify-between bg-orange-950/20 px-2.5 py-1.5 rounded-lg border border-orange-500/20">
-                        <span class="text-orange-300 font-bold">今日</span>
-                        <span id="todayWeatherIcon" class="text-base">☀️</span>
-                        <div class="text-right">
-                            <span class="text-orange-400 font-bold">湿度 <span id="todayHumidity">--%</span></span>
-                        </div>
+                <!-- Clean HUD Weather Rows without Inner Card Boxes -->
+                <div class="space-y-1">
+                    <div class="flex items-center justify-between py-0.5 px-1 hover:bg-orange-500/10 transition rounded">
+                        <span class="text-orange-300 font-bold w-12">今日</span>
+                        <span id="todayWeatherIcon" class="text-sm">☀️</span>
+                        <span class="text-orange-400 text-[10px] text-right font-bold">湿度 <span id="todayHumidity">--%</span></span>
                     </div>
 
-                    <!-- Tomorrow Weather -->
-                    <div class="flex items-center justify-between bg-orange-950/20 px-2.5 py-1.5 rounded-lg border border-orange-500/20">
-                        <span class="text-orange-300 font-bold">明日</span>
-                        <span id="tomorrowWeatherIcon" class="text-base">🌤️</span>
-                        <div class="text-right">
-                            <span class="text-orange-400 font-bold">湿度 <span id="tomorrowHumidity">--%</span></span>
-                        </div>
+                    <div class="flex items-center justify-between py-0.5 px-1 hover:bg-orange-500/10 transition rounded">
+                        <span class="text-orange-300 font-bold w-12">明日</span>
+                        <span id="tomorrowWeatherIcon" class="text-sm">🌤️</span>
+                        <span class="text-orange-400 text-[10px] text-right font-bold">湿度 <span id="tomorrowHumidity">--%</span></span>
                     </div>
                 </div>
             </div>
 
-            <!-- 3. F.R.I.D.A.Y. Speech Output Display Box (10 Chars x 7 Lines Terminal) -->
-            <div class="bg-black/90 border border-orange-500/40 rounded-xl p-3 shadow-2xl flex-1 flex flex-col justify-start overflow-hidden">
-                <div class="text-[10px] font-orbitron text-orange-400 font-bold border-b border-orange-500/20 pb-1 mb-2 flex items-center justify-between shrink-0">
+            <!-- 3. F.R.I.D.A.Y. Speech Output Display Box (20 Chars x 7 Lines Terminal) -->
+            <div class="bg-black/80 border border-orange-500/20 rounded-lg p-2 shadow-xl flex-1 flex flex-col justify-start overflow-hidden">
+                <div class="text-[9px] font-orbitron text-orange-400 font-bold border-b border-orange-500/20 pb-1 mb-1 flex items-center justify-between shrink-0">
                     <span><i class="fa-solid fa-terminal text-orange-400 mr-1"></i> F.R.I.D.A.Y. SPEECH LOG</span>
-                    <span class="text-[9px] text-orange-500/60 font-mono">10 CHRS x 7 LINES</span>
+                    <span class="text-[8px] text-orange-500/60 font-mono">20 CHRS x 7 LINES</span>
                 </div>
 
-                <!-- 10 Chars per Line x 7 Lines Window Container -->
-                <div class="flex-1 bg-black/60 border border-orange-500/20 rounded-lg p-2.5 overflow-hidden flex items-start">
-                    <p id="fridaySpeechText" class="terminal-grid-box text-sm text-orange-100 font-mono font-medium tracking-wider w-full h-full text-left leading-relaxed">
-準備はいつでも
-できていますよ
-ボス。今日は何
-から手つけます
-か？
+                <!-- 20 Chars per Line x 7 Lines Window Container without nested box outlines -->
+                <div class="flex-1 bg-transparent p-1 overflow-hidden flex items-start">
+                    <p id="fridaySpeechText" class="terminal-grid-box text-[11px] md:text-xs text-orange-100 font-mono font-medium tracking-normal w-full h-full text-left leading-snug">
+準備はいつでもできていますよ、ボス。
+今日はどこから手をつけますか？
                     </p>
                 </div>
             </div>
@@ -250,24 +244,24 @@
     </main>
 
     <!-- Tasks & Workflow Modal -->
-    <div id="tasksModal" class="fixed inset-0 bg-black/95 backdrop-blur-md hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-black border border-orange-500/40 rounded-2xl w-full max-w-xl p-5 shadow-2xl relative max-h-[85vh] flex flex-col">
-            <button id="closeTasksBtn" class="absolute top-4 right-4 text-orange-500/60 hover:text-orange-300 text-lg cursor-pointer">
+    <div id="tasksModal" class="fixed inset-0 bg-black/95 backdrop-blur-md hidden z-50 flex items-center justify-center p-3">
+        <div class="bg-black border border-orange-500/40 rounded-xl w-full max-w-lg p-4 shadow-2xl relative max-h-[85vh] flex flex-col">
+            <button id="closeTasksBtn" class="absolute top-3 right-3 text-orange-500/60 hover:text-orange-300 text-base cursor-pointer">
                 <i class="fa-solid fa-xmark"></i>
             </button>
-            <h3 class="text-sm font-bold font-orbitron text-orange-400 mb-1 flex items-center gap-2">
+            <h3 class="text-xs font-bold font-orbitron text-orange-400 mb-1 flex items-center gap-1.5">
                 <i class="fa-solid fa-list-check text-orange-400"></i> MASTRA WORKFLOW & MCP TASKS
             </h3>
-            <p class="text-[11px] text-orange-500/70 mb-3">
+            <p class="text-[10px] text-orange-500/70 mb-2">
                 フライデーが会話から指示を自動判断して作成したタスクキュー一覧です。
             </p>
 
-            <div id="tasksList" class="flex-1 overflow-y-auto space-y-2.5 pr-1 font-mono text-xs my-2">
+            <div id="tasksList" class="flex-1 overflow-y-auto space-y-1.5 pr-1 font-mono text-xs my-1.5">
                 <!-- Dynamically populated tasks -->
             </div>
 
-            <div class="flex justify-end mt-2 pt-2 border-t border-orange-500/20">
-                <button id="clearCompletedTasksBtn" class="px-3 py-1 bg-orange-950/40 hover:bg-orange-900/60 border border-orange-500/30 text-orange-300 text-xs rounded-lg font-mono cursor-pointer">
+            <div class="flex justify-end mt-1.5 pt-1.5 border-t border-orange-500/20">
+                <button id="clearCompletedTasksBtn" class="px-2.5 py-1 bg-orange-950/40 hover:bg-orange-900/60 border border-orange-500/30 text-orange-300 text-[10px] rounded font-mono cursor-pointer">
                     完了済みタスクを整理
                 </button>
             </div>
@@ -275,34 +269,34 @@
     </div>
 
     <!-- Long-Term Memory (Vault) Modal -->
-    <div id="vaultModal" class="fixed inset-0 bg-black/95 backdrop-blur-md hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-black border border-orange-500/40 rounded-2xl w-full max-w-lg p-5 shadow-2xl relative">
-            <button id="closeVaultBtn" class="absolute top-4 right-4 text-orange-500/60 hover:text-orange-300 text-lg cursor-pointer">
+    <div id="vaultModal" class="fixed inset-0 bg-black/95 backdrop-blur-md hidden z-50 flex items-center justify-center p-3">
+        <div class="bg-black border border-orange-500/40 rounded-xl w-full max-w-md p-4 shadow-2xl relative">
+            <button id="closeVaultBtn" class="absolute top-3 right-3 text-orange-500/60 hover:text-orange-300 text-base cursor-pointer">
                 <i class="fa-solid fa-xmark"></i>
             </button>
-            <h3 class="text-sm font-bold font-orbitron text-orange-400 mb-1 flex items-center gap-2">
+            <h3 class="text-xs font-bold font-orbitron text-orange-400 mb-1 flex items-center gap-1.5">
                 <i class="fa-solid fa-brain text-orange-400"></i> LONG-TERM MEMORY (長期記憶)
             </h3>
-            <p class="text-[11px] text-orange-500/70 mb-3">
+            <p class="text-[10px] text-orange-500/70 mb-2">
                 メインエージェントおよびリサーチエージェントが記憶したユーザー情報と会話文脈です。
             </p>
 
-            <div class="mb-2 flex gap-2">
-                <button id="mainMemTabBtn" class="flex-1 py-1 text-xs font-mono font-bold border-b-2 border-orange-400 text-orange-300 cursor-pointer">メイン記憶</button>
-                <button id="researchMemTabBtn" class="flex-1 py-1 text-xs font-mono border-b-2 border-transparent text-orange-500/60 hover:text-orange-300 cursor-pointer">リサーチ記憶</button>
+            <div class="mb-1.5 flex gap-1.5">
+                <button id="mainMemTabBtn" class="flex-1 py-1 text-[11px] font-mono font-bold border-b-2 border-orange-400 text-orange-300 cursor-pointer">メイン記憶</button>
+                <button id="researchMemTabBtn" class="flex-1 py-1 text-[11px] font-mono border-b-2 border-transparent text-orange-500/60 hover:text-orange-300 cursor-pointer">リサーチ記憶</button>
             </div>
 
-            <textarea id="vaultContent" rows="6" class="w-full bg-black border border-orange-500/30 rounded-xl p-3 text-xs text-orange-100 font-mono focus:outline-none focus:border-orange-400" placeholder="【プロフィール】
+            <textarea id="vaultContent" rows="5" class="w-full bg-black border border-orange-500/30 rounded-lg p-2.5 text-xs text-orange-100 font-mono focus:outline-none focus:border-orange-400" placeholder="【プロフィール】
 名前：大学生（福井市学園在住）"></textarea>
 
-            <div class="flex justify-between items-center mt-3">
-                <button id="clearHistoryBtn" class="px-3 py-1 bg-rose-950/40 hover:bg-rose-900/60 border border-rose-500/30 text-rose-300 text-xs rounded-lg font-mono cursor-pointer">
+            <div class="flex justify-between items-center mt-2.5">
+                <button id="clearHistoryBtn" class="px-2.5 py-1 bg-rose-950/40 hover:bg-rose-900/60 border border-rose-500/30 text-rose-300 text-[10px] rounded font-mono cursor-pointer">
                     <i class="fa-solid fa-trash mr-1"></i> 直前会話履歴をリセット
                 </button>
-                <div class="flex items-center gap-2">
-                    <span id="vaultSavedMsg" class="text-xs text-emerald-400 hidden"><i class="fa-solid fa-check"></i> 保存しました</span>
-                    <button id="saveVaultBtn" class="bg-orange-500 hover:bg-orange-400 text-black font-bold px-5 py-1.5 rounded-xl transition text-xs cursor-pointer">
-                        保存する
+                <div class="flex items-center gap-1.5">
+                    <span id="vaultSavedMsg" class="text-[10px] text-emerald-400 hidden"><i class="fa-solid fa-check"></i> 保存完了</span>
+                    <button id="saveVaultBtn" class="bg-orange-500 hover:bg-orange-400 text-black font-bold px-4 py-1 rounded transition text-[11px] cursor-pointer">
+                        保存
                     </button>
                 </div>
             </div>
@@ -310,34 +304,34 @@
     </div>
 
     <!-- Configuration Modal -->
-    <div id="settingsModal" class="fixed inset-0 bg-black/95 backdrop-blur-md hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-black border border-orange-500/40 rounded-2xl w-full max-w-sm p-5 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-            <button id="closeSettingsBtn" class="absolute top-4 right-4 text-orange-500/60 hover:text-orange-300 text-lg cursor-pointer">
+    <div id="settingsModal" class="fixed inset-0 bg-black/95 backdrop-blur-md hidden z-50 flex items-center justify-center p-3">
+        <div class="bg-black border border-orange-500/40 rounded-xl w-full max-w-sm p-4 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button id="closeSettingsBtn" class="absolute top-3 right-3 text-orange-500/60 hover:text-orange-300 text-base cursor-pointer">
                 <i class="fa-solid fa-xmark"></i>
             </button>
-            <h3 class="text-sm font-bold font-orbitron text-orange-400 mb-4 flex items-center gap-2">
+            <h3 class="text-xs font-bold font-orbitron text-orange-400 mb-3 flex items-center gap-1.5">
                 <i class="fa-solid fa-sliders text-orange-400"></i> CONFIGURATION
             </h3>
 
-            <div class="space-y-3.5 text-xs">
+            <div class="space-y-2.5 text-[11px]">
                 <div>
-                    <label class="block font-orbitron text-orange-300 mb-1">GEMINI API KEY</label>
-                    <input type="password" id="apiKeyInput" placeholder="APIキー (AIzaSy...)" class="w-full bg-black border border-orange-500/30 rounded-xl px-3 py-2 text-orange-100 focus:outline-none focus:border-orange-400">
+                    <label class="block font-orbitron text-orange-300 mb-0.5">GEMINI API KEY</label>
+                    <input type="password" id="apiKeyInput" placeholder="APIキー (AIzaSy...)" class="w-full bg-black border border-orange-500/30 rounded px-2.5 py-1 text-orange-100 focus:outline-none focus:border-orange-400">
                 </div>
 
                 <div>
-                    <label class="block font-orbitron text-orange-300 mb-1">ELEVENLABS API KEY (オプション)</label>
-                    <input type="password" id="elevenApiKeyInput" placeholder="ElevenLabs API Key..." class="w-full bg-black border border-orange-500/30 rounded-xl px-3 py-2 text-orange-100 focus:outline-none focus:border-orange-400">
+                    <label class="block font-orbitron text-orange-300 mb-0.5">ELEVENLABS API KEY (オプション)</label>
+                    <input type="password" id="elevenApiKeyInput" placeholder="ElevenLabs API Key..." class="w-full bg-black border border-orange-500/30 rounded px-2.5 py-1 text-orange-100 focus:outline-none focus:border-orange-400">
                 </div>
 
                 <div>
-                    <label class="block font-orbitron text-orange-300 mb-1">ELEVENLABS VOICE ID</label>
-                    <input type="text" id="elevenVoiceIdInput" value="gHBfNp2PWSyFgpPlzCOd" class="w-full bg-black border border-orange-500/30 rounded-xl px-3 py-2 text-orange-100 focus:outline-none focus:border-orange-400 font-mono">
+                    <label class="block font-orbitron text-orange-300 mb-0.5">ELEVENLABS VOICE ID</label>
+                    <input type="text" id="elevenVoiceIdInput" value="gHBfNp2PWSyFgpPlzCOd" class="w-full bg-black border border-orange-500/30 rounded px-2.5 py-1 text-orange-100 focus:outline-none focus:border-orange-400 font-mono">
                 </div>
 
                 <div>
-                    <label class="block font-orbitron text-orange-300 mb-1">AI MODEL</label>
-                    <select id="aiModelSelect" class="w-full bg-black border border-orange-500/30 rounded-xl px-3 py-2 text-orange-100 focus:outline-none focus:border-orange-400">
+                    <label class="block font-orbitron text-orange-300 mb-0.5">AI MODEL</label>
+                    <select id="aiModelSelect" class="w-full bg-black border border-orange-500/30 rounded px-2.5 py-1 text-orange-100 focus:outline-none focus:border-orange-400">
                         <option value="gemini-3.5-flash-lite" selected>Gemini 3.5 Flash-Lite (最推奨)</option>
                         <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash-Lite</option>
                         <option value="gemini-3-flash">Gemini 3 Flash</option>
@@ -345,7 +339,7 @@
                 </div>
 
                 <div>
-                    <div class="flex justify-between items-center mb-1">
+                    <div class="flex justify-between items-center mb-0.5">
                         <label class="font-orbitron text-orange-300">SPEECH RATE</label>
                         <span id="speechRateVal" class="text-orange-400 font-mono font-bold">1.35x</span>
                     </div>
@@ -353,7 +347,7 @@
                 </div>
 
                 <div>
-                    <div class="flex justify-between items-center mb-1">
+                    <div class="flex justify-between items-center mb-0.5">
                         <label class="font-orbitron text-orange-300">VOICE PITCH</label>
                         <span id="speechPitchVal" class="text-orange-400 font-mono font-bold">1.30</span>
                     </div>
@@ -361,7 +355,7 @@
                 </div>
 
                 <div>
-                    <div class="flex justify-between items-center mb-1">
+                    <div class="flex justify-between items-center mb-0.5">
                         <label class="font-orbitron text-orange-300">CLAP SENSITIVITY</label>
                         <span id="clapSensVal" class="text-orange-400 font-mono font-bold">0.20</span>
                     </div>
@@ -369,8 +363,8 @@
                 </div>
             </div>
 
-            <div class="mt-5 flex justify-end">
-                <button id="saveSettingsBtn" class="bg-orange-500 hover:bg-orange-400 text-black font-bold px-5 py-2 rounded-xl transition text-xs cursor-pointer">
+            <div class="mt-4 flex justify-end">
+                <button id="saveSettingsBtn" class="bg-orange-500 hover:bg-orange-400 text-black font-bold px-4 py-1.5 rounded transition text-[11px] cursor-pointer">
                     設定を保存
                 </button>
             </div>
@@ -421,7 +415,7 @@
 
         /* Application State */
         let state = {
-            status: 'STANDBY', // STANDBY, LISTENING, THINKING, SEARCHING_WEB, CREATING_TASK, EXECUTING_WORKFLOW, SPEAKING, ERROR
+            status: 'STANDBY',
             apiKey: safeGetStorage('friday_gemini_key') || '',
             elevenApiKey: safeGetStorage('friday_eleven_key') || '',
             elevenVoiceId: safeGetStorage('friday_eleven_voice') || 'gHBfNp2PWSyFgpPlzCOd',
@@ -450,7 +444,6 @@
         /* Weather API Fetcher for Fukui City (Open-Meteo API) */
         async function fetchFukuiWeather() {
             try {
-                // Fukui City Lat: 36.0652, Lon: 136.2219
                 const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=36.0652&longitude=136.2219&current=temperature_2m,relative_humidity_2m,weather_code&daily=weather_code,relative_humidity_2m_mean&timezone=Asia%2FTokyo');
                 if (!res.ok) throw new Error('Weather API error');
                 const data = await res.json();
@@ -507,13 +500,13 @@
             bgCanvas.height = window.innerHeight;
 
             particles = [];
-            for (let i = 0; i < 60; i++) {
+            for (let i = 0; i < 50; i++) {
                 particles.push({
                     x: Math.random() * bgCanvas.width,
                     y: Math.random() * bgCanvas.height,
-                    radius: Math.random() * 1.5 + 0.5,
-                    alpha: Math.random() * 0.5 + 0.1,
-                    speed: Math.random() * 0.3 + 0.1
+                    radius: Math.random() * 1.2 + 0.4,
+                    alpha: Math.random() * 0.4 + 0.1,
+                    speed: Math.random() * 0.25 + 0.08
                 });
             }
         }
@@ -524,9 +517,9 @@
             if (!bgCtx || !bgCanvas) return;
             bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
 
-            bgCtx.strokeStyle = 'rgba(255, 140, 0, 0.03)';
+            bgCtx.strokeStyle = 'rgba(255, 140, 0, 0.025)';
             bgCtx.lineWidth = 1;
-            const step = 40;
+            const step = 35;
             for (let x = 0; x < bgCanvas.width; x += step) {
                 bgCtx.beginPath();
                 bgCtx.moveTo(x, 0);
@@ -579,14 +572,14 @@
 
             let pulseOffset = 0;
             if (state.status === 'SPEAKING') {
-                pulseOffset = Math.sin(Date.now() / 70) * 12 + Math.cos(Date.now() / 130) * 8;
+                pulseOffset = Math.sin(Date.now() / 70) * 10 + Math.cos(Date.now() / 130) * 6;
             } else {
-                pulseOffset = Math.sin(Date.now() / 250) * 3;
+                pulseOffset = Math.sin(Date.now() / 250) * 2.5;
             }
 
             // Outer Arc
             hudCtx.beginPath();
-            hudCtx.arc(cx, cy, 140 + pulseOffset * 0.3, hudAngle, hudAngle + Math.PI * 1.6);
+            hudCtx.arc(cx, cy, 130 + pulseOffset * 0.3, hudAngle, hudAngle + Math.PI * 1.6);
             hudCtx.strokeStyle = strokeColor;
             hudCtx.lineWidth = 1.5;
             hudCtx.setLineDash([4, 4]);
@@ -595,47 +588,47 @@
 
             // Highlight Arc
             hudCtx.beginPath();
-            hudCtx.arc(cx, cy, 140 + pulseOffset * 0.3, hudAngle + Math.PI * 0.2, hudAngle + Math.PI * 0.6);
+            hudCtx.arc(cx, cy, 130 + pulseOffset * 0.3, hudAngle + Math.PI * 0.2, hudAngle + Math.PI * 0.6);
             hudCtx.strokeStyle = '#ffffff';
-            hudCtx.lineWidth = 3.5;
+            hudCtx.lineWidth = 3;
             hudCtx.stroke();
 
             // Middle Dotted Ring
             hudCtx.beginPath();
-            hudCtx.arc(cx, cy, 118 + pulseOffset * 0.5, -hudAngle * 1.5, -hudAngle * 1.5 + Math.PI * 1.8);
+            hudCtx.arc(cx, cy, 108 + pulseOffset * 0.5, -hudAngle * 1.5, -hudAngle * 1.5 + Math.PI * 1.8);
             hudCtx.strokeStyle = strokeColor;
-            hudCtx.lineWidth = 2;
-            hudCtx.setLineDash([2, 6]);
+            hudCtx.lineWidth = 1.5;
+            hudCtx.setLineDash([2, 5]);
             hudCtx.stroke();
             hudCtx.setLineDash([]);
 
             // Inner Ring
             hudCtx.beginPath();
-            hudCtx.arc(cx, cy, 85 + pulseOffset * 0.7, 0, Math.PI * 2);
-            hudCtx.strokeStyle = 'rgba(255, 140, 0, 0.35)';
+            hudCtx.arc(cx, cy, 78 + pulseOffset * 0.6, 0, Math.PI * 2);
+            hudCtx.strokeStyle = 'rgba(255, 140, 0, 0.3)';
             hudCtx.lineWidth = 1;
             hudCtx.stroke();
 
             // Core
-            const coreRadius = Math.max(36, 48 + pulseOffset);
+            const coreRadius = Math.max(32, 44 + pulseOffset);
             hudCtx.beginPath();
             hudCtx.arc(cx, cy, coreRadius, 0, Math.PI * 2);
             hudCtx.fillStyle = 'rgba(0, 0, 0, 0.9)';
             hudCtx.strokeStyle = strokeColor;
-            hudCtx.lineWidth = state.status === 'SPEAKING' ? 3 : 2;
+            hudCtx.lineWidth = state.status === 'SPEAKING' ? 2.5 : 1.8;
             hudCtx.shadowColor = strokeColor;
-            hudCtx.shadowBlur = state.status === 'SPEAKING' ? 28 : 16;
+            hudCtx.shadowBlur = state.status === 'SPEAKING' ? 24 : 14;
             hudCtx.fill();
             hudCtx.stroke();
             hudCtx.shadowBlur = 0;
 
             // Core Text
             hudCtx.fillStyle = '#ffffff';
-            hudCtx.font = '900 13px Orbitron';
+            hudCtx.font = '900 12px Orbitron';
             hudCtx.textAlign = 'center';
             hudCtx.textBaseline = 'middle';
             hudCtx.shadowColor = strokeColor;
-            hudCtx.shadowBlur = 10;
+            hudCtx.shadowBlur = 8;
             hudCtx.fillText('F.R.I.D.A.Y.', cx, cy);
             hudCtx.shadowBlur = 0;
 
@@ -648,11 +641,11 @@
         const graphCtx = graphCanvas ? graphCanvas.getContext('2d') : null;
 
         let graphNodes = [
-            { id: 'memory', label: 'Long-Term Memory', x: 80, y: 60, vx: (Math.random()-0.5)*0.2, vy: (Math.random()-0.5)*0.2, color: '#fbbf24', r: 5, stateMatch: ['MEMORY_READ', 'THINKING'] },
-            { id: 'mastra', label: 'Mastra Workflow', x: 520, y: 60, vx: (Math.random()-0.5)*0.2, vy: (Math.random()-0.5)*0.2, color: '#c084fc', r: 5, stateMatch: ['CREATING_TASK'] },
-            { id: 'mcp', label: 'MCP Tools', x: 530, y: 360, vx: (Math.random()-0.5)*0.2, vy: (Math.random()-0.5)*0.2, color: '#34d399', r: 5, stateMatch: ['EXECUTING_WORKFLOW'] },
-            { id: 'web', label: 'Google Search', x: 70, y: 360, vx: (Math.random()-0.5)*0.2, vy: (Math.random()-0.5)*0.2, color: '#38bdf8', r: 5, stateMatch: ['SEARCHING_WEB'] },
-            { id: 'user', label: 'User Context', x: 300, y: 380, vx: (Math.random()-0.5)*0.2, vy: (Math.random()-0.5)*0.2, color: '#fb7185', r: 5, stateMatch: ['LISTENING'] }
+            { id: 'memory', label: 'Long-Term Memory', x: 70, y: 50, vx: (Math.random()-0.5)*0.18, vy: (Math.random()-0.5)*0.18, color: '#fbbf24', r: 4.5, stateMatch: ['MEMORY_READ', 'THINKING'] },
+            { id: 'mastra', label: 'Mastra Workflow', x: 530, y: 50, vx: (Math.random()-0.5)*0.18, vy: (Math.random()-0.5)*0.18, color: '#c084fc', r: 4.5, stateMatch: ['CREATING_TASK'] },
+            { id: 'mcp', label: 'MCP Tools', x: 540, y: 330, vx: (Math.random()-0.5)*0.18, vy: (Math.random()-0.5)*0.18, color: '#34d399', r: 4.5, stateMatch: ['EXECUTING_WORKFLOW'] },
+            { id: 'web', label: 'Google Search', x: 60, y: 330, vx: (Math.random()-0.5)*0.18, vy: (Math.random()-0.5)*0.18, color: '#38bdf8', r: 4.5, stateMatch: ['SEARCHING_WEB'] },
+            { id: 'user', label: 'User Context', x: 300, y: 345, vx: (Math.random()-0.5)*0.18, vy: (Math.random()-0.5)*0.18, color: '#fb7185', r: 4.5, stateMatch: ['LISTENING'] }
         ];
 
         function drawGraph() {
@@ -672,15 +665,15 @@
                 n1.x += n1.vx;
                 n1.y += n1.vy;
 
-                if (n1.x < 40 || n1.x > graphCanvas.width - 40) n1.vx *= -1;
-                if (n1.y < 30 || n1.y > graphCanvas.height - 30) n1.vy *= -1;
+                if (n1.x < 35 || n1.x > graphCanvas.width - 35) n1.vx *= -1;
+                if (n1.y < 25 || n1.y > graphCanvas.height - 25) n1.vy *= -1;
 
                 const dCoreX = n1.x - centerCoreX;
                 const dCoreY = n1.y - centerCoreY;
                 const distCore = Math.sqrt(dCoreX * dCoreX + dCoreY * dCoreY);
-                if (distCore < 120) {
-                    n1.x = centerCoreX + (dCoreX / distCore) * 125;
-                    n1.y = centerCoreY + (dCoreY / distCore) * 125;
+                if (distCore < 110) {
+                    n1.x = centerCoreX + (dCoreX / distCore) * 115;
+                    n1.y = centerCoreY + (dCoreY / distCore) * 115;
                 }
             }
 
@@ -693,9 +686,9 @@
 
                 if (isActive) {
                     graphCtx.strokeStyle = node.color;
-                    graphCtx.lineWidth = 2.5;
+                    graphCtx.lineWidth = 2;
                     graphCtx.shadowColor = node.color;
-                    graphCtx.shadowBlur = 18;
+                    graphCtx.shadowBlur = 14;
                     graphCtx.stroke();
                     graphCtx.shadowBlur = 0;
 
@@ -703,11 +696,11 @@
                     const px = centerCoreX + (node.x - centerCoreX) * progress;
                     const py = centerCoreY + (node.y - centerCoreY) * progress;
                     graphCtx.beginPath();
-                    graphCtx.arc(px, py, 3.5, 0, Math.PI * 2);
+                    graphCtx.arc(px, py, 3, 0, Math.PI * 2);
                     graphCtx.fillStyle = '#ffffff';
                     graphCtx.fill();
                 } else {
-                    graphCtx.strokeStyle = 'rgba(255, 140, 0, 0.15)';
+                    graphCtx.strokeStyle = 'rgba(255, 140, 0, 0.12)';
                     graphCtx.lineWidth = 1;
                     graphCtx.stroke();
                 }
@@ -715,20 +708,20 @@
 
             graphNodes.forEach(node => {
                 const isActive = node.stateMatch.includes(state.status);
-                const currentRadius = isActive ? node.r * 2 : node.r;
+                const currentRadius = isActive ? node.r * 1.8 : node.r;
 
                 graphCtx.beginPath();
                 graphCtx.arc(node.x, node.y, currentRadius, 0, Math.PI * 2);
                 graphCtx.fillStyle = node.color;
                 graphCtx.shadowColor = node.color;
-                graphCtx.shadowBlur = isActive ? 25 : 8;
+                graphCtx.shadowBlur = isActive ? 20 : 6;
                 graphCtx.fill();
                 graphCtx.shadowBlur = 0;
 
-                graphCtx.fillStyle = isActive ? '#ffffff' : 'rgba(255, 255, 255, 0.7)';
-                graphCtx.font = isActive ? 'bold 10px Orbitron' : '8px Orbitron';
+                graphCtx.fillStyle = isActive ? '#ffffff' : 'rgba(255, 255, 255, 0.65)';
+                graphCtx.font = isActive ? 'bold 9px Orbitron' : '7.5px Orbitron';
                 graphCtx.textAlign = 'center';
-                graphCtx.fillText(node.label, node.x, node.y + currentRadius + 12);
+                graphCtx.fillText(node.label, node.x, node.y + currentRadius + 10);
             });
 
             requestAnimationFrame(drawGraph);
@@ -832,12 +825,12 @@
             const badge = document.getElementById('hudStatusBadge');
             if (badge) {
                 badge.innerText = badgeText;
-                if (status === 'LISTENING') badge.className = 'text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-black border border-yellow-500/60 text-yellow-400 text-glow-yellow block';
-                else if (status === 'ERROR') badge.className = 'text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-black border border-red-500/60 text-red-400 text-glow-red block';
-                else if (status === 'SEARCHING_WEB') badge.className = 'text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-black border border-sky-500/60 text-sky-400 block';
-                else if (status === 'CREATING_TASK') badge.className = 'text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-black border border-purple-500/60 text-purple-400 block';
-                else if (status === 'EXECUTING_WORKFLOW') badge.className = 'text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-black border border-emerald-500/60 text-emerald-400 block';
-                else badge.className = 'text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-black border border-orange-500/40 text-orange-300 tracking-wider block';
+                if (status === 'LISTENING') badge.className = 'text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-black border border-yellow-500/60 text-yellow-400 text-glow-yellow block';
+                else if (status === 'ERROR') badge.className = 'text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-black border border-red-500/60 text-red-400 text-glow-red block';
+                else if (status === 'SEARCHING_WEB') badge.className = 'text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-black border border-sky-500/60 text-sky-400 block';
+                else if (status === 'CREATING_TASK') badge.className = 'text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-black border border-purple-500/60 text-purple-400 block';
+                else if (status === 'EXECUTING_WORKFLOW') badge.className = 'text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-black border border-emerald-500/60 text-emerald-400 block';
+                else badge.className = 'text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-black border border-orange-500/40 text-orange-300 tracking-wider block';
             }
 
             if (speechText) {
@@ -845,8 +838,40 @@
             }
         }
 
-        /* 10 Chars per Line x 7 Lines Terminal Output Formatter */
+        /* 20 Chars per Line x 7 Lines Terminal Output with Natural Wrapping */
         let activeTypingTimer = null;
+
+        function buildNatural20x7Layout(rawText) {
+            const MAX_CHARS_PER_LINE = 20;
+            const MAX_LINES = 7;
+
+            // Split into paragraphs / natural segments
+            const segments = rawText.replace(/\r/g, '').split('\n');
+            const lines = [];
+
+            segments.forEach(seg => {
+                let currentLine = '';
+                for (let i = 0; i < seg.length; i++) {
+                    const ch = seg[i];
+                    currentLine += ch;
+
+                    // Natural punctuation wrap or line length boundary
+                    const isPunctuation = (ch === '。' || ch === '！' || ch === '？' || ch === '!' || ch === '?');
+
+                    if (isPunctuation || currentLine.length >= MAX_CHARS_PER_LINE) {
+                        lines.push(currentLine);
+                        currentLine = '';
+                    }
+                }
+                if (currentLine.length > 0) {
+                    lines.push(currentLine);
+                }
+            });
+
+            // Keep only the most recent 7 lines
+            const recentLines = lines.slice(-MAX_LINES);
+            return recentLines.join('\n');
+        }
 
         function formatAndAnimateSpeechText(fullText) {
             if (activeTypingTimer) {
@@ -860,7 +885,7 @@
             speechEl.innerText = '';
             speechEl.classList.add('typing-cursor');
 
-            const cleanText = fullText.replace(/\s+/g, '').trim();
+            const cleanText = fullText.trim();
             let charIdx = 0;
 
             activeTypingTimer = setInterval(() => {
@@ -872,21 +897,10 @@
                 }
 
                 charIdx++;
-                const visibleSubstring = cleanText.substring(0, charIdx);
+                const currentChunk = cleanText.substring(0, charIdx);
+                speechEl.innerText = buildNatural20x7Layout(currentChunk);
 
-                // Format into 10 characters per line
-                let formattedGrid = '';
-                for (let i = 0; i < visibleSubstring.length; i += 10) {
-                    formattedGrid += visibleSubstring.substring(i, i + 10) + '\n';
-                }
-
-                // Show up to last 7 lines if text exceeds 70 characters
-                const lines = formattedGrid.trim().split('\n');
-                const last7Lines = lines.slice(-7).join('\n');
-
-                speechEl.innerText = last7Lines;
-
-            }, 45); // 45ms per character
+            }, 40); // 40ms per character
         }
 
         function getSystemPrompt() {
@@ -1093,17 +1107,17 @@ ${state.vaultResearchText}`;
             if (!list) return;
 
             if (state.tasks.length === 0) {
-                list.innerHTML = `<div class="text-orange-500/50 py-4 text-center">タスクキューは空です。</div>`;
+                list.innerHTML = `<div class="text-orange-500/50 py-3 text-center text-[10px]">タスクキューは空です。</div>`;
                 return;
             }
 
             list.innerHTML = state.tasks.map(t => `
-                <div class="bg-black/80 border border-orange-500/30 p-2.5 rounded-xl flex items-center justify-between">
+                <div class="bg-black/80 border border-orange-500/30 p-2 rounded-lg flex items-center justify-between">
                     <div>
-                        <div class="text-orange-200 font-bold">${escapeHtml(t.text)}</div>
-                        <div class="text-[10px] text-orange-500/60">${t.time} // ID: ${t.id}</div>
+                        <div class="text-orange-200 font-bold text-[11px]">${escapeHtml(t.text)}</div>
+                        <div class="text-[9px] text-orange-500/60">${t.time} // ID: ${t.id}</div>
                     </div>
-                    <span class="px-2 py-0.5 text-[9px] rounded font-mono ${t.status === 'COMPLETED' ? 'bg-emerald-950 text-emerald-400 border border-emerald-500/40' : 'bg-amber-950 text-amber-400 border border-amber-500/40 animate-pulse'}">
+                    <span class="px-1.5 py-0.2 text-[8px] rounded font-mono ${t.status === 'COMPLETED' ? 'bg-emerald-950 text-emerald-400 border border-emerald-500/40' : 'bg-amber-950 text-amber-400 border border-amber-500/40 animate-pulse'}">
                         ${t.status}
                     </span>
                 </div>
@@ -1125,7 +1139,7 @@ ${state.vaultResearchText}`;
 
         // Fetch Live Weather for Fukui on load
         fetchFukuiWeather();
-        setInterval(fetchFukuiWeather, 600000); // Refresh weather every 10 mins
+        setInterval(fetchFukuiWeather, 600000);
 
         // Navigation & Modal Bindings
         bind('toggleGraphBtn', 'click', () => {
@@ -1166,15 +1180,15 @@ ${state.vaultResearchText}`;
 
         bind('mainMemTabBtn', 'click', () => {
             state.activeTab = 'main';
-            document.getElementById('mainMemTabBtn').className = 'flex-1 py-1 text-xs font-mono font-bold border-b-2 border-orange-400 text-orange-300';
-            document.getElementById('researchMemTabBtn').className = 'flex-1 py-1 text-xs font-mono border-b-2 border-transparent text-orange-500/60 hover:text-orange-300';
+            document.getElementById('mainMemTabBtn').className = 'flex-1 py-1 text-[11px] font-mono font-bold border-b-2 border-orange-400 text-orange-300';
+            document.getElementById('researchMemTabBtn').className = 'flex-1 py-1 text-[11px] font-mono border-b-2 border-transparent text-orange-500/60 hover:text-orange-300';
             setElVal('vaultContent', state.vaultMainText);
         });
 
         bind('researchMemTabBtn', 'click', () => {
             state.activeTab = 'research';
-            document.getElementById('researchMemTabBtn').className = 'flex-1 py-1 text-xs font-mono font-bold border-b-2 border-orange-400 text-orange-300';
-            document.getElementById('mainMemTabBtn').className = 'flex-1 py-1 text-xs font-mono border-b-2 border-transparent text-orange-500/60 hover:text-orange-300';
+            document.getElementById('researchMemTabBtn').className = 'flex-1 py-1 text-[11px] font-mono font-bold border-b-2 border-orange-400 text-orange-300';
+            document.getElementById('mainMemTabBtn').className = 'flex-1 py-1 text-[11px] font-mono border-b-2 border-transparent text-orange-500/60 hover:text-orange-300';
             setElVal('vaultContent', state.vaultResearchText);
         });
 
