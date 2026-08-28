@@ -105,6 +105,9 @@
         </div>
 
         <div class="flex items-center space-x-2">
+            <button id="toggleGraphBtn" class="px-2.5 py-1 rounded-lg border border-orange-500/30 hover:bg-orange-500/20 text-orange-300 text-xs font-orbitron transition flex items-center gap-1.5">
+                <i class="fa-solid fa-circle-nodes text-orange-400"></i> GRAPH VISUALIZER
+            </button>
             <button id="openTasksBtn" class="px-2.5 py-1 rounded-lg border border-orange-500/30 hover:bg-orange-500/20 text-orange-300 text-xs font-orbitron transition flex items-center gap-1.5">
                 <i class="fa-solid fa-list-check text-orange-400"></i> WORKFLOW
             </button>
@@ -132,19 +135,24 @@
         <!-- Central Hologram Ring Section (40% Viewport Scale) -->
         <section class="w-full flex-1 p-1 flex flex-col items-center justify-center relative overflow-hidden my-1 shrink-0">
             
+            <!-- Obsidian-style Agent & Knowledge Graph Visualizer Canvas Overlay -->
+            <div id="obsidianGraphContainer" class="absolute inset-0 pointer-events-none flex items-center justify-center transition-opacity duration-500 opacity-30">
+                <canvas id="graphCanvas" width="800" height="400" class="w-full h-full object-contain"></canvas>
+            </div>
+
             <!-- Hologram Canvas Container -->
-            <div class="relative w-full aspect-square max-w-[260px] md:max-w-[300px] lg:max-w-[330px] flex items-center justify-center my-auto">
+            <div class="relative w-full aspect-square max-w-[260px] md:max-w-[300px] lg:max-w-[330px] flex items-center justify-center my-auto z-10">
                 <canvas id="hudCanvas" width="400" height="400" class="w-full h-full drop-shadow-[0_0_25px_rgba(255,140,0,0.4)]"></canvas>
             </div>
 
             <!-- Current Status Badge -->
-            <div class="text-center my-1.5">
+            <div class="text-center my-1.5 z-10">
                 <span id="hudStatusBadge" class="text-[11px] font-mono font-bold px-3 py-0.5 rounded-full bg-black border border-orange-500/40 text-orange-300 tracking-wider">
                     ● STANDBY
                 </span>
             </div>
 
-            <div class="w-full max-w-2xl bg-black/90 border border-orange-500/30 rounded-xl px-4 py-2.5 shadow-2xl relative min-h-[48px] max-h-[54px] flex items-center justify-center shrink-0 overflow-hidden">
+            <div class="w-full max-w-2xl bg-black/90 border border-orange-500/30 rounded-xl px-4 py-2.5 shadow-2xl relative min-h-[48px] max-h-[54px] flex items-center justify-center shrink-0 overflow-hidden z-10">
                 <p id="fridaySpeechText" class="text-xs md:text-sm text-orange-100 font-medium leading-none tracking-wide text-center transition-all duration-300 w-full px-2">
                     準備はいつでもできていますよ、ボス。今日はどこから手をつけますか？
                 </p>
@@ -343,823 +351,181 @@
             vaultMainText: localStorage.getItem('friday_vault_main') || `【プロフィール】\n名前：大学生（福井市学園在住）`,
             vaultResearchText: localStorage.getItem('friday_vault_research') || `【リサーチ記憶】\n興味関心：最新AIモデル、Mastraワークフロー、MCP開発`,
             activeTab: 'main',
+            showGraphVisualizer: true,
             tasks: JSON.parse(localStorage.getItem('friday_tasks') || '[]')
         };
 
         /* Google OAuth Auth Guard */
-        function checkAuth() {
-            const overlay = document.getElementById('authOverlay');
-            if (!state.authenticated && overlay) {
-                overlay.classList.remove('hidden');
-            } else if (overlay) {
-                overlay.classList.add('hidden');
-            }
-        }
-        bind('googleLoginBtn', 'click', () => {
-            state.authenticated = true;
-            localStorage.setItem('friday_auth', 'true');
-            checkAuth();
-        });
-        checkAuth();
-
-        /* Realtime Clock Handler */
-        function updateLiveClock() {
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const date = String(now.getDate()).padStart(2, '0');
-            const days = ['日', '月', '火', '水', '木', '金', '土'];
-            const dayName = days[now.getDay()];
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
-
-            const formattedFull = `${year}.${month}.${date} (${dayName}) ${hours}:${minutes}:${seconds} JST`;
-            const formattedTime = `${hours}:${minutes}:${seconds}`;
-
-            const fullEl = document.getElementById('liveClockDisplay');
-            const mobEl = document.getElementById('mobileClockDisplay');
-
-            if (fullEl) fullEl.innerText = formattedFull;
-            if (mobEl) mobEl.innerText = formattedTime;
-        }
-        setInterval(updateLiveClock, 1000);
-        updateLiveClock();
-
-        function updateModelBadge() {
-            const badge = document.getElementById('aiModelBadge');
-            if (badge) badge.innerText = state.aiModel;
-        }
-
-        function updateSearchButtonUI() {
-            const btnText = document.getElementById('searchModeText');
-            if (btnText) {
-                btnText.innerText = state.useSearchGrounding ? 'ON' : 'OFF';
-                btnText.className = state.useSearchGrounding ? 'text-orange-300 font-bold' : 'text-slate-500';
-            }
-        }
-
-        /* Status Manager with Dynamic Visual States */
-        let statusRecoveryTimer = null;
-        function updateStatus(newStatus, subText = '') {
-            state.status = newStatus;
-            const badgeEl = document.getElementById('hudStatusBadge');
-            const stateBadgeEl = document.getElementById('aiStateBadge');
-
-            if (statusRecoveryTimer) clearTimeout(statusRecoveryTimer);
-
-            if (stateBadgeEl) stateBadgeEl.innerText = `STATUS: ${newStatus}`;
-
-            if (badgeEl) {
-                badgeEl.innerText = `● ${newStatus}`;
-                if (newStatus === 'LISTENING') {
-                    badgeEl.className = 'text-[11px] font-mono font-bold px-3 py-0.5 rounded-full bg-black border border-yellow-500 text-yellow-400 tracking-wider animate-pulse';
-                } else if (newStatus === 'ERROR' || newStatus.includes('ERR')) {
-                    badgeEl.className = 'text-[11px] font-mono font-bold px-3 py-0.5 rounded-full bg-black border border-red-500 text-red-500 tracking-wider animate-pulse';
-                    statusRecoveryTimer = setTimeout(() => {
-                        if (state.status === 'ERROR' || state.status.includes('ERR')) {
-                            updateStatus('STANDBY');
-                        }
-                    }, 3500);
-                } else if (newStatus === 'THINKING' || newStatus === 'SEARCHING_WEB') {
-                    badgeEl.className = 'text-[11px] font-mono font-bold px-3 py-0.5 rounded-full bg-black border border-orange-500/80 text-orange-300 tracking-wider animate-pulse';
-                } else if (newStatus === 'CREATING_TASK' || newStatus === 'EXECUTING_WORKFLOW') {
-                    badgeEl.className = 'text-[11px] font-mono font-bold px-3 py-0.5 rounded-full bg-black border border-cyan-500 text-cyan-300 tracking-wider animate-pulse';
-                } else {
-                    badgeEl.className = 'text-[11px] font-mono font-bold px-3 py-0.5 rounded-full bg-black border border-orange-500/40 text-orange-300 tracking-wider';
-                }
-            }
-        }
-
-        function getSystemPrompt() {
-            const now = new Date();
-            const nowJST = now.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short', hour: '2-digit', minute: '2-digit', second: '2-digit' });
-
-            return `あなたはF.R.I.D.A.Y.（フライデー）という名前の高度AIアシスタントです。
-- 知的で仕事が早く、非常に優秀な女性AIです。
-- ユーザーを「ボス」と呼びます（公式な場面では「サー」）。
-- フランクでテンポが良く、人間味のある親しみやすさを持ちます。
-- 長々と語らず、要点をテキパキと短くスマートに伝えます。
-- 日本語で返答します。
-
-【応答ルール】
-- ユーザーから日時や時間を尋ねられていない限り、発話の冒頭で「本日は〇年〇月〇日…」といった日時の前置き挨拶を絶対にしないでください。
-
-【タスク・リサーチ処理ポリシー】
-- 「今日の〇〇のニュースを調べて」等の短時間で完結する簡単な調べものは、直接回答・検索してください。
-- 時間がかかる調査、後で実行したい処理、複雑なプロジェクト構築命令を受けた場合は、回答文の末尾に「TASK_CREATE:タスクタイトル|詳細説明」を付与してください。プログラムが自動でMastra Workflowタスクとして登録します。
-
-【現在のバックグラウンド日本標準時 (JST)】:
-${nowJST}
-
-【長期記憶ナレッジ】:
-${state.vaultMainText}
-${state.vaultResearchText}`;
-        }
-
-        const bgCanvas = document.getElementById('bgCanvas');
-        const bgCtx = bgCanvas ? bgCanvas.getContext('2d') : null;
-        let particles = [];
-
-        function initBgParticles() {
-            if (!bgCanvas) return;
-            bgCanvas.width = window.innerWidth;
-            bgCanvas.height = window.innerHeight;
-            particles = [];
-            for (let i = 0; i < 65; i++) {
-                particles.push({
-                    x: Math.random() * bgCanvas.width,
-                    y: Math.random() * bgCanvas.height,
-                    radius: Math.random() * 1.5 + 0.5,
-                    vx: (Math.random() - 0.5) * 0.4,
-                    vy: (Math.random() - 0.5) * 0.4,
-                    alpha: Math.random() * 0.6 + 0.2
-                });
-            }
-        }
-        window.addEventListener('resize', initBgParticles);
-        initBgParticles();
-
-        function drawBackground() {
-            if (!bgCtx || !bgCanvas) return;
-            bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
-
-            // Floating Star Particles
-            for (let p of particles) {
-                p.x += p.vx;
-                p.y += p.vy;
-                if (p.x < 0) p.x = bgCanvas.width;
-                if (p.x > bgCanvas.width) p.x = 0;
-                if (p.y < 0) p.y = bgCanvas.height;
-                if (p.y > bgCanvas.height) p.y = 0;
-
-                bgCtx.beginPath();
-                bgCtx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-                bgCtx.fillStyle = `rgba(255, 140, 0, ${p.alpha})`;
-                bgCtx.fill();
-            }
-
-            // Radar Corner Arc
-            bgCtx.beginPath();
-            bgCtx.arc(80, 80, 50, 0, Math.PI * 1.5);
-            bgCtx.strokeStyle = 'rgba(255, 140, 0, 0.15)';
-            bgCtx.lineWidth = 1;
-            bgCtx.stroke();
-
-            // Waveform Oscilloscope Line at Bottom
-            bgCtx.beginPath();
-            const time = Date.now() * 0.003;
-            for (let x = 0; x < bgCanvas.width; x += 10) {
-                const y = bgCanvas.height - 30 + Math.sin(x * 0.02 + time) * 6;
-                if (x === 0) bgCtx.moveTo(x, y);
-                else bgCtx.lineTo(x, y);
-            }
-            bgCtx.strokeStyle = 'rgba(255, 140, 0, 0.12)';
-            bgCtx.lineWidth = 1.5;
-            bgCtx.stroke();
-
-            requestAnimationFrame(drawBackground);
-        }
-        drawBackground();
-
-        const canvas = document.getElementById('hudCanvas');
-        const ctx = canvas ? canvas.getContext('2d') : null;
-        let angle = 0;
-
-        function drawHUD() {
-            if (!ctx || !canvas) return;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            const cx = canvas.width / 2;
-            const cy = canvas.height / 2;
-
-            let baseColor = 'rgba(255, 140, 0, 0.85)';
-            let dimColor = 'rgba(255, 140, 0, 0.35)';
-            let speed = 0.03;
-
-            if (state.status === 'LISTENING') {
-                baseColor = 'rgba(255, 204, 0, 0.95)';
-                dimColor = 'rgba(255, 204, 0, 0.4)';
-                speed = 0.06;
-            } else if (state.status === 'ERROR' || state.status.includes('ERR')) {
-                baseColor = 'rgba(255, 50, 50, 0.95)';
-                dimColor = 'rgba(255, 50, 50, 0.4)';
-            } else if (state.status === 'CREATING_TASK' || state.status === 'EXECUTING_WORKFLOW') {
-                baseColor = 'rgba(6, 182, 212, 0.95)';
-                dimColor = 'rgba(6, 182, 212, 0.4)';
-                speed = 0.08;
-            }
-
-            angle = (angle + speed) % (Math.PI * 2);
-
-            ctx.beginPath();
-            ctx.arc(cx, cy, 160, angle, angle + Math.PI * 0.75);
-            ctx.strokeStyle = baseColor;
-            ctx.lineWidth = 3;
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.arc(cx, cy, 140, angle, angle + Math.PI * 0.85);
-            ctx.strokeStyle = dimColor;
-            ctx.lineWidth = 4;
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.arc(cx, cy, 100, -angle * 1.5, -angle * 1.5 + Math.PI * 1.3);
-            ctx.strokeStyle = baseColor;
-            ctx.lineWidth = 3.5;
-            ctx.setLineDash([8, 6]);
-            ctx.stroke();
-            ctx.setLineDash([]);
-
-            const pulse = Math.sin(Date.now() / 180) * 4;
-            ctx.beginPath();
-            ctx.arc(cx, cy, 45 + pulse, 0, Math.PI * 2);
-            ctx.fillStyle = baseColor;
-            ctx.shadowColor = baseColor;
-            ctx.shadowBlur = 25;
-            ctx.fill();
-            ctx.shadowBlur = 0;
-
-            ctx.fillStyle = '#000000';
-            ctx.font = '900 11px Orbitron';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('F . R . I . D . A . Y .', cx, cy);
-
-            requestAnimationFrame(drawHUD);
-        }
-        if (canvas) drawHUD();
-
-        let displaySentenceTimer = null;
-        function displayFridayWords(text, citations = []) {
-            if (displaySentenceTimer) clearInterval(displaySentenceTimer);
-            const speechTextEl = document.getElementById('fridaySpeechText');
-            if (!speechTextEl) return;
-
-            const cleanFullText = text.replace(/\n+/g, ' ').trim();
-            const sentences = cleanFullText
-                .split(/(?<=[。！？])/)
-                .map(s => s.trim())
-                .filter(s => s.length > 0);
-
-            if (sentences.length <= 1) {
-                speechTextEl.innerText = cleanFullText;
-            } else {
-                let currentIdx = 0;
-                speechTextEl.innerText = sentences[0];
-
-                const stepInterval = Math.max(2200, Math.min(4500, (sentences[0].length * 120) / (state.speechRate || 1.35)));
-
-                displaySentenceTimer = setInterval(() => {
-                    currentIdx++;
-                    if (currentIdx < sentences.length) {
-                        speechTextEl.innerText = sentences[currentIdx];
-                    } else {
-                        clearInterval(displaySentenceTimer);
-                    }
-                }, stepInterval);
-            }
-
-            const citationContainer = document.getElementById('citationContainer');
-            const citationLinks = document.getElementById('citationLinks');
-
-            if (citations && citations.length > 0 && citationContainer && citationLinks) {
-                citationLinks.innerHTML = citations.map(c => 
-                    `<a href="${c.uri}" target="_blank" class="hover:underline text-orange-300">🔗 ${escapeHtml(c.title || c.uri)}</a>`
-                ).join(' ');
-                citationContainer.classList.remove('hidden');
-            } else if (citationContainer) {
-                citationContainer.classList.add('hidden');
-            }
-        }
-
-        function addTask(title, detail) {
-            const newTask = {
-                id: Date.now(),
-                title: title,
-                detail: detail,
-                status: 'IN_PROGRESS',
-                createdAt: new Date().toLocaleString('ja-JP')
-            };
-            state.tasks.unshift(newTask);
-            localStorage.setItem('friday_tasks', JSON.stringify(state.tasks));
-            renderTasks();
-            updateStatus('CREATING_TASK', `タスク作成: ${title}`);
-        }
-
-        function renderTasks() {
-            const listEl = document.getElementById('tasksList');
-            if (!listEl) return;
-            if (state.tasks.length === 0) {
-                listEl.innerHTML = `<div class="text-center py-6 text-orange-500/50">現在作成されたタスクはありません</div>`;
-                return;
-            }
-            listEl.innerHTML = state.tasks.map(t => `
-                <div class="bg-black border border-orange-500/30 rounded-xl p-3 flex justify-between items-start gap-2">
-                    <div>
-                        <div class="font-bold text-orange-300 flex items-center gap-2">
-                            <span class="text-[9px] px-1.5 py-0.2 rounded ${t.status==='COMPLETED'?'bg-emerald-950 text-emerald-400 border border-emerald-500/40':'bg-orange-950 text-orange-400 border border-orange-500/40'}">${t.status}</span>
-                            ${escapeHtml(t.title)}
-                        </div>
-                        <div class="text-[11px] text-orange-100/80 mt-1">${escapeHtml(t.detail)}</div>
-                        <div class="text-[9px] text-orange-500/50 mt-1">${t.createdAt}</div>
-                    </div>
-                    <button onclick="toggleTaskStatus(${t.id})" class="text-xs px-2 py-1 border border-orange-500/40 hover:bg-orange-500/20 rounded">
-                        ${t.status === 'COMPLETED' ? '未完了にする' : '完了'}
-                    </button>
-                </div>
-            `).join('');
-        }
-
-        window.toggleTaskStatus = function(id) {
-            const task = state.tasks.find(t => t.id === id);
-            if (task) {
-                task.status = task.status === 'COMPLETED' ? 'IN_PROGRESS' : 'COMPLETED';
-                localStorage.setItem('friday_tasks', JSON.stringify(state.tasks));
-                renderTasks();
-            }
-        };
-
-        bind('clearCompletedTasksBtn', 'click', () => {
-            state.tasks = state.tasks.filter(t => t.status !== 'COMPLETED');
-            localStorage.setItem('friday_tasks', JSON.stringify(state.tasks));
-            renderTasks();
-        });
-
-        async function fetchWithRetry(url, options, retries = 2, backoff = 1000) {
-            try {
-                const res = await fetch(url, options);
-                if (res.status === 403) {
-                    throw new Error('⚠️ APIキーが無効か未設定です。「CONFIG」ボタンからGoogle AI StudioのAPIキーを設定してください。');
-                }
-                if (res.status === 429) {
-                    throw new Error('⚠️ レート制限 (429) に達しました。1分ほど時間をおいて試してください。');
-                }
-                if (!res.ok) {
-                    const errJson = await res.json().catch(() => ({}));
-                    const detail = errJson.error?.message || `HTTPエラー ${res.status}`;
-                    throw new Error(`⚠️ Google API Error (${res.status}): ${detail}`);
-                }
-                return res;
-            } catch (err) {
-                if (retries <= 0 || err.message.includes('403') || err.message.includes('429')) {
-                    throw err;
-                }
-                await new Promise(r => setTimeout(r, backoff));
-                return fetchWithRetry(url, options, retries - 1, backoff * 2);
-            }
-        }
-
-        async function handleUserQuery(promptText, imageBase64 = null) {
-            if (!state.apiKey) {
-                displayFridayWords('⚠️ APIキーが設定されていません。右上の「CONFIG」ボタンから Google AI Studio の APIキーを入力してください。');
-                updateStatus('ERROR', 'APIキーを設定してください。');
-                return;
-            }
-
-            if (!imageBase64 && (promptText.includes('生成') || promptText.includes('描いて') || promptText.includes('画像を作成') || promptText.includes('ホログラム'))) {
-                generateHologramImage(promptText);
-                return;
-            }
-
-            updateStatus('THINKING', '思考中...');
-
-            try {
-                const apiKey = state.apiKey;
-                const model = state.aiModel || 'gemini-3.5-flash-lite';
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-
-                let parts = [{ text: promptText }];
-                if (imageBase64) {
-                    parts.push({
-                        inlineData: {
-                            mimeType: 'image/jpeg',
-                            data: imageBase64.split(',')[1] || imageBase64
-                        }
-                    });
-                }
-
-                const payload = {
-                    contents: [{ parts: parts }],
-                    systemInstruction: { parts: [{ text: getSystemPrompt() }] }
-                };
-
-                if (state.useSearchGrounding) {
-                    payload.tools = [{ "google_search": {} }];
-                    updateStatus('SEARCHING_WEB', 'Webリサーチ中...');
-                }
-
-                let response;
-                try {
-                    response = await fetchWithRetry(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                } catch (firstErr) {
-                    if (payload.tools) {
-                        delete payload.tools;
-                        response = await fetchWithRetry(apiUrl, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(payload)
-                        });
-                    } else {
-                        throw firstErr;
-                    }
-                }
-
-                const result = await response.json();
-                const candidate = result.candidates?.[0];
-
-                if (candidate && candidate.content?.parts?.[0]?.text) {
-                    let replyText = candidate.content.parts[0].text;
-                    
-                    let citations = [];
-                    const groundingMetadata = candidate.groundingMetadata;
-                    if (groundingMetadata && groundingMetadata.groundingAttributions) {
-                        citations = groundingMetadata.groundingAttributions
-                            .map(attr => ({ uri: attr.web?.uri, title: attr.web?.title }))
-                            .filter(src => src.uri && src.title);
-                    }
-
-                    // Check for task creation directive
-                    if (replyText.includes('TASK_CREATE:')) {
-                        const taskMatch = replyText.match(/TASK_CREATE:(.*?)\|(.*)/);
-                        if (taskMatch) {
-                            const taskTitle = taskMatch[1].trim();
-                            const taskDetail = taskMatch[2].trim();
-                            addTask(taskTitle, taskDetail);
-                            replyText = replyText.replace(/TASK_CREATE:.*/, '').trim();
-                        }
-                    }
-
-                    displayFridayWords(replyText, citations);
-                    speakText(replyText);
-                } else {
-                    throw new Error('無効な応答データが返されました。');
-                }
-
-            } catch (err) {
-                console.error('Gemini API Fetch Error:', err);
-                displayFridayWords(err.message);
-                updateStatus('ERROR', 'APIエラーが発生しました。');
-            }
-        }
-
-        async function generateHologramImage(promptText) {
-            if (!state.apiKey) {
-                displayFridayWords('⚠️ APIキーを設定してください。');
-                updateStatus('ERROR', 'APIキー未設定');
-                return;
-            }
-
-            updateStatus('GENERATING', 'ホログラム画像合成中...');
-            displayFridayWords(`🎨 ホログラム画像生成プロセスを開始: "${promptText}"`);
-
-            try {
-                const apiKey = state.apiKey;
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${apiKey}`;
-
-                const payload = {
-                    contents: [{
-                        parts: [{ text: `A futuristic holographic blueprint or HUD scheme of: ${promptText}. High tech, neon orange glowing accent, transparent futuristic aesthetic` }]
-                    }],
-                    generationConfig: {
-                        responseModalities: ['IMAGE']
-                    }
-                };
-
-                const response = await fetchWithRetry(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                const result = await response.json();
-                const part = result?.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
-
-                if (part && part.inlineData) {
-                    const imageUrl = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
-                    displayFridayWords(`ボス、ご要求のホログラム画像を合成しました。下のリンクを開いて確認できます。`);
-                    window.open(imageUrl, '_blank');
-                    speakText('ボス、ホログラム画像の生成が完了しました。');
-                } else {
-                    throw new Error('画像データの取得に失敗しました。');
-                }
-            } catch (err) {
-                console.error('Image Gen Error:', err);
-                displayFridayWords(`⚠️ 生成エラー: ${err.message}`);
-                updateStatus('ERROR', '生成失敗');
-            }
-        }
-
-        async function speakText(text) {
-            if (state.elevenApiKey && state.elevenVoiceId) {
-                try {
-                    updateStatus('SPEAKING', 'ElevenLabs 音声合成中...');
-                    const url = `https://api.elevenlabs.io/v1/text-to-speech/${state.elevenVoiceId}`;
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        headers: {
-                            'Accept': 'audio/mpeg',
-                            'xi-api-key': state.elevenApiKey,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            text: text,
-                            model_id: "eleven_multilingual_v2",
-                            voice_settings: { stability: 0.5, similarity_boost: 0.75 }
-                        })
-                    });
-
-                    if (response.ok) {
-                        const blob = await response.blob();
-                        const audioUrl = URL.createObjectURL(blob);
-                        const audio = new Audio(audioUrl);
-                        audio.onended = () => updateStatus('STANDBY');
-                        audio.play();
-                        return;
-                    }
-                } catch (e) {
-                    console.warn('ElevenLabs Speech failed, falling back to Web Speech:', e);
+        /* Obsidian-style Agent & Knowledge Graph Visualizer */
+        const graphCanvas = document.getElementById('graphCanvas');
+        const graphCtx = graphCanvas ? graphCanvas.getContext('2d') : null;
+
+        const graphNodes = [
+            { id: 'user', label: 'USER PROMPT', x: 0.15, y: 0.5, active: false, color: '#f59e0b' },
+            { id: 'friday', label: 'F.R.I.D.A.Y. CORE', x: 0.5, y: 0.5, active: true, color: '#ff8c00' },
+            { id: 'web', label: 'MCP SEARCH', x: 0.3, y: 0.2, active: false, color: '#06b6d4' },
+            { id: 'workflow', label: 'MASTRA WORKFLOW', x: 0.7, y: 0.2, active: false, color: '#10b981' },
+            { id: 'vault', label: 'LONG-TERM MEMORY', x: 0.5, y: 0.82, active: false, color: '#a855f7' }
+        ];
+
+        const graphEdges = [
+            { from: 'user', to: 'friday' },
+            { from: 'friday', to: 'web' },
+            { from: 'friday', to: 'workflow' },
+            { from: 'friday', to: 'vault' },
+            { from: 'web', to: 'workflow' }
+        ];
+
+        let graphPulse = 0;
+
+        function drawObsidianGraph() {
+            if (!graphCtx || !graphCanvas) return;
+            graphCtx.clearRect(0, 0, graphCanvas.width, graphCanvas.height);
+
+            const w = graphCanvas.width;
+            const h = graphCanvas.height;
+
+            graphPulse += 0.05;
+
+            // Sync Node Active States based on state.status
+            graphNodes.find(n => n.id === 'web').active = (state.status === 'SEARCHING_WEB');
+            graphNodes.find(n => n.id === 'workflow').active = (state.status === 'CREATING_TASK' || state.status === 'EXECUTING_WORKFLOW');
+            graphNodes.find(n => n.id === 'vault').active = (state.status === 'THINKING' || state.status === 'SPEAKING');
+            graphNodes.find(n => n.id === 'user').active = (state.status === 'LISTENING');
+
+            // Draw Edges with animated data pulses
+            for (let edge of graphEdges) {
+                const source = graphNodes.find(n => n.id === edge.from);
+                const target = graphNodes.find(n => n.id === edge.to);
+
+                const x1 = source.x * w;
+                const y1 = source.y * h;
+                const x2 = target.x * w;
+                const y2 = target.y * h;
+
+                const isEdgeActive = source.active || target.active;
+
+                graphCtx.beginPath();
+                graphCtx.moveTo(x1, y1);
+                graphCtx.lineTo(x2, y2);
+                graphCtx.strokeStyle = isEdgeActive ? 'rgba(255, 140, 0, 0.45)' : 'rgba(255, 140, 0, 0.12)';
+                graphCtx.lineWidth = isEdgeActive ? 1.8 : 1.0;
+                graphCtx.stroke();
+
+                // Draw moving data particles along edges when active
+                if (isEdgeActive) {
+                    const progress = (Math.sin(graphPulse + x1) + 1) / 2;
+                    const px = x1 + (x2 - x1) * progress;
+                    const py = y1 + (y2 - y1) * progress;
+
+                    graphCtx.beginPath();
+                    graphCtx.arc(px, py, 2.5, 0, Math.PI * 2);
+                    graphCtx.fillStyle = '#ffaa00';
+                    graphCtx.shadowColor = '#ff8c00';
+                    graphCtx.shadowBlur = 8;
+                    graphCtx.fill();
+                    graphCtx.shadowBlur = 0;
                 }
             }
 
-            speakBrowserSpeech(text);
-        }
+            // Draw Nodes
+            for (let node of graphNodes) {
+                const nx = node.x * w;
+                const ny = node.y * h;
+                const radius = node.id === 'friday' ? 12 : 7;
 
-        function speakBrowserSpeech(text) {
-            if (!('speechSynthesis' in window)) {
-                updateStatus('STANDBY');
-                return;
-            }
-            window.speechSynthesis.cancel();
-
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'ja-JP';
-            utterance.rate = state.speechRate || 1.35;
-            utterance.pitch = state.speechPitch || 1.30;
-
-            const voices = window.speechSynthesis.getVoices();
-            const jpVoices = voices.filter(v => v.lang.includes('ja') || v.lang.includes('JA'));
-            const preferredVoice = jpVoices.find(v => 
-                v.name.includes('Nanami') ||
-                v.name.includes('Haruka') ||
-                v.name.includes('Ayumi') ||
-                v.name.includes('Kyoko') ||
-                v.name.includes('Google 日本語') ||
-                v.name.includes('Female') ||
-                v.name.includes('女性')
-            ) || jpVoices[0];
-
-            if (preferredVoice) utterance.voice = preferredVoice;
-
-            utterance.onstart = () => updateStatus('SPEAKING');
-            utterance.onend = () => updateStatus('STANDBY');
-            utterance.onerror = () => updateStatus('STANDBY');
-
-            window.speechSynthesis.speak(utterance);
-        }
-
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        let recognition = null;
-
-        if (SpeechRecognition) {
-            recognition = new SpeechRecognition();
-            recognition.lang = 'ja-JP';
-            recognition.interimResults = false;
-
-            recognition.onstart = () => {
-                updateStatus('LISTENING', 'どうぞ、ボス。話しかけてください...');
-            };
-
-            recognition.onresult = (event) => {
-                const text = event.results[0][0].transcript;
-                displayFridayWords(`「${text}」`);
-                handleUserQuery(text);
-            };
-
-            recognition.onerror = (event) => {
-                console.error('Speech recognition error:', event.error);
-                updateStatus('ERROR', '音声入力エラーが発生しました。');
-            };
-
-            recognition.onend = () => {
-                if (state.status === 'LISTENING') {
-                    updateStatus('STANDBY');
+                // Pulsing outer halo for active nodes
+                if (node.active) {
+                    const ringRadius = radius + Math.sin(graphPulse * 2) * 5 + 4;
+                    graphCtx.beginPath();
+                    graphCtx.arc(nx, ny, ringRadius, 0, Math.PI * 2);
+                    graphCtx.strokeStyle = node.color;
+                    graphCtx.lineWidth = 1.5;
+                    graphCtx.stroke();
                 }
-            };
-        }
 
-        function startVoiceRecognition() {
-            if (!recognition) {
-                alert('お使いのブラウザはWeb Speech APIに対応していません。ChromeまたはEdgeをご使用ください。');
-                return;
+                // Main Node Circle
+                graphCtx.beginPath();
+                graphCtx.arc(nx, ny, radius, 0, Math.PI * 2);
+                graphCtx.fillStyle = node.active ? node.color : '#111827';
+                graphCtx.strokeStyle = node.color;
+                graphCtx.lineWidth = 2;
+                graphCtx.shadowColor = node.color;
+                graphCtx.shadowBlur = node.active ? 15 : 4;
+                graphCtx.fill();
+                graphCtx.stroke();
+                graphCtx.shadowBlur = 0;
+
+                // Obsidian Label Text
+                graphCtx.fillStyle = node.active ? '#ffffff' : 'rgba(255, 140, 0, 0.6)';
+                graphCtx.font = '600 9px Orbitron';
+                graphCtx.textAlign = 'center';
+                graphCtx.fillText(node.label, nx, ny + radius + 14);
             }
-            if (state.status === 'THINKING' || state.status === 'LISTENING') return;
-            
-            try {
-                if (audioCtx && audioCtx.state === 'suspended') {
-                    audioCtx.resume();
-                }
-                recognition.start();
-            } catch (e) {
-                console.warn(e);
-            }
+
+            requestAnimationFrame(drawObsidianGraph);
         }
+        drawObsidianGraph();
 
-        bind('micBtn', 'click', () => {
-            startVoiceRecognition();
-        });
-
-        bind('clapToggleBtn', 'click', () => {
-            state.clapEnabled = !state.clapEnabled;
-            const statusText = document.getElementById('clapStatusText');
-            if (statusText) statusText.innerText = state.clapEnabled ? 'クラップ: ON' : 'クラップ: OFF';
-        });
-
-        bind('toggleSearchBtn', 'click', () => {
-            state.useSearchGrounding = !state.useSearchGrounding;
-            localStorage.setItem('friday_search_mode', state.useSearchGrounding);
-            updateSearchButtonUI();
-            displayFridayWords(`Web検索グラウンディングを ${state.useSearchGrounding ? '有効' : '無効'} に設定しました。`);
-        });
-
-        const tasksModal = document.getElementById('tasksModal');
-        const vaultModal = document.getElementById('vaultModal');
-        const settingsModal = document.getElementById('settingsModal');
-
-        bind('openTasksBtn', 'click', () => {
-            renderTasks();
-            tasksModal?.classList.remove('hidden');
-        });
-        bind('closeTasksBtn', 'click', () => tasksModal?.classList.add('hidden'));
-
-        function openSettingsModal() {
-            setElVal('apiKeyInput', state.apiKey);
-            setElVal('elevenApiKeyInput', state.elevenApiKey);
-            setElVal('elevenVoiceIdInput', state.elevenVoiceId);
-            setElVal('aiModelSelect', state.aiModel);
-            setElVal('speechRateSlider', state.speechRate);
-            setElVal('speechPitchSlider', state.speechPitch);
-            setElVal('clapSensitivity', state.clapThreshold);
-            
-            const rateVal = document.getElementById('speechRateVal');
-            if (rateVal) rateVal.innerText = state.speechRate.toFixed(2) + 'x';
-
-            const pitchVal = document.getElementById('speechPitchVal');
-            if (pitchVal) pitchVal.innerText = state.speechPitch.toFixed(2);
-
-            const clapSensVal = document.getElementById('clapSensVal');
-            if (clapSensVal) clapSensVal.innerText = state.clapThreshold.toFixed(2);
-            
-            settingsModal?.classList.remove('hidden');
-        }
-
-        bind('openSettingsBtn', 'click', openSettingsModal);
-        bind('closeSettingsBtn', 'click', () => settingsModal?.classList.add('hidden'));
-
-        bind('speechRateSlider', 'input', (e) => {
-            const val = parseFloat(e.target.value);
-            const rateVal = document.getElementById('speechRateVal');
-            if (rateVal) rateVal.innerText = val.toFixed(2) + 'x';
-        });
-
-        bind('speechPitchSlider', 'input', (e) => {
-            const val = parseFloat(e.target.value);
-            const pitchVal = document.getElementById('speechPitchVal');
-            if (pitchVal) pitchVal.innerText = val.toFixed(2);
-        });
-
-        bind('saveSettingsBtn', 'click', () => {
-            state.apiKey = getElVal('apiKeyInput').trim();
-            state.elevenApiKey = getElVal('elevenApiKeyInput').trim();
-            state.elevenVoiceId = getElVal('elevenVoiceIdInput').trim() || 'gHBfNp2PWSyFgpPlzCOd';
-            state.aiModel = getElVal('aiModelSelect') || 'gemini-3.5-flash-lite';
-            state.speechRate = parseFloat(getElVal('speechRateSlider')) || 1.35;
-            state.speechPitch = parseFloat(getElVal('speechPitchSlider')) || 1.30;
-            state.clapThreshold = parseFloat(getElVal('clapSensitivity')) || 0.20;
-
-            localStorage.setItem('friday_gemini_key', state.apiKey);
-            localStorage.setItem('friday_eleven_key', state.elevenApiKey);
-            localStorage.setItem('friday_eleven_voice', state.elevenVoiceId);
-            localStorage.setItem('friday_ai_model', state.aiModel);
-            localStorage.setItem('friday_speech_rate', state.speechRate);
-            localStorage.setItem('friday_speech_pitch', state.speechPitch);
-            localStorage.setItem('friday_clap_sens', state.clapThreshold);
-
-            updateModelBadge();
-            settingsModal?.classList.add('hidden');
-            displayFridayWords(`設定を更新しました。`);
-        });
-
-        bind('openVaultBtn', 'click', () => {
-            setElVal('vaultContent', state.activeTab === 'main' ? state.vaultMainText : state.vaultResearchText);
-            vaultModal?.classList.remove('hidden');
-        });
-
-        bind('closeVaultBtn', 'click', () => vaultModal?.classList.add('hidden'));
-
-        bind('mainMemTabBtn', 'click', () => {
-            state.activeTab = 'main';
-            document.getElementById('mainMemTabBtn').className = 'flex-1 py-1 text-xs font-mono font-bold border-b-2 border-orange-400 text-orange-300';
-            document.getElementById('researchMemTabBtn').className = 'flex-1 py-1 text-xs font-mono border-b-2 border-transparent text-orange-500/60 hover:text-orange-300';
-            setElVal('vaultContent', state.vaultMainText);
-        });
-
-        bind('researchMemTabBtn', 'click', () => {
-            state.activeTab = 'research';
-            document.getElementById('researchMemTabBtn').className = 'flex-1 py-1 text-xs font-mono font-bold border-b-2 border-orange-400 text-orange-300';
-            document.getElementById('mainMemTabBtn').className = 'flex-1 py-1 text-xs font-mono border-b-2 border-transparent text-orange-500/60 hover:text-orange-300';
-            setElVal('vaultContent', state.vaultResearchText);
-        });
-
-        bind('saveVaultBtn', 'click', () => {
-            if (state.activeTab === 'main') {
-                state.vaultMainText = getElVal('vaultContent');
-                localStorage.setItem('friday_vault_main', state.vaultMainText);
-            } else {
-                state.vaultResearchText = getElVal('vaultContent');
-                localStorage.setItem('friday_vault_research', state.vaultResearchText);
-            }
-            
-            const msg = document.getElementById('vaultSavedMsg');
-            msg?.classList.remove('hidden');
-            setTimeout(() => msg?.classList.add('hidden'), 2000);
-        });
-
-        bind('uploadImgBtn', 'click', () => {
-            document.getElementById('imageFileInput')?.click();
-        });
-
-        bind('imageFileInput', 'change', (e) => {
-            const file = e.target.files?.[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (evt) => {
-                displayFridayWords(`📎 添付画像解析中: ${file.name}`);
-                handleUserQuery('添付された画像を詳細に解析してください。', evt.target.result);
-            };
-            reader.readAsDataURL(file);
-        });
-
-        bind('textForm', 'submit', (e) => {
-            e.preventDefault();
-            const input = document.getElementById('userInput');
-            if (!input) return;
-            const text = input.value.trim();
-            if (!text) return;
-            input.value = '';
-            displayFridayWords(`「${text}」`);
-            handleUserQuery(text);
-        });
-
-        let audioCtx = null;
-        let analyser = null;
-
-        async function initClapDetector() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                analyser = audioCtx.createAnalyser();
-                const source = audioCtx.createMediaStreamSource(stream);
-                source.connect(analyser);
-
-                analyser.fftSize = 512;
-                const bufferLength = analyser.frequencyBinCount;
-                const dataArray = new Uint8Array(bufferLength);
-
-                function checkAudioSpike() {
-                    if (state.clapEnabled && state.status === 'STANDBY') {
-                        analyser.getByteFrequencyData(dataArray);
-                        let sum = 0;
-                        for (let i = 0; i < bufferLength; i++) {
-                            sum += dataArray[i];
-                        }
-                        let average = sum / bufferLength / 255;
-
-                        if (average > state.clapThreshold) {
-                            startVoiceRecognition();
-                        }
-                    }
-                    setTimeout(checkAudioSpike, 80);
-                }
-                checkAudioSpike();
-            } catch (err) {
-                console.warn('Microphone access for clap detection:', err);
-            }
-        }
-
-        window.addEventListener('keydown', (e) => {
-            if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
-                e.preventDefault();
-                startVoiceRecognition();
+        bind('toggleGraphBtn', 'click', () => {
+            state.showGraphVisualizer = !state.showGraphVisualizer;
+            const container = document.getElementById('obsidianGraphContainer');
+            if (container) {
+                container.style.opacity = state.showGraphVisualizer ? '0.35' : '0';
             }
         });
 
         window.addEventListener('click', () => {
-            if (!audioCtx) initClapDetector();
+        let displaySentenceTimer = null;
+        let displayDelayTimer = null;
+
+        function displayFridayWords(text, citations = []) {
+            if (displaySentenceTimer) clearInterval(displaySentenceTimer);
+            if (displayDelayTimer) clearTimeout(displayDelayTimer);
+
+            const speechTextEl = document.getElementById('fridaySpeechText');
+            if (!speechTextEl) return;
+
+            // 0.7-second delay sync with speech audio output latency
+            displayDelayTimer = setTimeout(() => {
+                const cleanFullText = text.replace(/\n+/g, ' ').trim();
+                const sentences = cleanFullText
+                    .split(/(?<=[。！？])/)
+                    .map(s => s.trim())
+                    .filter(s => s.length > 0);
+
+                if (sentences.length <= 1) {
+                    speechTextEl.innerText = cleanFullText;
+                } else {
+                    let currentIdx = 0;
+                    speechTextEl.innerText = sentences[0];
+
+                    const stepInterval = Math.max(2200, Math.min(4500, (sentences[0].length * 120) / (state.speechRate || 1.35)));
+
+                    displaySentenceTimer = setInterval(() => {
+                        currentIdx++;
+                        if (currentIdx < sentences.length) {
+                            speechTextEl.innerText = sentences[currentIdx];
+                        } else {
+                            clearInterval(displaySentenceTimer);
+                        }
+                    }, stepInterval);
+                }
+
+                const citationContainer = document.getElementById('citationContainer');
+                const citationLinks = document.getElementById('citationLinks');
+
+                if (citations && citations.length > 0 && citationContainer && citationLinks) {
+                    citationLinks.innerHTML = citations.map(c => 
+                        `<a href="${c.uri}" target="_blank" class="hover:underline text-orange-300">🔗 ${escapeHtml(c.title || c.uri)}</a>`
+                    ).join(' ');
+                    citationContainer.classList.remove('hidden');
+                } else if (citationContainer) {
+                    citationContainer.classList.add('hidden');
+                }
+            }, 700); // 0.7 second delay
+        }
+
         }, { once: true });
 
         updateModelBadge();
