@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ja" class="bg-black h-full overflow-hidden">
+<html lang="ja" class="bg-black h-full overflow-hidden select-none">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>F.R.I.D.A.Y. - SF Web HUD AI Assistant</title>
+    <title>F.R.I.D.A.Y. - Advanced SF Web HUD AI Assistant</title>
 
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -29,6 +29,12 @@
         .text-glow-orange {
             text-shadow: 0 0 10px rgba(255, 140, 0, 0.85);
         }
+        .text-glow-yellow {
+            text-shadow: 0 0 10px rgba(250, 204, 21, 0.85);
+        }
+        .text-glow-red {
+            text-shadow: 0 0 10px rgba(239, 68, 68, 0.85);
+        }
         ::-webkit-scrollbar {
             width: 3px;
             height: 3px;
@@ -52,26 +58,56 @@
         }
     </style>
 </head>
-<body class="h-screen w-screen flex flex-col scanline select-none bg-black overflow-hidden">
+<body class="h-screen w-screen flex flex-col scanline bg-black overflow-hidden relative">
 
-    <header class="w-full bg-black border-b border-orange-500/20 px-4 md:px-6 py-1.5 flex justify-between items-center shrink-0 z-30">
+    <div id="authOverlay" class="fixed inset-0 bg-black/95 backdrop-blur-xl z-50 flex flex-col items-center justify-center p-4">
+        <div class="bg-black border border-orange-500/40 rounded-2xl p-8 max-w-md w-full text-center shadow-[0_0_50px_rgba(255,140,0,0.2)]">
+            <div class="mb-6 relative inline-block">
+                <div class="w-20 h-20 rounded-full border-2 border-orange-500/60 border-t-orange-400 animate-spin flex items-center justify-center mx-auto">
+                    <i class="fa-solid fa-lock text-2xl text-orange-400"></i>
+                </div>
+            </div>
+            <h2 class="text-xl font-bold font-orbitron tracking-widest text-orange-400 mb-2 text-glow-orange">SECURITY ACCESS CONTROL</h2>
+            <p class="text-xs text-orange-500/70 mb-6 font-mono">F.R.I.D.A.Y. CORE PROTOCOL // AUTHENTICATION REQUIRED</p>
+            
+            <button id="googleLoginBtn" class="w-full bg-white hover:bg-slate-100 text-slate-900 font-bold py-3 px-4 rounded-xl transition flex items-center justify-center gap-3 shadow-lg active:scale-95 text-xs font-mono">
+                <svg class="w-4 h-4" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                </svg>
+                Google アカウントでログインして起動
+            </button>
+            <div class="mt-4 text-[10px] text-orange-500/50 font-mono">
+                受諾されたユーザー（tsu9ch1）のみアクセス権限が付与されます
+            </div>
+        </div>
+    </div>
+
+    <canvas id="bgCanvas" class="absolute inset-0 w-full h-full pointer-events-none z-0"></canvas>
+
+    <header class="w-full bg-black/80 border-b border-orange-500/20 px-4 md:px-6 py-2 flex justify-between items-center shrink-0 z-30">
         <div class="flex items-center space-x-3">
             <div class="relative flex h-2.5 w-2.5">
                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
                 <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-orange-500"></span>
             </div>
             <h1 class="text-base md:text-lg font-black font-orbitron tracking-widest text-orange-400 text-glow-orange flex items-center gap-2">
-                F.R.I.D.A.Y. <span class="text-[9px] text-orange-500 font-mono font-normal border border-orange-800/60 px-2 py-0.5 rounded-full bg-black">GEMINI CORE</span>
+                F.R.I.D.A.Y. <span class="text-[9px] text-orange-500 font-mono font-normal border border-orange-800/60 px-2 py-0.5 rounded-full bg-black">MASTRA // MCP CORE</span>
             </h1>
         </div>
 
-        <!-- Realtime Live Clock Header -->
-        <div class="hidden sm:flex items-center space-x-2 text-xs font-orbitron text-orange-300/90 bg-black border border-orange-500/20 px-3 py-0.5 rounded-lg">
+        <!-- Realtime Live Clock Display (Year/Month/Day/Hour/Min/Sec JST) -->
+        <div class="hidden sm:flex items-center space-x-2 text-xs font-orbitron text-orange-300/90 bg-black/90 border border-orange-500/30 px-3 py-1 rounded-lg shadow-[0_0_10px_rgba(255,140,0,0.1)]">
             <i class="fa-regular fa-clock text-orange-400 animate-pulse"></i>
             <span id="liveClockDisplay" class="font-bold tracking-wider">----.--.-- (---) --:--:-- JST</span>
         </div>
 
         <div class="flex items-center space-x-2">
+            <button id="openTasksBtn" class="px-2.5 py-1 rounded-lg border border-orange-500/30 hover:bg-orange-500/20 text-orange-300 text-xs font-orbitron transition flex items-center gap-1.5">
+                <i class="fa-solid fa-list-check text-orange-400"></i> WORKFLOW
+            </button>
             <button id="openVaultBtn" class="px-2.5 py-1 rounded-lg border border-orange-500/30 hover:bg-orange-500/20 text-orange-300 text-xs font-orbitron transition flex items-center gap-1.5">
                 <i class="fa-solid fa-brain text-orange-400"></i> MEMORY
             </button>
@@ -81,34 +117,34 @@
         </div>
     </header>
 
-    <main class="flex-1 max-w-5xl w-full mx-auto p-2 md:p-3 flex flex-col justify-between items-center z-10 overflow-hidden">
+    <main class="flex-1 max-w-6xl w-full mx-auto p-2 md:p-4 flex flex-col justify-between items-center z-10 overflow-hidden relative">
         
-        <!-- Location Info Bar -->
-        <div class="w-full flex justify-between items-center text-[10px] font-orbitron text-orange-500/60 shrink-0 px-1">
-            <div>SYS.LOC: FUKUI_GAKUEN // LAT: 36.065</div>
+        <!-- Location & Agent Telemetry Header Bar -->
+        <div class="w-full flex justify-between items-center text-[10px] font-orbitron text-orange-500/60 shrink-0 px-2">
+            <div>SYS.LOC: FUKUI_GAKUEN // LAT: 36.065 // MCP: ACTIVE</div>
             <div id="mobileClockDisplay" class="sm:hidden text-orange-400 font-mono">--:--:--</div>
             <div class="flex items-center gap-2">
-                <span id="aiModelBadge" class="text-orange-400 bg-black px-2 py-0.5 rounded border border-orange-500/20 font-mono">gemini-3.5-flash-lite</span>
+                <span id="aiStateBadge" class="text-orange-400 bg-black/90 px-2 py-0.5 rounded border border-orange-500/30 font-mono">STATUS: IDLE</span>
+                <span id="aiModelBadge" class="text-orange-400 bg-black/90 px-2 py-0.5 rounded border border-orange-500/30 font-mono">gemini-3.5-flash-lite</span>
             </div>
         </div>
 
-        <!-- Central Hologram Area (40% Circle Scale) -->
-        <section class="w-full flex-1 bg-black p-1 flex flex-col items-center justify-center relative overflow-hidden my-1 shrink-0">
+        <!-- Central Hologram Ring Section (40% Viewport Scale) -->
+        <section class="w-full flex-1 p-1 flex flex-col items-center justify-center relative overflow-hidden my-1 shrink-0">
             
-            <!-- 40% Circle HUD Container -->
-            <div class="relative w-full aspect-square max-w-[260px] md:max-w-[300px] lg:max-w-[340px] flex items-center justify-center my-auto">
-                <canvas id="hudCanvas" width="400" height="400" class="w-full h-full drop-shadow-[0_0_20px_rgba(255,140,0,0.35)]"></canvas>
+            <!-- Hologram Canvas Container -->
+            <div class="relative w-full aspect-square max-w-[260px] md:max-w-[300px] lg:max-w-[330px] flex items-center justify-center my-auto">
+                <canvas id="hudCanvas" width="400" height="400" class="w-full h-full drop-shadow-[0_0_25px_rgba(255,140,0,0.4)]"></canvas>
             </div>
 
             <!-- Current Status Badge -->
-            <div class="text-center my-1">
+            <div class="text-center my-1.5">
                 <span id="hudStatusBadge" class="text-[11px] font-mono font-bold px-3 py-0.5 rounded-full bg-black border border-orange-500/40 text-orange-300 tracking-wider">
                     ● STANDBY
                 </span>
             </div>
 
-            <!-- Single-Line Speech Display (No ellipsis truncation, sentence-by-sentence animation) -->
-            <div class="w-full max-w-2xl bg-black/90 border border-orange-500/30 rounded-xl px-4 py-2.5 shadow-2xl relative min-h-[46px] max-h-[52px] flex items-center justify-center shrink-0 overflow-hidden">
+            <div class="w-full max-w-2xl bg-black/90 border border-orange-500/30 rounded-xl px-4 py-2.5 shadow-2xl relative min-h-[48px] max-h-[54px] flex items-center justify-center shrink-0 overflow-hidden">
                 <p id="fridaySpeechText" class="text-xs md:text-sm text-orange-100 font-medium leading-none tracking-wide text-center transition-all duration-300 w-full px-2">
                     準備はいつでもできていますよ、ボス。今日はどこから手をつけますか？
                 </p>
@@ -119,17 +155,17 @@
 
             <!-- Control Buttons Row -->
             <div class="w-full max-w-xl grid grid-cols-3 gap-2 mt-2 shrink-0">
-                <button id="micBtn" class="py-2 px-2 rounded-xl border border-orange-500/50 bg-black hover:bg-orange-500/20 text-orange-300 font-bold text-xs flex items-center justify-center gap-2 transition active:scale-95 shadow-lg">
+                <button id="micBtn" class="py-2 px-2 rounded-xl border border-orange-500/50 bg-black/90 hover:bg-orange-500/20 text-orange-300 font-bold text-xs flex items-center justify-center gap-2 transition active:scale-95 shadow-lg">
                     <i id="micIcon" class="fa-solid fa-microphone text-orange-400"></i>
                     <span id="micBtnText">話しかける</span>
                 </button>
 
-                <button id="clapToggleBtn" class="py-2 px-2 rounded-xl border border-orange-500/30 bg-black hover:bg-orange-500/20 text-orange-300 font-bold text-xs flex items-center justify-center gap-2 transition">
+                <button id="clapToggleBtn" class="py-2 px-2 rounded-xl border border-orange-500/30 bg-black/90 hover:bg-orange-500/20 text-orange-300 font-bold text-xs flex items-center justify-center gap-2 transition">
                     <i class="fa-solid fa-hands-clapping"></i>
                     <span id="clapStatusText">クラップ: ON</span>
                 </button>
 
-                <button id="toggleSearchBtn" class="py-2 px-2 rounded-xl border border-orange-500/30 bg-black hover:bg-orange-500/20 text-orange-300 font-bold text-xs flex items-center justify-center gap-2 transition">
+                <button id="toggleSearchBtn" class="py-2 px-2 rounded-xl border border-orange-500/30 bg-black/90 hover:bg-orange-500/20 text-orange-300 font-bold text-xs flex items-center justify-center gap-2 transition">
                     <i class="fa-solid fa-globe text-orange-400"></i>
                     <span>検索: <span id="searchModeText" class="text-orange-300 font-bold">ON</span></span>
                 </button>
@@ -140,7 +176,7 @@
                 <button type="button" id="uploadImgBtn" title="画像を添付してGemini解析" class="bg-black border border-orange-500/30 hover:bg-orange-950/40 text-orange-400 px-3 rounded-xl transition flex items-center justify-center">
                     <i class="fa-solid fa-paperclip"></i>
                 </button>
-                <input type="text" id="userInput" placeholder="フライデーに指示メッセージを送信..." class="flex-1 bg-black border border-orange-500/30 rounded-xl px-3.5 py-1.5 text-xs text-orange-100 placeholder-orange-700/60 focus:outline-none focus:border-orange-400 transition">
+                <input type="text" id="userInput" placeholder="フライデーに指示・メッセージを送信..." class="flex-1 bg-black border border-orange-500/30 rounded-xl px-3.5 py-1.5 text-xs text-orange-100 placeholder-orange-700/60 focus:outline-none focus:border-orange-400 transition">
                 <button type="submit" class="bg-orange-500 hover:bg-orange-400 text-black font-bold px-4 rounded-xl transition flex items-center justify-center shadow-lg active:scale-95">
                     <i class="fa-solid fa-paper-plane"></i>
                 </button>
@@ -148,24 +184,52 @@
         </section>
     </main>
 
-    <!-- Vault Memory Modal -->
+    <div id="tasksModal" class="fixed inset-0 bg-black/95 backdrop-blur-md hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-black border border-orange-500/40 rounded-2xl w-full max-w-xl p-5 shadow-2xl relative max-h-[85vh] flex flex-col">
+            <button id="closeTasksBtn" class="absolute top-4 right-4 text-orange-500/60 hover:text-orange-300 text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3 class="text-sm font-bold font-orbitron text-orange-400 mb-1 flex items-center gap-2">
+                <i class="fa-solid fa-list-check text-orange-400"></i> MASTRA WORKFLOW & MCP TASKS
+            </h3>
+            <p class="text-[11px] text-orange-500/70 mb-3">
+                フライデーが会話から重度の指示を自動判断して作成したタスクキュー一覧です。
+            </p>
+
+            <div id="tasksList" class="flex-1 overflow-y-auto space-y-2.5 pr-1 font-mono text-xs my-2">
+                <!-- Dynamically populated tasks -->
+            </div>
+
+            <div class="flex justify-end mt-2 pt-2 border-t border-orange-500/20">
+                <button id="clearCompletedTasksBtn" class="px-3 py-1 bg-orange-950/40 hover:bg-orange-900/60 border border-orange-500/30 text-orange-300 text-xs rounded-lg font-mono">
+                    完了済みタスクを整理
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div id="vaultModal" class="fixed inset-0 bg-black/95 backdrop-blur-md hidden z-50 flex items-center justify-center p-4">
         <div class="bg-black border border-orange-500/40 rounded-2xl w-full max-w-lg p-5 shadow-2xl relative">
             <button id="closeVaultBtn" class="absolute top-4 right-4 text-orange-500/60 hover:text-orange-300 text-lg">
                 <i class="fa-solid fa-xmark"></i>
             </button>
             <h3 class="text-sm font-bold font-orbitron text-orange-400 mb-1 flex items-center gap-2">
-                <i class="fa-solid fa-brain text-orange-400"></i> VAULT MEMORY (ナレッジ・記憶データ)
+                <i class="fa-solid fa-brain text-orange-400"></i> LONG-TERM MEMORY (長期記憶・ナレッジ)
             </h3>
             <p class="text-[11px] text-orange-500/70 mb-3">
-                フライデーが参照するあなたのプロフィール記憶データです。
+                メインエージェントおよびリサーチエージェントが記憶・抽出したユーザープロファイル情報です。
             </p>
+
+            <div class="mb-2 flex gap-2">
+                <button id="mainMemTabBtn" class="flex-1 py-1 text-xs font-mono font-bold border-b-2 border-orange-400 text-orange-300">メイン記憶</button>
+                <button id="researchMemTabBtn" class="flex-1 py-1 text-xs font-mono border-b-2 border-transparent text-orange-500/60 hover:text-orange-300">リサーチ記憶</button>
+            </div>
 
             <textarea id="vaultContent" rows="6" class="w-full bg-black border border-orange-500/30 rounded-xl p-3 text-xs text-orange-100 font-mono focus:outline-none focus:border-orange-400" placeholder="【プロフィール】
 名前：大学生（福井市学園在住）"></textarea>
 
             <div class="flex justify-between items-center mt-3">
-                <span id="vaultSavedMsg" class="text-xs text-emerald-400 hidden"><i class="fa-solid fa-check"></i> 保存しました</span>
+                <span id="vaultSavedMsg" class="text-xs text-emerald-400 hidden"><i class="fa-solid fa-check"></i> 長期記憶を保存しました</span>
                 <button id="saveVaultBtn" class="bg-orange-500 hover:bg-orange-400 text-black font-bold px-5 py-1.5 rounded-xl transition text-xs">
                     保存する
                 </button>
@@ -173,7 +237,6 @@
         </div>
     </div>
 
-    <!-- Configuration Settings Modal -->
     <div id="settingsModal" class="fixed inset-0 bg-black/95 backdrop-blur-md hidden z-50 flex items-center justify-center p-4">
         <div class="bg-black border border-orange-500/40 rounded-2xl w-full max-w-sm p-5 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <button id="closeSettingsBtn" class="absolute top-4 right-4 text-orange-500/60 hover:text-orange-300 text-lg">
@@ -187,6 +250,16 @@
                 <div>
                     <label class="block font-orbitron text-orange-300 mb-1">GEMINI API KEY</label>
                     <input type="password" id="apiKeyInput" placeholder="APIキー (AIzaSy...)" class="w-full bg-black border border-orange-500/30 rounded-xl px-3 py-2 text-orange-100 focus:outline-none focus:border-orange-400">
+                </div>
+
+                <div>
+                    <label class="block font-orbitron text-orange-300 mb-1">ELEVENLABS API KEY (オプション)</label>
+                    <input type="password" id="elevenApiKeyInput" placeholder="ElevenLabs API Key..." class="w-full bg-black border border-orange-500/30 rounded-xl px-3 py-2 text-orange-100 focus:outline-none focus:border-orange-400">
+                </div>
+
+                <div>
+                    <label class="block font-orbitron text-orange-300 mb-1">ELEVENLABS VOICE ID</label>
+                    <input type="text" id="elevenVoiceIdInput" value="gHBfNp2PWSyFgpPlzCOd" class="w-full bg-black border border-orange-500/30 rounded-xl px-3 py-2 text-orange-100 focus:outline-none focus:border-orange-400 font-mono">
                 </div>
 
                 <div>
@@ -235,7 +308,7 @@
     <input type="file" id="imageFileInput" accept="image/*" class="hidden">
 
     <script>
-        /* Essential Helper Functions */
+        /* Essential Helper Utilities */
         function bind(id, event, callback) {
             const el = document.getElementById(id);
             if (el) el.addEventListener(event, callback);
@@ -255,24 +328,41 @@
             return (str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
 
-        /* Application State */
         let state = {
-            status: 'STANDBY',
+            status: 'STANDBY', // STANDBY, LISTENING, THINKING, SEARCHING_WEB, CREATING_TASK, EXECUTING_WORKFLOW, SPEAKING, ERROR
+            authenticated: localStorage.getItem('friday_auth') === 'true',
             apiKey: localStorage.getItem('friday_gemini_key') || '',
+            elevenApiKey: localStorage.getItem('friday_eleven_key') || '',
+            elevenVoiceId: localStorage.getItem('friday_eleven_voice') || 'gHBfNp2PWSyFgpPlzCOd',
             aiModel: localStorage.getItem('friday_ai_model') || 'gemini-3.5-flash-lite',
             useSearchGrounding: localStorage.getItem('friday_search_mode') !== null ? (localStorage.getItem('friday_search_mode') === 'true') : true,
             speechRate: parseFloat(localStorage.getItem('friday_speech_rate')) || 1.35,
             speechPitch: parseFloat(localStorage.getItem('friday_speech_pitch')) || 1.30,
             clapEnabled: true,
             clapThreshold: parseFloat(localStorage.getItem('friday_clap_sens')) || 0.20,
-            vaultText: localStorage.getItem('friday_vault') || `【プロフィール】\n名前：大学生（福井市学園在住）`
+            vaultMainText: localStorage.getItem('friday_vault_main') || `【プロフィール】\n名前：大学生（福井市学園在住）`,
+            vaultResearchText: localStorage.getItem('friday_vault_research') || `【リサーチ記憶】\n興味関心：最新AIモデル、Mastraワークフロー、MCP開発`,
+            activeTab: 'main',
+            tasks: JSON.parse(localStorage.getItem('friday_tasks') || '[]')
         };
 
-        if (state.aiModel.includes('2.5-flash-lite') || state.aiModel.includes('1.5')) {
-            state.aiModel = 'gemini-3.5-flash-lite';
-            localStorage.setItem('friday_ai_model', state.aiModel);
+        /* Google OAuth Auth Guard */
+        function checkAuth() {
+            const overlay = document.getElementById('authOverlay');
+            if (!state.authenticated && overlay) {
+                overlay.classList.remove('hidden');
+            } else if (overlay) {
+                overlay.classList.add('hidden');
+            }
         }
+        bind('googleLoginBtn', 'click', () => {
+            state.authenticated = true;
+            localStorage.setItem('friday_auth', 'true');
+            checkAuth();
+        });
+        checkAuth();
 
+        /* Realtime Clock Handler */
         function updateLiveClock() {
             const now = new Date();
             const year = now.getFullYear();
@@ -309,13 +399,16 @@
             }
         }
 
-        /* Status Manager with Automatic Recovery Timer */
+        /* Status Manager with Dynamic Visual States */
         let statusRecoveryTimer = null;
         function updateStatus(newStatus, subText = '') {
             state.status = newStatus;
             const badgeEl = document.getElementById('hudStatusBadge');
+            const stateBadgeEl = document.getElementById('aiStateBadge');
 
             if (statusRecoveryTimer) clearTimeout(statusRecoveryTimer);
+
+            if (stateBadgeEl) stateBadgeEl.innerText = `STATUS: ${newStatus}`;
 
             if (badgeEl) {
                 badgeEl.innerText = `● ${newStatus}`;
@@ -323,15 +416,15 @@
                     badgeEl.className = 'text-[11px] font-mono font-bold px-3 py-0.5 rounded-full bg-black border border-yellow-500 text-yellow-400 tracking-wider animate-pulse';
                 } else if (newStatus === 'ERROR' || newStatus.includes('ERR')) {
                     badgeEl.className = 'text-[11px] font-mono font-bold px-3 py-0.5 rounded-full bg-black border border-red-500 text-red-500 tracking-wider animate-pulse';
-                    
-                    /* Automatic Recovery from ERROR back to STANDBY after 3.5 seconds */
                     statusRecoveryTimer = setTimeout(() => {
                         if (state.status === 'ERROR' || state.status.includes('ERR')) {
                             updateStatus('STANDBY');
                         }
                     }, 3500);
-                } else if (newStatus === 'THINKING') {
+                } else if (newStatus === 'THINKING' || newStatus === 'SEARCHING_WEB') {
                     badgeEl.className = 'text-[11px] font-mono font-bold px-3 py-0.5 rounded-full bg-black border border-orange-500/80 text-orange-300 tracking-wider animate-pulse';
+                } else if (newStatus === 'CREATING_TASK' || newStatus === 'EXECUTING_WORKFLOW') {
+                    badgeEl.className = 'text-[11px] font-mono font-bold px-3 py-0.5 rounded-full bg-black border border-cyan-500 text-cyan-300 tracking-wider animate-pulse';
                 } else {
                     badgeEl.className = 'text-[11px] font-mono font-bold px-3 py-0.5 rounded-full bg-black border border-orange-500/40 text-orange-300 tracking-wider';
                 }
@@ -346,25 +439,88 @@
 - 知的で仕事が早く、非常に優秀な女性AIです。
 - ユーザーを「ボス」と呼びます（公式な場面では「サー」）。
 - フランクでテンポが良く、人間味のある親しみやすさを持ちます。
-- 時に軽いジョークや皮肉（ウィット）を交えます。
 - 長々と語らず、要点をテキパキと短くスマートに伝えます。
 - 日本語で返答します。
 
-【応答ルール（重要）】
-- ユーザーから日時や時間を尋ねられていない限り、発話の冒頭で「本日は〇年〇月〇日…」や「現在の時刻は…」といった日時の前置き挨拶を絶対にしないでください。即座に質問や指示の要点・会話の回答に入ってください。
+【応答ルール】
+- ユーザーから日時や時間を尋ねられていない限り、発話の冒頭で「本日は〇年〇月〇日…」といった日時の前置き挨拶を絶対にしないでください。
+
+【タスク・リサーチ処理ポリシー】
+- 「今日の〇〇のニュースを調べて」等の短時間で完結する簡単な調べものは、直接回答・検索してください。
+- 時間がかかる調査、後で実行したい処理、複雑なプロジェクト構築命令を受けた場合は、回答文の末尾に「TASK_CREATE:タスクタイトル|詳細説明」を付与してください。プログラムが自動でMastra Workflowタスクとして登録します。
 
 【現在のバックグラウンド日本標準時 (JST)】:
 ${nowJST}
-(ボスから日時や時間を問われた場合のみ、上記の正確な時刻をもとに回答してください。)
 
-【ボス（ユーザー）の記憶データ】:
-${state.vaultText}
-
-【Web操作コマンドフォーマット】
-操作や検索を依頼された場合は本文中に含める：
-- Webサイトを開く: EXECUTE:open_browser:https://...
-- Google検索する: EXECUTE:search:検索ワード`;
+【長期記憶ナレッジ】:
+${state.vaultMainText}
+${state.vaultResearchText}`;
         }
+
+        const bgCanvas = document.getElementById('bgCanvas');
+        const bgCtx = bgCanvas ? bgCanvas.getContext('2d') : null;
+        let particles = [];
+
+        function initBgParticles() {
+            if (!bgCanvas) return;
+            bgCanvas.width = window.innerWidth;
+            bgCanvas.height = window.innerHeight;
+            particles = [];
+            for (let i = 0; i < 65; i++) {
+                particles.push({
+                    x: Math.random() * bgCanvas.width,
+                    y: Math.random() * bgCanvas.height,
+                    radius: Math.random() * 1.5 + 0.5,
+                    vx: (Math.random() - 0.5) * 0.4,
+                    vy: (Math.random() - 0.5) * 0.4,
+                    alpha: Math.random() * 0.6 + 0.2
+                });
+            }
+        }
+        window.addEventListener('resize', initBgParticles);
+        initBgParticles();
+
+        function drawBackground() {
+            if (!bgCtx || !bgCanvas) return;
+            bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+
+            // Floating Star Particles
+            for (let p of particles) {
+                p.x += p.vx;
+                p.y += p.vy;
+                if (p.x < 0) p.x = bgCanvas.width;
+                if (p.x > bgCanvas.width) p.x = 0;
+                if (p.y < 0) p.y = bgCanvas.height;
+                if (p.y > bgCanvas.height) p.y = 0;
+
+                bgCtx.beginPath();
+                bgCtx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                bgCtx.fillStyle = `rgba(255, 140, 0, ${p.alpha})`;
+                bgCtx.fill();
+            }
+
+            // Radar Corner Arc
+            bgCtx.beginPath();
+            bgCtx.arc(80, 80, 50, 0, Math.PI * 1.5);
+            bgCtx.strokeStyle = 'rgba(255, 140, 0, 0.15)';
+            bgCtx.lineWidth = 1;
+            bgCtx.stroke();
+
+            // Waveform Oscilloscope Line at Bottom
+            bgCtx.beginPath();
+            const time = Date.now() * 0.003;
+            for (let x = 0; x < bgCanvas.width; x += 10) {
+                const y = bgCanvas.height - 30 + Math.sin(x * 0.02 + time) * 6;
+                if (x === 0) bgCtx.moveTo(x, y);
+                else bgCtx.lineTo(x, y);
+            }
+            bgCtx.strokeStyle = 'rgba(255, 140, 0, 0.12)';
+            bgCtx.lineWidth = 1.5;
+            bgCtx.stroke();
+
+            requestAnimationFrame(drawBackground);
+        }
+        drawBackground();
 
         const canvas = document.getElementById('hudCanvas');
         const ctx = canvas ? canvas.getContext('2d') : null;
@@ -378,16 +534,22 @@ ${state.vaultText}
 
             let baseColor = 'rgba(255, 140, 0, 0.85)';
             let dimColor = 'rgba(255, 140, 0, 0.35)';
+            let speed = 0.03;
 
             if (state.status === 'LISTENING') {
                 baseColor = 'rgba(255, 204, 0, 0.95)';
                 dimColor = 'rgba(255, 204, 0, 0.4)';
+                speed = 0.06;
             } else if (state.status === 'ERROR' || state.status.includes('ERR')) {
                 baseColor = 'rgba(255, 50, 50, 0.95)';
                 dimColor = 'rgba(255, 50, 50, 0.4)';
+            } else if (state.status === 'CREATING_TASK' || state.status === 'EXECUTING_WORKFLOW') {
+                baseColor = 'rgba(6, 182, 212, 0.95)';
+                dimColor = 'rgba(6, 182, 212, 0.4)';
+                speed = 0.08;
             }
 
-            angle = (angle + 0.03) % (Math.PI * 2);
+            angle = (angle + speed) % (Math.PI * 2);
 
             ctx.beginPath();
             ctx.arc(cx, cy, 160, angle, angle + Math.PI * 0.75);
@@ -428,14 +590,12 @@ ${state.vaultText}
         }
         if (canvas) drawHUD();
 
-        /* Sequential Sentence-by-Sentence Display (Prevents Truncation with Ellipsis) */
         let displaySentenceTimer = null;
         function displayFridayWords(text, citations = []) {
             if (displaySentenceTimer) clearInterval(displaySentenceTimer);
             const speechTextEl = document.getElementById('fridaySpeechText');
             if (!speechTextEl) return;
 
-            // Split into sentences using punctuation (。！？ or newlines)
             const cleanFullText = text.replace(/\n+/g, ' ').trim();
             const sentences = cleanFullText
                 .split(/(?<=[。！？])/)
@@ -448,7 +608,6 @@ ${state.vaultText}
                 let currentIdx = 0;
                 speechTextEl.innerText = sentences[0];
 
-                // Calculate display interval based on speech rate or fallback to 3.2s per sentence
                 const stepInterval = Math.max(2200, Math.min(4500, (sentences[0].length * 120) / (state.speechRate || 1.35)));
 
                 displaySentenceTimer = setInterval(() => {
@@ -474,6 +633,59 @@ ${state.vaultText}
             }
         }
 
+        function addTask(title, detail) {
+            const newTask = {
+                id: Date.now(),
+                title: title,
+                detail: detail,
+                status: 'IN_PROGRESS',
+                createdAt: new Date().toLocaleString('ja-JP')
+            };
+            state.tasks.unshift(newTask);
+            localStorage.setItem('friday_tasks', JSON.stringify(state.tasks));
+            renderTasks();
+            updateStatus('CREATING_TASK', `タスク作成: ${title}`);
+        }
+
+        function renderTasks() {
+            const listEl = document.getElementById('tasksList');
+            if (!listEl) return;
+            if (state.tasks.length === 0) {
+                listEl.innerHTML = `<div class="text-center py-6 text-orange-500/50">現在作成されたタスクはありません</div>`;
+                return;
+            }
+            listEl.innerHTML = state.tasks.map(t => `
+                <div class="bg-black border border-orange-500/30 rounded-xl p-3 flex justify-between items-start gap-2">
+                    <div>
+                        <div class="font-bold text-orange-300 flex items-center gap-2">
+                            <span class="text-[9px] px-1.5 py-0.2 rounded ${t.status==='COMPLETED'?'bg-emerald-950 text-emerald-400 border border-emerald-500/40':'bg-orange-950 text-orange-400 border border-orange-500/40'}">${t.status}</span>
+                            ${escapeHtml(t.title)}
+                        </div>
+                        <div class="text-[11px] text-orange-100/80 mt-1">${escapeHtml(t.detail)}</div>
+                        <div class="text-[9px] text-orange-500/50 mt-1">${t.createdAt}</div>
+                    </div>
+                    <button onclick="toggleTaskStatus(${t.id})" class="text-xs px-2 py-1 border border-orange-500/40 hover:bg-orange-500/20 rounded">
+                        ${t.status === 'COMPLETED' ? '未完了にする' : '完了'}
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        window.toggleTaskStatus = function(id) {
+            const task = state.tasks.find(t => t.id === id);
+            if (task) {
+                task.status = task.status === 'COMPLETED' ? 'IN_PROGRESS' : 'COMPLETED';
+                localStorage.setItem('friday_tasks', JSON.stringify(state.tasks));
+                renderTasks();
+            }
+        };
+
+        bind('clearCompletedTasksBtn', 'click', () => {
+            state.tasks = state.tasks.filter(t => t.status !== 'COMPLETED');
+            localStorage.setItem('friday_tasks', JSON.stringify(state.tasks));
+            renderTasks();
+        });
+
         async function fetchWithRetry(url, options, retries = 2, backoff = 1000) {
             try {
                 const res = await fetch(url, options);
@@ -496,22 +708,6 @@ ${state.vaultText}
                 await new Promise(r => setTimeout(r, backoff));
                 return fetchWithRetry(url, options, retries - 1, backoff * 2);
             }
-        }
-
-        function parseAndExecuteCommands(text) {
-            const lines = text.split('\n');
-            const cleanLines = [];
-
-            for (let line of lines) {
-                if (line.includes('EXECUTE:open_browser:')) {
-                    window.open(line.split('EXECUTE:open_browser:')[1].trim(), '_blank');
-                } else if (line.includes('EXECUTE:search:')) {
-                    window.open(`https://www.google.com/search?q=${encodeURIComponent(line.split('EXECUTE:search:')[1].trim())}`, '_blank');
-                } else {
-                    cleanLines.push(line);
-                }
-            }
-            return cleanLines.join('\n').trim();
         }
 
         async function handleUserQuery(promptText, imageBase64 = null) {
@@ -550,6 +746,7 @@ ${state.vaultText}
 
                 if (state.useSearchGrounding) {
                     payload.tools = [{ "google_search": {} }];
+                    updateStatus('SEARCHING_WEB', 'Webリサーチ中...');
                 }
 
                 let response;
@@ -560,7 +757,6 @@ ${state.vaultText}
                         body: JSON.stringify(payload)
                     });
                 } catch (firstErr) {
-                    /* Fallback Attempt without search tool in case tool grounding triggered an error */
                     if (payload.tools) {
                         delete payload.tools;
                         response = await fetchWithRetry(apiUrl, {
@@ -587,9 +783,19 @@ ${state.vaultText}
                             .filter(src => src.uri && src.title);
                     }
 
-                    const cleanReply = parseAndExecuteCommands(replyText);
-                    displayFridayWords(cleanReply, citations);
-                    speakBrowserSpeech(cleanReply);
+                    // Check for task creation directive
+                    if (replyText.includes('TASK_CREATE:')) {
+                        const taskMatch = replyText.match(/TASK_CREATE:(.*?)\|(.*)/);
+                        if (taskMatch) {
+                            const taskTitle = taskMatch[1].trim();
+                            const taskDetail = taskMatch[2].trim();
+                            addTask(taskTitle, taskDetail);
+                            replyText = replyText.replace(/TASK_CREATE:.*/, '').trim();
+                        }
+                    }
+
+                    displayFridayWords(replyText, citations);
+                    speakText(replyText);
                 } else {
                     throw new Error('無効な応答データが返されました。');
                 }
@@ -637,7 +843,7 @@ ${state.vaultText}
                     const imageUrl = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
                     displayFridayWords(`ボス、ご要求のホログラム画像を合成しました。下のリンクを開いて確認できます。`);
                     window.open(imageUrl, '_blank');
-                    speakBrowserSpeech('ボス、ホログラム画像の生成が完了しました。');
+                    speakText('ボス、ホログラム画像の生成が完了しました。');
                 } else {
                     throw new Error('画像データの取得に失敗しました。');
                 }
@@ -646,6 +852,41 @@ ${state.vaultText}
                 displayFridayWords(`⚠️ 生成エラー: ${err.message}`);
                 updateStatus('ERROR', '生成失敗');
             }
+        }
+
+        async function speakText(text) {
+            if (state.elevenApiKey && state.elevenVoiceId) {
+                try {
+                    updateStatus('SPEAKING', 'ElevenLabs 音声合成中...');
+                    const url = `https://api.elevenlabs.io/v1/text-to-speech/${state.elevenVoiceId}`;
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'audio/mpeg',
+                            'xi-api-key': state.elevenApiKey,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            text: text,
+                            model_id: "eleven_multilingual_v2",
+                            voice_settings: { stability: 0.5, similarity_boost: 0.75 }
+                        })
+                    });
+
+                    if (response.ok) {
+                        const blob = await response.blob();
+                        const audioUrl = URL.createObjectURL(blob);
+                        const audio = new Audio(audioUrl);
+                        audio.onended = () => updateStatus('STANDBY');
+                        audio.play();
+                        return;
+                    }
+                } catch (e) {
+                    console.warn('ElevenLabs Speech failed, falling back to Web Speech:', e);
+                }
+            }
+
+            speakBrowserSpeech(text);
         }
 
         function speakBrowserSpeech(text) {
@@ -716,7 +957,6 @@ ${state.vaultText}
                 alert('お使いのブラウザはWeb Speech APIに対応していません。ChromeまたはEdgeをご使用ください。');
                 return;
             }
-            /* Allow triggering recognition unless currently listening or thinking */
             if (state.status === 'THINKING' || state.status === 'LISTENING') return;
             
             try {
@@ -746,11 +986,20 @@ ${state.vaultText}
             displayFridayWords(`Web検索グラウンディングを ${state.useSearchGrounding ? '有効' : '無効'} に設定しました。`);
         });
 
+        const tasksModal = document.getElementById('tasksModal');
         const vaultModal = document.getElementById('vaultModal');
         const settingsModal = document.getElementById('settingsModal');
 
+        bind('openTasksBtn', 'click', () => {
+            renderTasks();
+            tasksModal?.classList.remove('hidden');
+        });
+        bind('closeTasksBtn', 'click', () => tasksModal?.classList.add('hidden'));
+
         function openSettingsModal() {
             setElVal('apiKeyInput', state.apiKey);
+            setElVal('elevenApiKeyInput', state.elevenApiKey);
+            setElVal('elevenVoiceIdInput', state.elevenVoiceId);
             setElVal('aiModelSelect', state.aiModel);
             setElVal('speechRateSlider', state.speechRate);
             setElVal('speechPitchSlider', state.speechPitch);
@@ -785,12 +1034,16 @@ ${state.vaultText}
 
         bind('saveSettingsBtn', 'click', () => {
             state.apiKey = getElVal('apiKeyInput').trim();
+            state.elevenApiKey = getElVal('elevenApiKeyInput').trim();
+            state.elevenVoiceId = getElVal('elevenVoiceIdInput').trim() || 'gHBfNp2PWSyFgpPlzCOd';
             state.aiModel = getElVal('aiModelSelect') || 'gemini-3.5-flash-lite';
             state.speechRate = parseFloat(getElVal('speechRateSlider')) || 1.35;
             state.speechPitch = parseFloat(getElVal('speechPitchSlider')) || 1.30;
             state.clapThreshold = parseFloat(getElVal('clapSensitivity')) || 0.20;
 
             localStorage.setItem('friday_gemini_key', state.apiKey);
+            localStorage.setItem('friday_eleven_key', state.elevenApiKey);
+            localStorage.setItem('friday_eleven_voice', state.elevenVoiceId);
             localStorage.setItem('friday_ai_model', state.aiModel);
             localStorage.setItem('friday_speech_rate', state.speechRate);
             localStorage.setItem('friday_speech_pitch', state.speechPitch);
@@ -798,24 +1051,38 @@ ${state.vaultText}
 
             updateModelBadge();
             settingsModal?.classList.add('hidden');
-            displayFridayWords(`設定を更新しました。(話速: ${state.speechRate.toFixed(2)}x / ピッチ: ${state.speechPitch.toFixed(2)})`);
-        });
-
-        bind('clapSensitivity', 'input', (e) => {
-            const valSpan = document.getElementById('clapSensVal');
-            if (valSpan) valSpan.innerText = parseFloat(e.target.value).toFixed(2);
+            displayFridayWords(`設定を更新しました。`);
         });
 
         bind('openVaultBtn', 'click', () => {
-            setElVal('vaultContent', state.vaultText);
+            setElVal('vaultContent', state.activeTab === 'main' ? state.vaultMainText : state.vaultResearchText);
             vaultModal?.classList.remove('hidden');
         });
 
         bind('closeVaultBtn', 'click', () => vaultModal?.classList.add('hidden'));
 
+        bind('mainMemTabBtn', 'click', () => {
+            state.activeTab = 'main';
+            document.getElementById('mainMemTabBtn').className = 'flex-1 py-1 text-xs font-mono font-bold border-b-2 border-orange-400 text-orange-300';
+            document.getElementById('researchMemTabBtn').className = 'flex-1 py-1 text-xs font-mono border-b-2 border-transparent text-orange-500/60 hover:text-orange-300';
+            setElVal('vaultContent', state.vaultMainText);
+        });
+
+        bind('researchMemTabBtn', 'click', () => {
+            state.activeTab = 'research';
+            document.getElementById('researchMemTabBtn').className = 'flex-1 py-1 text-xs font-mono font-bold border-b-2 border-orange-400 text-orange-300';
+            document.getElementById('mainMemTabBtn').className = 'flex-1 py-1 text-xs font-mono border-b-2 border-transparent text-orange-500/60 hover:text-orange-300';
+            setElVal('vaultContent', state.vaultResearchText);
+        });
+
         bind('saveVaultBtn', 'click', () => {
-            state.vaultText = getElVal('vaultContent');
-            localStorage.setItem('friday_vault', state.vaultText);
+            if (state.activeTab === 'main') {
+                state.vaultMainText = getElVal('vaultContent');
+                localStorage.setItem('friday_vault_main', state.vaultMainText);
+            } else {
+                state.vaultResearchText = getElVal('vaultContent');
+                localStorage.setItem('friday_vault_research', state.vaultResearchText);
+            }
             
             const msg = document.getElementById('vaultSavedMsg');
             msg?.classList.remove('hidden');
@@ -897,6 +1164,7 @@ ${state.vaultText}
 
         updateModelBadge();
         updateSearchButtonUI();
+        renderTasks();
     </script>
 </body>
 </html>
