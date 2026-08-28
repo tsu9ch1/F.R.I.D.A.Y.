@@ -70,7 +70,7 @@
             <h2 class="text-xl font-bold font-orbitron tracking-widest text-orange-400 mb-2 text-glow-orange">SECURITY ACCESS CONTROL</h2>
             <p class="text-xs text-orange-500/70 mb-6 font-mono">F.R.I.D.A.Y. CORE PROTOCOL // AUTHENTICATION REQUIRED</p>
             
-            <button id="googleLoginBtn" class="w-full bg-white hover:bg-slate-100 text-slate-900 font-bold py-3 px-4 rounded-xl transition flex items-center justify-center gap-3 shadow-lg active:scale-95 text-xs font-mono cursor-pointer">
+            <button id="googleLoginBtn" onclick="handleGoogleLogin(event)" class="w-full bg-white hover:bg-slate-100 text-slate-900 font-bold py-3 px-4 rounded-xl transition flex items-center justify-center gap-3 shadow-lg active:scale-95 text-xs font-mono cursor-pointer relative z-50">
                 <svg class="w-4 h-4" viewBox="0 0 24 24">
                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                     <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -165,4 +165,898 @@
 
             <!-- Control Buttons Row -->
             <div class="w-full max-w-xl grid grid-cols-3 gap-2 mt-2 shrink-0">
-                <button id="micBtn" class="py-2 px-2 rounded-xl border border-orange-500/50 bg-black/90 hover:bg-orange-500/20 text-orange-300 font-bold text-xs flex items-center justify-center
+                <button id="micBtn" class="py-2 px-2 rounded-xl border border-orange-500/50 bg-black/90 hover:bg-orange-500/20 text-orange-300 font-bold text-xs flex items-center justify-center gap-2 transition active:scale-95 shadow-lg cursor-pointer">
+                    <i id="micIcon" class="fa-solid fa-microphone text-orange-400"></i>
+                    <span id="micBtnText">話しかける</span>
+                </button>
+
+                <button id="clapToggleBtn" class="py-2 px-2 rounded-xl border border-orange-500/30 bg-black/90 hover:bg-orange-500/20 text-orange-300 font-bold text-xs flex items-center justify-center gap-2 transition cursor-pointer">
+                    <i class="fa-solid fa-hands-clapping"></i>
+                    <span id="clapStatusText">クラップ: ON</span>
+                </button>
+
+                <button id="toggleSearchBtn" class="py-2 px-2 rounded-xl border border-orange-500/30 bg-black/90 hover:bg-orange-500/20 text-orange-300 font-bold text-xs flex items-center justify-center gap-2 transition cursor-pointer">
+                    <i class="fa-solid fa-globe text-orange-400"></i>
+                    <span>検索: <span id="searchModeText" class="text-emerald-400 font-bold">ON</span></span>
+                </button>
+            </div>
+
+            <!-- Direct Prompt Input Form -->
+            <form id="textForm" class="w-full max-w-xl mt-2 flex gap-2 shrink-0">
+                <button type="button" id="uploadImgBtn" title="画像を添付してGemini解析" class="bg-black border border-orange-500/30 hover:bg-orange-950/40 text-orange-400 px-3 rounded-xl transition flex items-center justify-center cursor-pointer">
+                    <i class="fa-solid fa-paperclip"></i>
+                </button>
+                <input type="text" id="userInput" placeholder="フライデーに指示・メッセージを送信..." class="flex-1 bg-black border border-orange-500/30 rounded-xl px-3.5 py-1.5 text-xs text-orange-100 placeholder-orange-700/60 focus:outline-none focus:border-orange-400 transition">
+                <button type="submit" class="bg-orange-500 hover:bg-orange-400 text-black font-bold px-4 rounded-xl transition flex items-center justify-center shadow-lg active:scale-95 cursor-pointer">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </form>
+        </section>
+    </main>
+
+    <!-- Tasks & Workflow Modal -->
+    <div id="tasksModal" class="fixed inset-0 bg-black/95 backdrop-blur-md hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-black border border-orange-500/40 rounded-2xl w-full max-w-xl p-5 shadow-2xl relative max-h-[85vh] flex flex-col">
+            <button id="closeTasksBtn" class="absolute top-4 right-4 text-orange-500/60 hover:text-orange-300 text-lg cursor-pointer">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3 class="text-sm font-bold font-orbitron text-orange-400 mb-1 flex items-center gap-2">
+                <i class="fa-solid fa-list-check text-orange-400"></i> MASTRA WORKFLOW & MCP TASKS
+            </h3>
+            <p class="text-[11px] text-orange-500/70 mb-3">
+                フライデーが会話から重度の指示を自動判断して作成したタスクキュー一覧です。
+            </p>
+
+            <div id="tasksList" class="flex-1 overflow-y-auto space-y-2.5 pr-1 font-mono text-xs my-2">
+                <!-- Dynamically populated tasks -->
+            </div>
+
+            <div class="flex justify-end mt-2 pt-2 border-t border-orange-500/20">
+                <button id="clearCompletedTasksBtn" class="px-3 py-1 bg-orange-950/40 hover:bg-orange-900/60 border border-orange-500/30 text-orange-300 text-xs rounded-lg font-mono cursor-pointer">
+                    完了済みタスクを整理
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Long-Term Memory (Vault) Modal -->
+    <div id="vaultModal" class="fixed inset-0 bg-black/95 backdrop-blur-md hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-black border border-orange-500/40 rounded-2xl w-full max-w-lg p-5 shadow-2xl relative">
+            <button id="closeVaultBtn" class="absolute top-4 right-4 text-orange-500/60 hover:text-orange-300 text-lg cursor-pointer">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3 class="text-sm font-bold font-orbitron text-orange-400 mb-1 flex items-center gap-2">
+                <i class="fa-solid fa-brain text-orange-400"></i> LONG-TERM MEMORY (長期記憶・ナレッジ)
+            </h3>
+            <p class="text-[11px] text-orange-500/70 mb-3">
+                メインエージェントおよびリサーチエージェントが記憶・抽出したユーザープロファイル情報です。
+            </p>
+
+            <div class="mb-2 flex gap-2">
+                <button id="mainMemTabBtn" class="flex-1 py-1 text-xs font-mono font-bold border-b-2 border-orange-400 text-orange-300 cursor-pointer">メイン記憶</button>
+                <button id="researchMemTabBtn" class="flex-1 py-1 text-xs font-mono border-b-2 border-transparent text-orange-500/60 hover:text-orange-300 cursor-pointer">リサーチ記憶</button>
+            </div>
+
+            <textarea id="vaultContent" rows="6" class="w-full bg-black border border-orange-500/30 rounded-xl p-3 text-xs text-orange-100 font-mono focus:outline-none focus:border-orange-400" placeholder="【プロフィール】
+名前：大学生（福井市学園在住）"></textarea>
+
+            <div class="flex justify-between items-center mt-3">
+                <span id="vaultSavedMsg" class="text-xs text-emerald-400 hidden"><i class="fa-solid fa-check"></i> 長期記憶を保存しました</span>
+                <button id="saveVaultBtn" class="bg-orange-500 hover:bg-orange-400 text-black font-bold px-5 py-1.5 rounded-xl transition text-xs cursor-pointer">
+                    保存する
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Configuration Modal -->
+    <div id="settingsModal" class="fixed inset-0 bg-black/95 backdrop-blur-md hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-black border border-orange-500/40 rounded-2xl w-full max-w-sm p-5 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button id="closeSettingsBtn" class="absolute top-4 right-4 text-orange-500/60 hover:text-orange-300 text-lg cursor-pointer">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3 class="text-sm font-bold font-orbitron text-orange-400 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-sliders text-orange-400"></i> CONFIGURATION
+            </h3>
+
+            <div class="space-y-3.5 text-xs">
+                <div>
+                    <label class="block font-orbitron text-orange-300 mb-1">GEMINI API KEY</label>
+                    <input type="password" id="apiKeyInput" placeholder="APIキー (AIzaSy...)" class="w-full bg-black border border-orange-500/30 rounded-xl px-3 py-2 text-orange-100 focus:outline-none focus:border-orange-400">
+                </div>
+
+                <div>
+                    <label class="block font-orbitron text-orange-300 mb-1">ELEVENLABS API KEY (オプション)</label>
+                    <input type="password" id="elevenApiKeyInput" placeholder="ElevenLabs API Key..." class="w-full bg-black border border-orange-500/30 rounded-xl px-3 py-2 text-orange-100 focus:outline-none focus:border-orange-400">
+                </div>
+
+                <div>
+                    <label class="block font-orbitron text-orange-300 mb-1">ELEVENLABS VOICE ID</label>
+                    <input type="text" id="elevenVoiceIdInput" value="gHBfNp2PWSyFgpPlzCOd" class="w-full bg-black border border-orange-500/30 rounded-xl px-3 py-2 text-orange-100 focus:outline-none focus:border-orange-400 font-mono">
+                </div>
+
+                <div>
+                    <label class="block font-orbitron text-orange-300 mb-1">AI MODEL</label>
+                    <select id="aiModelSelect" class="w-full bg-black border border-orange-500/30 rounded-xl px-3 py-2 text-orange-100 focus:outline-none focus:border-orange-400">
+                        <option value="gemini-3.5-flash-lite" selected>Gemini 3.5 Flash-Lite (最推奨)</option>
+                        <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash-Lite</option>
+                        <option value="gemini-3-flash">Gemini 3 Flash</option>
+                    </select>
+                </div>
+
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="font-orbitron text-orange-300">SPEECH RATE</label>
+                        <span id="speechRateVal" class="text-orange-400 font-mono font-bold">1.35x</span>
+                    </div>
+                    <input type="range" id="speechRateSlider" min="0.7" max="2.2" step="0.05" value="1.35" class="w-full accent-orange-400">
+                </div>
+
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="font-orbitron text-orange-300">VOICE PITCH</label>
+                        <span id="speechPitchVal" class="text-orange-400 font-mono font-bold">1.30</span>
+                    </div>
+                    <input type="range" id="speechPitchSlider" min="0.8" max="1.8" step="0.05" value="1.30" class="w-full accent-orange-400">
+                </div>
+
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="font-orbitron text-orange-300">CLAP SENSITIVITY</label>
+                        <span id="clapSensVal" class="text-orange-400 font-mono font-bold">0.20</span>
+                    </div>
+                    <input type="range" id="clapSensitivity" min="0.05" max="0.5" step="0.01" value="0.2" class="w-full accent-orange-400">
+                </div>
+            </div>
+
+            <div class="mt-5 flex justify-end">
+                <button id="saveSettingsBtn" class="bg-orange-500 hover:bg-orange-400 text-black font-bold px-5 py-2 rounded-xl transition text-xs cursor-pointer">
+                    設定を保存
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden File Input for Multimodal Image Analysis -->
+    <input type="file" id="imageFileInput" accept="image/*" class="hidden">
+
+    <script>
+        /* Safe Storage Utilities with Exception Guards */
+        function safeGetStorage(key, defaultVal = '') {
+            try {
+                const val = localStorage.getItem(key);
+                return val !== null ? val : defaultVal;
+            } catch (e) {
+                console.warn('localStorage read disabled:', e);
+                return defaultVal;
+            }
+        }
+
+        function safeSetStorage(key, val) {
+            try {
+                localStorage.setItem(key, val);
+            } catch (e) {
+                console.warn('localStorage write disabled:', e);
+            }
+        }
+
+        /* Top-level Google Authentication Handler (Guaranteed Execution) */
+        window.handleGoogleLogin = function(e) {
+            if (e) e.preventDefault();
+            const btn = document.getElementById('googleLoginBtn');
+            if (btn) {
+                btn.innerHTML = `<i class="fa-solid fa-circle-notch animate-spin text-orange-400"></i> SECURITY CLEARANCE GRANTED...`;
+            }
+            safeSetStorage('friday_auth', 'true');
+            if (typeof state !== 'undefined') state.authenticated = true;
+
+            const authOverlay = document.getElementById('authOverlay');
+            if (authOverlay) {
+                authOverlay.style.transition = 'opacity 0.3s ease';
+                authOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    authOverlay.style.display = 'none';
+                    authOverlay.classList.add('hidden');
+                }, 300);
+            }
+        };
+
+        function bind(id, event, callback) {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener(event, callback);
+        }
+
+        function getElVal(id) {
+            const el = document.getElementById(id);
+            return el ? el.value : '';
+        }
+
+        function setElVal(id, val) {
+            const el = document.getElementById(id);
+            if (el) el.value = val;
+        }
+
+        function escapeHtml(str) {
+            return (str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        /* Application State */
+        let state = {
+            status: 'STANDBY', // STANDBY, LISTENING, THINKING, SEARCHING_WEB, CREATING_TASK, EXECUTING_WORKFLOW, SPEAKING, ERROR
+            authenticated: safeGetStorage('friday_auth') === 'true',
+            apiKey: safeGetStorage('friday_gemini_key') || '',
+            elevenApiKey: safeGetStorage('friday_eleven_key') || '',
+            elevenVoiceId: safeGetStorage('friday_eleven_voice') || 'gHBfNp2PWSyFgpPlzCOd',
+            aiModel: safeGetStorage('friday_ai_model') || 'gemini-3.5-flash-lite',
+            useSearchGrounding: safeGetStorage('friday_search_mode') !== 'false',
+            speechRate: parseFloat(safeGetStorage('friday_speech_rate')) || 1.35,
+            speechPitch: parseFloat(safeGetStorage('friday_speech_pitch')) || 1.30,
+            clapEnabled: true,
+            clapThreshold: parseFloat(safeGetStorage('friday_clap_sens')) || 0.20,
+            vaultMainText: safeGetStorage('friday_vault_main') || `【プロフィール】\n名前：大学生（福井市学園在住）`,
+            vaultResearchText: safeGetStorage('friday_vault_research') || `【リサーチ記憶】\n興味関心：最新AIモデル、Mastraワークフロー、MCP開発`,
+            activeTab: 'main',
+            showGraphVisualizer: true,
+            tasks: JSON.parse(safeGetStorage('friday_tasks') || '[]')
+        };
+
+        function checkAuthStatus() {
+            const authOverlay = document.getElementById('authOverlay');
+            if (state.authenticated && authOverlay) {
+                authOverlay.style.display = 'none';
+                authOverlay.classList.add('hidden');
+            }
+        }
+
+        checkAuthStatus();
+
+        const bgCanvas = document.getElementById('bgCanvas');
+        const bgCtx = bgCanvas ? bgCanvas.getContext('2d') : null;
+        let particles = [];
+
+        function initBgCanvas() {
+            if (!bgCanvas || !bgCtx) return;
+            bgCanvas.width = window.innerWidth;
+            bgCanvas.height = window.innerHeight;
+
+            particles = [];
+            for (let i = 0; i < 60; i++) {
+                particles.push({
+                    x: Math.random() * bgCanvas.width,
+                    y: Math.random() * bgCanvas.height,
+                    radius: Math.random() * 1.5 + 0.5,
+                    alpha: Math.random() * 0.5 + 0.1,
+                    speed: Math.random() * 0.3 + 0.1
+                });
+            }
+        }
+        window.addEventListener('resize', initBgCanvas);
+        initBgCanvas();
+
+        function drawBgCanvas() {
+            if (!bgCtx || !bgCanvas) return;
+            bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+
+            // Grid Lines
+            bgCtx.strokeStyle = 'rgba(255, 140, 0, 0.03)';
+            bgCtx.lineWidth = 1;
+            const step = 40;
+            for (let x = 0; x < bgCanvas.width; x += step) {
+                bgCtx.beginPath();
+                bgCtx.moveTo(x, 0);
+                bgCtx.lineTo(x, bgCanvas.height);
+                bgCtx.stroke();
+            }
+            for (let y = 0; y < bgCanvas.height; y += step) {
+                bgCtx.beginPath();
+                bgCtx.moveTo(0, y);
+                bgCtx.lineTo(bgCanvas.width, y);
+                bgCtx.stroke();
+            }
+
+            // Particles
+            particles.forEach(p => {
+                p.y -= p.speed;
+                if (p.y < 0) p.y = bgCanvas.height;
+                bgCtx.beginPath();
+                bgCtx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                bgCtx.fillStyle = `rgba(255, 140, 0, ${p.alpha})`;
+                bgCtx.fill();
+            });
+
+            requestAnimationFrame(drawBgCanvas);
+        }
+        drawBgCanvas();
+
+        const hudCanvas = document.getElementById('hudCanvas');
+        const hudCtx = hudCanvas ? hudCanvas.getContext('2d') : null;
+        let hudAngle = 0;
+
+        function drawHUD() {
+            if (!hudCtx || !hudCanvas) return;
+            hudCtx.clearRect(0, 0, hudCanvas.width, hudCanvas.height);
+            const cx = hudCanvas.width / 2;
+            const cy = hudCanvas.height / 2;
+
+            // Color based on state
+            let color = 'rgba(255, 140, 0, 0.85)';
+            if (state.status === 'LISTENING') color = 'rgba(250, 204, 21, 0.9)'; // Yellow
+            else if (state.status === 'ERROR') color = 'rgba(239, 68, 68, 0.9)'; // Red
+            else if (state.status === 'SEARCHING_WEB') color = 'rgba(56, 189, 248, 0.9)'; // Cyan
+            else if (state.status === 'EXECUTING_WORKFLOW') color = 'rgba(168, 85, 247, 0.9)'; // Purple
+
+            let speed = 0.03;
+            if (state.status === 'THINKING' || state.status === 'EXECUTING_WORKFLOW') speed = 0.08;
+
+            hudAngle = (hudAngle + speed) % (Math.PI * 2);
+
+            // Outer Arc 1
+            hudCtx.beginPath();
+            hudCtx.arc(cx, cy, 145, hudAngle, hudAngle + Math.PI * 0.7);
+            hudCtx.strokeStyle = color;
+            hudCtx.lineWidth = 3;
+            hudCtx.stroke();
+
+            // Outer Arc 2
+            hudCtx.beginPath();
+            hudCtx.arc(cx, cy, 130, -hudAngle * 1.2, -hudAngle * 1.2 + Math.PI * 0.9);
+            hudCtx.strokeStyle = color;
+            hudCtx.lineWidth = 2;
+            hudCtx.setLineDash([6, 6]);
+            hudCtx.stroke();
+            hudCtx.setLineDash([]);
+
+            // Pulsing Center Core
+            const pulse = Math.sin(Date.now() / 250) * 5;
+            hudCtx.beginPath();
+            hudCtx.arc(cx, cy, 48 + pulse, 0, Math.PI * 2);
+            hudCtx.fillStyle = color;
+            hudCtx.shadowColor = color;
+            hudCtx.shadowBlur = 20;
+            hudCtx.fill();
+            hudCtx.shadowBlur = 0;
+
+            // Fixed Center Text
+            hudCtx.fillStyle = '#000000';
+            hudCtx.font = '900 12px Orbitron';
+            hudCtx.textAlign = 'center';
+            hudCtx.textBaseline = 'middle';
+            hudCtx.fillText('F . R . I . D . A . Y .', cx, cy);
+
+            requestAnimationFrame(drawHUD);
+        }
+        if (hudCanvas) drawHUD();
+
+        const graphCanvas = document.getElementById('graphCanvas');
+        const graphCtx = graphCanvas ? graphCanvas.getContext('2d') : null;
+        let graphNodes = [
+            { id: 'friday', label: 'F.R.I.D.A.Y.', x: 400, y: 200, color: '#ff8c00', r: 18 },
+            { id: 'memory', label: 'Long-Term Memory', x: 250, y: 120, color: '#f59e0b', r: 12 },
+            { id: 'mastra', label: 'Mastra Workflow', x: 550, y: 130, color: '#a855f7', r: 14 },
+            { id: 'mcp', label: 'MCP Tools', x: 580, y: 280, color: '#38bdf8', r: 12 },
+            { id: 'web', label: 'Google Search', x: 230, y: 270, color: '#10b981', r: 12 },
+            { id: 'user', label: 'User Context', x: 400, y: 320, color: '#f43f5e', r: 11 }
+        ];
+        let graphLinks = [
+            { from: 'friday', to: 'memory' },
+            { from: 'friday', to: 'mastra' },
+            { from: 'mastra', to: 'mcp' },
+            { from: 'friday', to: 'web' },
+            { from: 'friday', to: 'user' }
+        ];
+
+        function drawGraph() {
+            if (!graphCtx || !graphCanvas) return;
+            graphCtx.clearRect(0, 0, graphCanvas.width, graphCanvas.height);
+
+            if (!state.showGraphVisualizer) {
+                requestAnimationFrame(drawGraph);
+                return;
+            }
+
+            // Draw Links
+            graphLinks.forEach(link => {
+                const source = graphNodes.find(n => n.id === link.from);
+                const target = graphNodes.find(n => n.id === link.to);
+                if (source && target) {
+                    graphCtx.beginPath();
+                    graphCtx.moveTo(source.x, source.y);
+                    graphCtx.lineTo(target.x, target.y);
+                    graphCtx.strokeStyle = 'rgba(255, 140, 0, 0.25)';
+                    graphCtx.lineWidth = 1.5;
+                    graphCtx.stroke();
+                }
+            });
+
+            // Draw Nodes
+            graphNodes.forEach(node => {
+                const pulse = Math.sin(Date.now() / 300 + node.x) * 2;
+                graphCtx.beginPath();
+                graphCtx.arc(node.x, node.y, node.r + pulse, 0, Math.PI * 2);
+                graphCtx.fillStyle = node.color;
+                graphCtx.shadowColor = node.color;
+                graphCtx.shadowBlur = 10;
+                graphCtx.fill();
+                graphCtx.shadowBlur = 0;
+
+                graphCtx.fillStyle = '#ffffff';
+                graphCtx.font = '10px Orbitron';
+                graphCtx.textAlign = 'center';
+                graphCtx.fillText(node.label, node.x, node.y + node.r + 14);
+            });
+
+            requestAnimationFrame(drawGraph);
+        }
+        drawGraph();
+
+        let audioCtx = null;
+        let analyser = null;
+
+        async function initClapDetector() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioCtx.createAnalyser();
+                const source = audioCtx.createMediaStreamSource(stream);
+                source.connect(analyser);
+
+                analyser.fftSize = 512;
+                const bufferLength = analyser.frequencyBinCount;
+                const dataArray = new Uint8Array(bufferLength);
+
+                function checkAudioSpike() {
+                    if (state.clapEnabled && state.status === 'STANDBY') {
+                        analyser.getByteFrequencyData(dataArray);
+                        let sum = 0;
+                        for (let i = 0; i < bufferLength; i++) sum += dataArray[i];
+                        let average = sum / bufferLength / 255;
+
+                        if (average > state.clapThreshold) {
+                            startVoiceRecognition();
+                        }
+                    }
+                    setTimeout(checkAudioSpike, 80);
+                }
+                checkAudioSpike();
+            } catch (err) {
+                console.warn('Microphone access unverified:', err);
+            }
+        }
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition = null;
+
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.lang = 'ja-JP';
+            recognition.interimResults = false;
+
+            recognition.onstart = () => {
+                updateUIState('LISTENING', '● LISTENING...', 'どうぞ、ボス。話しかけてください...');
+            };
+
+            recognition.onresult = (event) => {
+                const text = event.results[0][0].transcript;
+                handleUserQuery(text);
+            };
+
+            recognition.onerror = () => {
+                updateUIState('ERROR', '● ERROR', '音声認識に失敗しました。');
+                setTimeout(() => updateUIState('STANDBY', '● STANDBY', '準備完了'), 3000);
+            };
+
+            recognition.onend = () => {
+                if (state.status === 'LISTENING') {
+                    updateUIState('STANDBY', '● STANDBY', '準備完了');
+                }
+            };
+        }
+
+        function startVoiceRecognition() {
+            if (!recognition) return;
+            if (state.status !== 'STANDBY' && state.status !== 'ERROR') return;
+            try {
+                if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+                recognition.start();
+            } catch (e) {
+                console.warn(e);
+            }
+        }
+
+        function updateUIState(status, badgeText, speechText = '') {
+            state.status = status;
+
+            const badge = document.getElementById('hudStatusBadge');
+            if (badge) {
+                badge.innerText = badgeText;
+                if (status === 'LISTENING') badge.className = 'text-[11px] font-mono font-bold px-3 py-0.5 rounded-full bg-black border border-yellow-500/60 text-yellow-400 text-glow-yellow';
+                else if (status === 'ERROR') badge.className = 'text-[11px] font-mono font-bold px-3 py-0.5 rounded-full bg-black border border-red-500/60 text-red-400 text-glow-red';
+                else badge.className = 'text-[11px] font-mono font-bold px-3 py-0.5 rounded-full bg-black border border-orange-500/40 text-orange-300 tracking-wider';
+            }
+
+            const stateBadge = document.getElementById('aiStateBadge');
+            if (stateBadge) stateBadge.innerText = `STATUS: ${status}`;
+
+            if (speechText) {
+                const speechEl = document.getElementById('fridaySpeechText');
+                if (speechEl) speechEl.innerText = speechText;
+            }
+        }
+
+        function getSystemPrompt() {
+            return `あなたはF.R.I.D.A.Y.（フライデー）という名前の高度AIアシスタントです。
+- 知的で仕事が早く、非常に優秀な女性AIです。
+- ユーザーを「ボス」と呼びます（公式な場面では「サー」）。
+- フランクでテンポが良く、人間味のある親しみやすさを持ちます。
+- 時に軽いジョークや皮肉（ウィット）を交えます。
+- 長々と語らず、要点をテキパキと短くスマートに伝えます。
+- 日本語で返答します。
+- 日時の質問をされていない限り、発話の冒頭で「本日は〜」等の挨拶を言わないでください。
+
+【ボス（ユーザー）の長期記憶 (LTM)】:
+${state.vaultMainText}
+${state.vaultResearchText}`;
+        }
+
+        async function fetchWithRetry(url, options, retries = 2, backoff = 1000) {
+            try {
+                const res = await fetch(url, options);
+                if (res.status === 403) throw new Error('⚠️ APIキーが無効か未設定です。「CONFIG」より設定してください。');
+                if (res.status === 429) throw new Error('⚠️ レート制限(429)に達しました。少し時間をおいてください。');
+                if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
+                return res;
+            } catch (err) {
+                if (retries <= 0 || err.message.includes('403') || err.message.includes('429')) throw err;
+                await new Promise(r => setTimeout(r, backoff));
+                return fetchWithRetry(url, options, retries - 1, backoff * 2);
+            }
+        }
+
+        async function handleUserQuery(promptText, imageBase64 = null) {
+            if (!state.apiKey) {
+                updateUIState('ERROR', '● ERROR', '⚠️ APIキーが未設定です。右上のCONFIGからGoogle AI StudioのAPIキーを入力してください。');
+                return;
+            }
+
+            // Task vs Simple Research Detection
+            const isHeavyTask = promptText.includes('タスク') || promptText.includes('ワークフロー') || promptText.includes('作成して') || promptText.length > 50;
+
+            if (isHeavyTask) {
+                updateUIState('CREATING_TASK', '● MASTRA TASK', '指示からMastraワークフロータスクを作成中...');
+                const newTask = {
+                    id: Date.now(),
+                    text: promptText,
+                    status: 'IN_PROGRESS',
+                    time: new Date().toLocaleTimeString('ja-JP')
+                };
+                state.tasks.unshift(newTask);
+                safeSetStorage('friday_tasks', JSON.stringify(state.tasks));
+                renderTasks();
+            } else if (state.useSearchGrounding) {
+                updateUIState('SEARCHING_WEB', '● SEARCHING WEB', 'Google検索グラウンディングで最新情報を参照中...');
+            } else {
+                updateUIState('THINKING', '● THINKING', '思考中...');
+            }
+
+            try {
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${state.aiModel}:generateContent?key=${state.apiKey}`;
+
+                let parts = [{ text: promptText }];
+                if (imageBase64) {
+                    parts.push({
+                        inlineData: {
+                            mimeType: 'image/jpeg',
+                            data: imageBase64.split(',')[1] || imageBase64
+                        }
+                    });
+                }
+
+                const payload = {
+                    contents: [{ parts: parts }],
+                    systemInstruction: { parts: [{ text: getSystemPrompt() }] }
+                };
+
+                if (state.useSearchGrounding) {
+                    payload.tools = [{ "google_search": {} }];
+                }
+
+                const response = await fetchWithRetry(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                const candidate = result.candidates?.[0];
+
+                if (candidate && candidate.content?.parts?.[0]?.text) {
+                    let replyText = candidate.content.parts[0].text;
+                    
+                    // Mark task as complete if created
+                    if (isHeavyTask && state.tasks.length > 0) {
+                        state.tasks[0].status = 'COMPLETED';
+                        safeSetStorage('friday_tasks', JSON.stringify(state.tasks));
+                        renderTasks();
+                    }
+
+                    // Execute speech & sequential text display with 0.7s delay
+                    speakAndAnimateText(replyText);
+                } else {
+                    throw new Error('無効な応答データです。');
+                }
+
+            } catch (err) {
+                console.error(err);
+                updateUIState('ERROR', '● ERROR', err.message);
+                setTimeout(() => updateUIState('STANDBY', '● STANDBY', '待機中'), 3500);
+            }
+        }
+
+        function speakAndAnimateText(fullText) {
+            updateUIState('SPEAKING', '● SPEAKING', '');
+
+            // Split into sentences without truncation
+            const sentences = fullText.split(/(?<=[。！？\n])/).filter(s => s.trim().length > 0);
+            if (sentences.length === 0) sentences.push(fullText);
+
+            // 0.7-Second Delay Sync before displaying first sentence
+            setTimeout(() => {
+                let index = 0;
+                const speechEl = document.getElementById('fridaySpeechText');
+
+                if (speechEl) speechEl.innerText = sentences[0];
+
+                if (sentences.length > 1) {
+                    const interval = setInterval(() => {
+                        index++;
+                        if (index < sentences.length && speechEl) {
+                            speechEl.innerText = sentences[index];
+                        } else {
+                            clearInterval(interval);
+                        }
+                    }, 2800);
+                }
+            }, 700);
+
+            // Execute TTS (ElevenLabs or Web Speech API)
+            if (state.elevenApiKey && state.elevenVoiceId) {
+                speakElevenLabs(fullText);
+            } else {
+                speakBrowserSpeech(fullText);
+            }
+        }
+
+        async function speakElevenLabs(text) {
+            try {
+                const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${state.elevenVoiceId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'xi-api-key': state.elevenApiKey
+                    },
+                    body: JSON.stringify({
+                        text: text,
+                        model_id: "eleven_multilingual_v2",
+                        voice_settings: { stability: 0.5, similarity_boost: 0.75 }
+                    })
+                });
+                if (!res.ok) throw new Error('ElevenLabs API error');
+                const blob = await res.blob();
+                const audio = new Audio(URL.createObjectURL(blob));
+                audio.onended = () => updateUIState('STANDBY', '● STANDBY', '準備完了');
+                audio.play();
+            } catch (e) {
+                console.warn('ElevenLabs failed, fallback to Web Speech:', e);
+                speakBrowserSpeech(text);
+            }
+        }
+
+        function speakBrowserSpeech(text) {
+            if (!('speechSynthesis' in window)) {
+                updateUIState('STANDBY', '● STANDBY', '準備完了');
+                return;
+            }
+            window.speechSynthesis.cancel();
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'ja-JP';
+            utterance.rate = state.speechRate;
+            utterance.pitch = state.speechPitch;
+
+            const voices = window.speechSynthesis.getVoices();
+            const jpVoice = voices.find(v => v.lang.includes('ja') && (v.name.includes('Nanami') || v.name.includes('Haruka') || v.name.includes('Google')));
+            if (jpVoice) utterance.voice = jpVoice;
+
+            utterance.onend = () => updateUIState('STANDBY', '● STANDBY', '準備完了');
+            utterance.onerror = () => updateUIState('STANDBY', '● STANDBY', '準備完了');
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function renderTasks() {
+            const list = document.getElementById('tasksList');
+            if (!list) return;
+
+            if (state.tasks.length === 0) {
+                list.innerHTML = `<div class="text-orange-500/50 py-4 text-center">タスクキューは空です。</div>`;
+                return;
+            }
+
+            list.innerHTML = state.tasks.map(t => `
+                <div class="bg-black/80 border border-orange-500/30 p-2.5 rounded-xl flex items-center justify-between">
+                    <div>
+                        <div class="text-orange-200 font-bold">${escapeHtml(t.text)}</div>
+                        <div class="text-[10px] text-orange-500/60">${t.time} // ID: ${t.id}</div>
+                    </div>
+                    <span class="px-2 py-0.5 text-[9px] rounded font-mono ${t.status === 'COMPLETED' ? 'bg-emerald-950 text-emerald-400 border border-emerald-500/40' : 'bg-amber-950 text-amber-400 border border-amber-500/40 animate-pulse'}">
+                        ${t.status}
+                    </span>
+                </div>
+            `).join('');
+        }
+
+        // Live Clock Updates
+        setInterval(() => {
+            const now = new Date();
+            const clockStr = now.toLocaleString('ja-JP', {
+                timeZone: 'Asia/Tokyo',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                weekday: 'short',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            }) + ' JST';
+
+            const liveClock = document.getElementById('liveClockDisplay');
+            if (liveClock) liveClock.innerText = clockStr;
+
+            const mobileClock = document.getElementById('mobileClockDisplay');
+            if (mobileClock) mobileClock.innerText = now.toLocaleTimeString('ja-JP');
+        }, 1000);
+
+        // Navigation Bindings
+        bind('toggleGraphBtn', 'click', () => {
+            state.showGraphVisualizer = !state.showGraphVisualizer;
+            const container = document.getElementById('obsidianGraphContainer');
+            if (container) container.style.opacity = state.showGraphVisualizer ? '0.3' : '0';
+        });
+
+        bind('openTasksBtn', 'click', () => {
+            renderTasks();
+            document.getElementById('tasksModal')?.classList.remove('hidden');
+        });
+        bind('closeTasksBtn', 'click', () => document.getElementById('tasksModal')?.classList.add('hidden'));
+
+        bind('clearCompletedTasksBtn', 'click', () => {
+            state.tasks = state.tasks.filter(t => t.status !== 'COMPLETED');
+            safeSetStorage('friday_tasks', JSON.stringify(state.tasks));
+            renderTasks();
+        });
+
+        bind('openVaultBtn', 'click', () => {
+            setElVal('vaultContent', state.activeTab === 'main' ? state.vaultMainText : state.vaultResearchText);
+            document.getElementById('vaultModal')?.classList.remove('hidden');
+        });
+        bind('closeVaultBtn', 'click', () => document.getElementById('vaultModal')?.classList.add('hidden'));
+
+        bind('mainMemTabBtn', 'click', () => {
+            state.activeTab = 'main';
+            document.getElementById('mainMemTabBtn').className = 'flex-1 py-1 text-xs font-mono font-bold border-b-2 border-orange-400 text-orange-300';
+            document.getElementById('researchMemTabBtn').className = 'flex-1 py-1 text-xs font-mono border-b-2 border-transparent text-orange-500/60 hover:text-orange-300';
+            setElVal('vaultContent', state.vaultMainText);
+        });
+
+        bind('researchMemTabBtn', 'click', () => {
+            state.activeTab = 'research';
+            document.getElementById('researchMemTabBtn').className = 'flex-1 py-1 text-xs font-mono font-bold border-b-2 border-orange-400 text-orange-300';
+            document.getElementById('mainMemTabBtn').className = 'flex-1 py-1 text-xs font-mono border-b-2 border-transparent text-orange-500/60 hover:text-orange-300';
+            setElVal('vaultContent', state.vaultResearchText);
+        });
+
+        bind('saveVaultBtn', 'click', () => {
+            const val = getElVal('vaultContent');
+            if (state.activeTab === 'main') {
+                state.vaultMainText = val;
+                safeSetStorage('friday_vault_main', val);
+            } else {
+                state.vaultResearchText = val;
+                safeSetStorage('friday_vault_research', val);
+            }
+            const msg = document.getElementById('vaultSavedMsg');
+            if (msg) {
+                msg.classList.remove('hidden');
+                setTimeout(() => msg.classList.add('hidden'), 2000);
+            }
+        });
+
+        bind('openSettingsBtn', 'click', () => {
+            setElVal('apiKeyInput', state.apiKey);
+            setElVal('elevenApiKeyInput', state.elevenApiKey);
+            setElVal('elevenVoiceIdInput', state.elevenVoiceId);
+            setElVal('aiModelSelect', state.aiModel);
+            setElVal('speechRateSlider', state.speechRate);
+            setElVal('speechPitchSlider', state.speechPitch);
+            setElVal('clapSensitivity', state.clapThreshold);
+            document.getElementById('settingsModal')?.classList.remove('hidden');
+        });
+
+        bind('closeSettingsBtn', 'click', () => document.getElementById('settingsModal')?.classList.add('hidden'));
+
+        bind('saveSettingsBtn', 'click', () => {
+            state.apiKey = getElVal('apiKeyInput').trim();
+            state.elevenApiKey = getElVal('elevenApiKeyInput').trim();
+            state.elevenVoiceId = getElVal('elevenVoiceIdInput').trim() || 'gHBfNp2PWSyFgpPlzCOd';
+            state.aiModel = getElVal('aiModelSelect') || 'gemini-3.5-flash-lite';
+            state.speechRate = parseFloat(getElVal('speechRateSlider')) || 1.35;
+            state.speechPitch = parseFloat(getElVal('speechPitchSlider')) || 1.30;
+            state.clapThreshold = parseFloat(getElVal('clapSensitivity')) || 0.20;
+
+            safeSetStorage('friday_gemini_key', state.apiKey);
+            safeSetStorage('friday_eleven_key', state.elevenApiKey);
+            safeSetStorage('friday_eleven_voice', state.elevenVoiceId);
+            safeSetStorage('friday_ai_model', state.aiModel);
+            safeSetStorage('friday_speech_rate', state.speechRate);
+            safeSetStorage('friday_speech_pitch', state.speechPitch);
+            safeSetStorage('friday_clap_sens', state.clapThreshold);
+
+            const badge = document.getElementById('aiModelBadge');
+            if (badge) badge.innerText = state.aiModel;
+
+            document.getElementById('settingsModal')?.classList.add('hidden');
+        });
+
+        bind('micBtn', 'click', () => startVoiceRecognition());
+
+        bind('clapToggleBtn', 'click', () => {
+            state.clapEnabled = !state.clapEnabled;
+            const el = document.getElementById('clapStatusText');
+            if (el) el.innerText = state.clapEnabled ? 'クラップ: ON' : 'クラップ: OFF';
+        });
+
+        bind('toggleSearchBtn', 'click', () => {
+            state.useSearchGrounding = !state.useSearchGrounding;
+            safeSetStorage('friday_search_mode', state.useSearchGrounding);
+            const el = document.getElementById('searchModeText');
+            if (el) {
+                el.innerText = state.useSearchGrounding ? 'ON' : 'OFF';
+                el.className = state.useSearchGrounding ? 'text-emerald-400 font-bold' : 'text-slate-500';
+            }
+        });
+
+        bind('textForm', 'submit', (e) => {
+            e.preventDefault();
+            const input = document.getElementById('userInput');
+            if (!input) return;
+            const text = input.value.trim();
+            if (!text) return;
+            input.value = '';
+            handleUserQuery(text);
+        });
+
+        bind('uploadImgBtn', 'click', () => document.getElementById('imageFileInput')?.click());
+
+        bind('imageFileInput', 'change', (e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                handleUserQuery('添付された画像を詳しく解析してください。', evt.target.result);
+            };
+            reader.readAsDataURL(file);
+        });
+
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+                e.preventDefault();
+                startVoiceRecognition();
+            }
+        });
+
+        window.addEventListener('click', () => {
+            if (!audioCtx) initClapDetector();
+        }, { once: true });
+    </script>
+</body>
+</html>
