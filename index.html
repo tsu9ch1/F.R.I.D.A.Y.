@@ -70,7 +70,7 @@
             <h2 class="text-xl font-bold font-orbitron tracking-widest text-orange-400 mb-2 text-glow-orange">SECURITY ACCESS CONTROL</h2>
             <p class="text-xs text-orange-500/70 mb-6 font-mono">F.R.I.D.A.Y. CORE PROTOCOL // AUTHENTICATION REQUIRED</p>
             
-            <button id="googleLoginBtn" class="w-full bg-white hover:bg-slate-100 text-slate-900 font-bold py-3 px-4 rounded-xl transition flex items-center justify-center gap-3 shadow-lg active:scale-95 text-xs font-mono">
+            <button id="googleLoginBtn" class="w-full bg-white hover:bg-slate-100 text-slate-900 font-bold py-3 px-4 rounded-xl transition flex items-center justify-center gap-3 shadow-lg active:scale-95 text-xs font-mono cursor-pointer">
                 <svg class="w-4 h-4" viewBox="0 0 24 24">
                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                     <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -85,6 +85,7 @@
         </div>
     </div>
 
+    <!-- Background Canvas for Sci-Fi Visual Effects -->
     <canvas id="bgCanvas" class="absolute inset-0 w-full h-full pointer-events-none z-0"></canvas>
 
     <header class="w-full bg-black/80 border-b border-orange-500/20 px-4 md:px-6 py-2 flex justify-between items-center shrink-0 z-30">
@@ -105,16 +106,16 @@
         </div>
 
         <div class="flex items-center space-x-2">
-            <button id="toggleGraphBtn" class="px-2.5 py-1 rounded-lg border border-orange-500/30 hover:bg-orange-500/20 text-orange-300 text-xs font-orbitron transition flex items-center gap-1.5">
+            <button id="toggleGraphBtn" class="px-2.5 py-1 rounded-lg border border-orange-500/30 hover:bg-orange-500/20 text-orange-300 text-xs font-orbitron transition flex items-center gap-1.5 cursor-pointer">
                 <i class="fa-solid fa-circle-nodes text-orange-400"></i> GRAPH VISUALIZER
             </button>
-            <button id="openTasksBtn" class="px-2.5 py-1 rounded-lg border border-orange-500/30 hover:bg-orange-500/20 text-orange-300 text-xs font-orbitron transition flex items-center gap-1.5">
+            <button id="openTasksBtn" class="px-2.5 py-1 rounded-lg border border-orange-500/30 hover:bg-orange-500/20 text-orange-300 text-xs font-orbitron transition flex items-center gap-1.5 cursor-pointer">
                 <i class="fa-solid fa-list-check text-orange-400"></i> WORKFLOW
             </button>
-            <button id="openVaultBtn" class="px-2.5 py-1 rounded-lg border border-orange-500/30 hover:bg-orange-500/20 text-orange-300 text-xs font-orbitron transition flex items-center gap-1.5">
+            <button id="openVaultBtn" class="px-2.5 py-1 rounded-lg border border-orange-500/30 hover:bg-orange-500/20 text-orange-300 text-xs font-orbitron transition flex items-center gap-1.5 cursor-pointer">
                 <i class="fa-solid fa-brain text-orange-400"></i> MEMORY
             </button>
-            <button id="openSettingsBtn" class="px-2.5 py-1 rounded-lg border border-orange-500/30 hover:bg-orange-500/20 text-orange-300 text-xs font-orbitron transition flex items-center gap-1.5">
+            <button id="openSettingsBtn" class="px-2.5 py-1 rounded-lg border border-orange-500/30 hover:bg-orange-500/20 text-orange-300 text-xs font-orbitron transition flex items-center gap-1.5 cursor-pointer">
                 <i class="fa-solid fa-sliders text-orange-400"></i> CONFIG
             </button>
         </div>
@@ -122,7 +123,7 @@
 
     <main class="flex-1 max-w-6xl w-full mx-auto p-2 md:p-4 flex flex-col justify-between items-center z-10 overflow-hidden relative">
         
-        <!-- Location & Agent Telemetry Header Bar -->
+        <!-- Location & Telemetry Bar -->
         <div class="w-full flex justify-between items-center text-[10px] font-orbitron text-orange-500/60 shrink-0 px-2">
             <div>SYS.LOC: FUKUI_GAKUEN // LAT: 36.065 // MCP: ACTIVE</div>
             <div id="mobileClockDisplay" class="sm:hidden text-orange-400 font-mono">--:--:--</div>
@@ -132,26 +133,27 @@
             </div>
         </div>
 
-        <!-- Central Hologram Ring Section (40% Viewport Scale) -->
+        <!-- Central Hologram Ring Section (~40% Viewport Scale) -->
         <section class="w-full flex-1 p-1 flex flex-col items-center justify-center relative overflow-hidden my-1 shrink-0">
             
-            <!-- Obsidian-style Agent & Knowledge Graph Visualizer Canvas Overlay -->
+            <!-- Obsidian Agent & Knowledge Graph Overlay Canvas -->
             <div id="obsidianGraphContainer" class="absolute inset-0 pointer-events-none flex items-center justify-center transition-opacity duration-500 opacity-30">
                 <canvas id="graphCanvas" width="800" height="400" class="w-full h-full object-contain"></canvas>
             </div>
 
-            <!-- Hologram Canvas Container -->
+            <!-- Main Hologram Ring Canvas Container -->
             <div class="relative w-full aspect-square max-w-[260px] md:max-w-[300px] lg:max-w-[330px] flex items-center justify-center my-auto z-10">
                 <canvas id="hudCanvas" width="400" height="400" class="w-full h-full drop-shadow-[0_0_25px_rgba(255,140,0,0.4)]"></canvas>
             </div>
 
-            <!-- Current Status Badge -->
+            <!-- Current Status Badge Indicator -->
             <div class="text-center my-1.5 z-10">
                 <span id="hudStatusBadge" class="text-[11px] font-mono font-bold px-3 py-0.5 rounded-full bg-black border border-orange-500/40 text-orange-300 tracking-wider">
                     ● STANDBY
                 </span>
             </div>
 
+            <!-- Sentence-by-Sentence Sequential Text Display -->
             <div class="w-full max-w-2xl bg-black/90 border border-orange-500/30 rounded-xl px-4 py-2.5 shadow-2xl relative min-h-[48px] max-h-[54px] flex items-center justify-center shrink-0 overflow-hidden z-10">
                 <p id="fridaySpeechText" class="text-xs md:text-sm text-orange-100 font-medium leading-none tracking-wide text-center transition-all duration-300 w-full px-2">
                     準備はいつでもできていますよ、ボス。今日はどこから手をつけますか？
@@ -163,227 +165,4 @@
 
             <!-- Control Buttons Row -->
             <div class="w-full max-w-xl grid grid-cols-3 gap-2 mt-2 shrink-0">
-                <button id="micBtn" class="py-2 px-2 rounded-xl border border-orange-500/50 bg-black/90 hover:bg-orange-500/20 text-orange-300 font-bold text-xs flex items-center justify-center gap-2 transition active:scale-95 shadow-lg">
-                    <i id="micIcon" class="fa-solid fa-microphone text-orange-400"></i>
-                    <span id="micBtnText">話しかける</span>
-                </button>
-
-                <button id="clapToggleBtn" class="py-2 px-2 rounded-xl border border-orange-500/30 bg-black/90 hover:bg-orange-500/20 text-orange-300 font-bold text-xs flex items-center justify-center gap-2 transition">
-                    <i class="fa-solid fa-hands-clapping"></i>
-                    <span id="clapStatusText">クラップ: ON</span>
-                </button>
-
-                <button id="toggleSearchBtn" class="py-2 px-2 rounded-xl border border-orange-500/30 bg-black/90 hover:bg-orange-500/20 text-orange-300 font-bold text-xs flex items-center justify-center gap-2 transition">
-                    <i class="fa-solid fa-globe text-orange-400"></i>
-                    <span>検索: <span id="searchModeText" class="text-orange-300 font-bold">ON</span></span>
-                </button>
-            </div>
-
-            <!-- Direct Prompt Input Form -->
-            <form id="textForm" class="w-full max-w-xl mt-2 flex gap-2 shrink-0">
-                <button type="button" id="uploadImgBtn" title="画像を添付してGemini解析" class="bg-black border border-orange-500/30 hover:bg-orange-950/40 text-orange-400 px-3 rounded-xl transition flex items-center justify-center">
-                    <i class="fa-solid fa-paperclip"></i>
-                </button>
-                <input type="text" id="userInput" placeholder="フライデーに指示・メッセージを送信..." class="flex-1 bg-black border border-orange-500/30 rounded-xl px-3.5 py-1.5 text-xs text-orange-100 placeholder-orange-700/60 focus:outline-none focus:border-orange-400 transition">
-                <button type="submit" class="bg-orange-500 hover:bg-orange-400 text-black font-bold px-4 rounded-xl transition flex items-center justify-center shadow-lg active:scale-95">
-                    <i class="fa-solid fa-paper-plane"></i>
-                </button>
-            </form>
-        </section>
-    </main>
-
-    <div id="tasksModal" class="fixed inset-0 bg-black/95 backdrop-blur-md hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-black border border-orange-500/40 rounded-2xl w-full max-w-xl p-5 shadow-2xl relative max-h-[85vh] flex flex-col">
-            <button id="closeTasksBtn" class="absolute top-4 right-4 text-orange-500/60 hover:text-orange-300 text-lg">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-            <h3 class="text-sm font-bold font-orbitron text-orange-400 mb-1 flex items-center gap-2">
-                <i class="fa-solid fa-list-check text-orange-400"></i> MASTRA WORKFLOW & MCP TASKS
-            </h3>
-            <p class="text-[11px] text-orange-500/70 mb-3">
-                フライデーが会話から重度の指示を自動判断して作成したタスクキュー一覧です。
-            </p>
-
-            <div id="tasksList" class="flex-1 overflow-y-auto space-y-2.5 pr-1 font-mono text-xs my-2">
-                <!-- Dynamically populated tasks -->
-            </div>
-
-            <div class="flex justify-end mt-2 pt-2 border-t border-orange-500/20">
-                <button id="clearCompletedTasksBtn" class="px-3 py-1 bg-orange-950/40 hover:bg-orange-900/60 border border-orange-500/30 text-orange-300 text-xs rounded-lg font-mono">
-                    完了済みタスクを整理
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <div id="vaultModal" class="fixed inset-0 bg-black/95 backdrop-blur-md hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-black border border-orange-500/40 rounded-2xl w-full max-w-lg p-5 shadow-2xl relative">
-            <button id="closeVaultBtn" class="absolute top-4 right-4 text-orange-500/60 hover:text-orange-300 text-lg">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-            <h3 class="text-sm font-bold font-orbitron text-orange-400 mb-1 flex items-center gap-2">
-                <i class="fa-solid fa-brain text-orange-400"></i> LONG-TERM MEMORY (長期記憶・ナレッジ)
-            </h3>
-            <p class="text-[11px] text-orange-500/70 mb-3">
-                メインエージェントおよびリサーチエージェントが記憶・抽出したユーザープロファイル情報です。
-            </p>
-
-            <div class="mb-2 flex gap-2">
-                <button id="mainMemTabBtn" class="flex-1 py-1 text-xs font-mono font-bold border-b-2 border-orange-400 text-orange-300">メイン記憶</button>
-                <button id="researchMemTabBtn" class="flex-1 py-1 text-xs font-mono border-b-2 border-transparent text-orange-500/60 hover:text-orange-300">リサーチ記憶</button>
-            </div>
-
-            <textarea id="vaultContent" rows="6" class="w-full bg-black border border-orange-500/30 rounded-xl p-3 text-xs text-orange-100 font-mono focus:outline-none focus:border-orange-400" placeholder="【プロフィール】
-名前：大学生（福井市学園在住）"></textarea>
-
-            <div class="flex justify-between items-center mt-3">
-                <span id="vaultSavedMsg" class="text-xs text-emerald-400 hidden"><i class="fa-solid fa-check"></i> 長期記憶を保存しました</span>
-                <button id="saveVaultBtn" class="bg-orange-500 hover:bg-orange-400 text-black font-bold px-5 py-1.5 rounded-xl transition text-xs">
-                    保存する
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <div id="settingsModal" class="fixed inset-0 bg-black/95 backdrop-blur-md hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-black border border-orange-500/40 rounded-2xl w-full max-w-sm p-5 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-            <button id="closeSettingsBtn" class="absolute top-4 right-4 text-orange-500/60 hover:text-orange-300 text-lg">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-            <h3 class="text-sm font-bold font-orbitron text-orange-400 mb-4 flex items-center gap-2">
-                <i class="fa-solid fa-sliders text-orange-400"></i> CONFIGURATION
-            </h3>
-
-            <div class="space-y-3.5 text-xs">
-                <div>
-                    <label class="block font-orbitron text-orange-300 mb-1">GEMINI API KEY</label>
-                    <input type="password" id="apiKeyInput" placeholder="APIキー (AIzaSy...)" class="w-full bg-black border border-orange-500/30 rounded-xl px-3 py-2 text-orange-100 focus:outline-none focus:border-orange-400">
-                </div>
-
-                <div>
-                    <label class="block font-orbitron text-orange-300 mb-1">ELEVENLABS API KEY (オプション)</label>
-                    <input type="password" id="elevenApiKeyInput" placeholder="ElevenLabs API Key..." class="w-full bg-black border border-orange-500/30 rounded-xl px-3 py-2 text-orange-100 focus:outline-none focus:border-orange-400">
-                </div>
-
-                <div>
-                    <label class="block font-orbitron text-orange-300 mb-1">ELEVENLABS VOICE ID</label>
-                    <input type="text" id="elevenVoiceIdInput" value="gHBfNp2PWSyFgpPlzCOd" class="w-full bg-black border border-orange-500/30 rounded-xl px-3 py-2 text-orange-100 focus:outline-none focus:border-orange-400 font-mono">
-                </div>
-
-                <div>
-                    <label class="block font-orbitron text-orange-300 mb-1">AI MODEL</label>
-                    <select id="aiModelSelect" class="w-full bg-black border border-orange-500/30 rounded-xl px-3 py-2 text-orange-100 focus:outline-none focus:border-orange-400">
-                        <option value="gemini-3.5-flash-lite" selected>Gemini 3.5 Flash-Lite (最推奨)</option>
-                        <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash-Lite</option>
-                        <option value="gemini-3-flash">Gemini 3 Flash</option>
-                    </select>
-                </div>
-
-                <div>
-                    <div class="flex justify-between items-center mb-1">
-                        <label class="font-orbitron text-orange-300">SPEECH RATE</label>
-                        <span id="speechRateVal" class="text-orange-400 font-mono font-bold">1.35x</span>
-                    </div>
-                    <input type="range" id="speechRateSlider" min="0.7" max="2.2" step="0.05" value="1.35" class="w-full accent-orange-400">
-                </div>
-
-                <div>
-                    <div class="flex justify-between items-center mb-1">
-                        <label class="font-orbitron text-orange-300">VOICE PITCH</label>
-                        <span id="speechPitchVal" class="text-orange-400 font-mono font-bold">1.30</span>
-                    </div>
-                    <input type="range" id="speechPitchSlider" min="0.8" max="1.8" step="0.05" value="1.30" class="w-full accent-orange-400">
-                </div>
-
-                <div>
-                    <div class="flex justify-between items-center mb-1">
-                        <label class="font-orbitron text-orange-300">CLAP SENSITIVITY</label>
-                        <span id="clapSensVal" class="text-orange-400 font-mono font-bold">0.20</span>
-                    </div>
-                    <input type="range" id="clapSensitivity" min="0.05" max="0.5" step="0.01" value="0.2" class="w-full accent-orange-400">
-                </div>
-            </div>
-
-            <div class="mt-5 flex justify-end">
-                <button id="saveSettingsBtn" class="bg-orange-500 hover:bg-orange-400 text-black font-bold px-5 py-2 rounded-xl transition text-xs">
-                    設定を保存
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Hidden Image Upload File Input -->
-    <input type="file" id="imageFileInput" accept="image/*" class="hidden">
-
-    <script>
-        /* Essential Helper Utilities */
-        function bind(id, event, callback) {
-            const el = document.getElementById(id);
-            if (el) el.addEventListener(event, callback);
-        }
-
-        function getElVal(id) {
-            const el = document.getElementById(id);
-            return el ? el.value : '';
-        }
-
-        function setElVal(id, val) {
-            const el = document.getElementById(id);
-            if (el) el.value = val;
-        }
-
-        function escapeHtml(str) {
-            return (str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        }
-
-        let state = {
-            status: 'STANDBY', // STANDBY, LISTENING, THINKING, SEARCHING_WEB, CREATING_TASK, EXECUTING_WORKFLOW, SPEAKING, ERROR
-            authenticated: localStorage.getItem('friday_auth') === 'true',
-            apiKey: localStorage.getItem('friday_gemini_key') || '',
-            elevenApiKey: localStorage.getItem('friday_eleven_key') || '',
-            elevenVoiceId: localStorage.getItem('friday_eleven_voice') || 'gHBfNp2PWSyFgpPlzCOd',
-            aiModel: localStorage.getItem('friday_ai_model') || 'gemini-3.5-flash-lite',
-            useSearchGrounding: localStorage.getItem('friday_search_mode') !== null ? (localStorage.getItem('friday_search_mode') === 'true') : true,
-            speechRate: parseFloat(localStorage.getItem('friday_speech_rate')) || 1.35,
-            speechPitch: parseFloat(localStorage.getItem('friday_speech_pitch')) || 1.30,
-            clapEnabled: true,
-            clapThreshold: parseFloat(localStorage.getItem('friday_clap_sens')) || 0.20,
-            vaultMainText: localStorage.getItem('friday_vault_main') || `【プロフィール】\n名前：大学生（福井市学園在住）`,
-            vaultResearchText: localStorage.getItem('friday_vault_research') || `【リサーチ記憶】\n興味関心：最新AIモデル、Mastraワークフロー、MCP開発`,
-            activeTab: 'main',
-            showGraphVisualizer: true,
-            tasks: JSON.parse(localStorage.getItem('friday_tasks') || '[]')
-    };
-
-    /* Google OAuth Auth Guard & Access Control */
-    function checkAuthStatus() {
-        const authOverlay = document.getElementById('authOverlay');
-        if (state.authenticated && authOverlay) {
-            authOverlay.classList.add('hidden');
-        }
-    }
-
-    bind('googleLoginBtn', 'click', () => {
-        const btn = document.getElementById('googleLoginBtn');
-        if (btn) {
-            btn.innerHTML = `<i class="fa-solid fa-circle-notch animate-spin text-orange-400"></i> SECURITY CLEARANCE GRANTED...`;
-        }
-        setTimeout(() => {
-            state.authenticated = true;
-            localStorage.setItem('friday_auth', 'true');
-            const authOverlay = document.getElementById('authOverlay');
-            if (authOverlay) {
-                authOverlay.style.transition = 'opacity 0.4s ease';
-                authOverlay.style.opacity = '0';
-                setTimeout(() => {
-                    authOverlay.classList.add('hidden');
-                }, 400);
-            }
-        }, 500);
-    });
-
-    checkAuthStatus();
-
-    /* Obsidian-style Agent & Knowledge Graph Visualizer */
-    const graphCanvas = document.getElementById('graphCanvas');
-<!-- ... existing code -->
+                <button id="micBtn" class="py-2 px-2 rounded-xl border border-orange-500/50 bg-black/90 hover:bg-orange-500/20 text-orange-300 font-bold text-xs flex items-center justify-center
