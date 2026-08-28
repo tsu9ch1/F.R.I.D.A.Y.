@@ -128,7 +128,6 @@
             <div>SYS.LOC: FUKUI_GAKUEN // LAT: 36.065 // MCP: ACTIVE</div>
             <div id="mobileClockDisplay" class="sm:hidden text-orange-400 font-mono">--:--:--</div>
             <div class="flex items-center gap-2">
-                <span id="aiStateBadge" class="text-orange-400 bg-black/90 px-2 py-0.5 rounded border border-orange-500/30 font-mono">STATUS: IDLE</span>
                 <span id="aiModelBadge" class="text-orange-400 bg-black/90 px-2 py-0.5 rounded border border-orange-500/30 font-mono">gemini-3.5-flash-lite</span>
             </div>
         </div>
@@ -137,13 +136,13 @@
         <section class="w-full flex-1 p-1 flex flex-col items-center justify-center relative overflow-hidden my-1 shrink-0">
             
             <!-- Obsidian Agent & Knowledge Graph Overlay Canvas -->
-            <div id="obsidianGraphContainer" class="absolute inset-0 pointer-events-none flex items-center justify-center transition-opacity duration-500 opacity-30">
+            <div id="obsidianGraphContainer" class="absolute inset-0 pointer-events-none flex items-center justify-center transition-opacity duration-500 opacity-80">
                 <canvas id="graphCanvas" width="800" height="400" class="w-full h-full object-contain"></canvas>
             </div>
 
             <!-- Main Hologram Ring Canvas Container -->
             <div class="relative w-full aspect-square max-w-[260px] md:max-w-[300px] lg:max-w-[330px] flex items-center justify-center my-auto z-10">
-                <canvas id="hudCanvas" width="400" height="400" class="w-full h-full drop-shadow-[0_0_25px_rgba(255,140,0,0.4)]"></canvas>
+                <canvas id="hudCanvas" width="400" height="400" class="w-full h-full drop-shadow-[0_0_25px_rgba(255,140,0,0.5)]"></canvas>
             </div>
 
             <!-- Current Status Badge Indicator -->
@@ -340,7 +339,7 @@
             }
         }
 
-        /* Top-level Google Authentication Handler (Guaranteed Execution) */
+        /* Top-level Google Authentication Handler */
         window.handleGoogleLogin = function(e) {
             if (e) e.preventDefault();
             const btn = document.getElementById('googleLoginBtn');
@@ -382,7 +381,7 @@
 
         /* Application State */
         let state = {
-            status: 'STANDBY', // STANDBY, LISTENING, THINKING, SEARCHING_WEB, CREATING_TASK, EXECUTING_WORKFLOW, SPEAKING, ERROR
+            status: 'STANDBY',
             authenticated: safeGetStorage('friday_auth') === 'true',
             apiKey: safeGetStorage('friday_gemini_key') || '',
             elevenApiKey: safeGetStorage('friday_eleven_key') || '',
@@ -407,9 +406,9 @@
                 authOverlay.classList.add('hidden');
             }
         }
-
         checkAuthStatus();
 
+        /* Background Canvas Visual Effects */
         const bgCanvas = document.getElementById('bgCanvas');
         const bgCtx = bgCanvas ? bgCanvas.getContext('2d') : null;
         let particles = [];
@@ -437,7 +436,6 @@
             if (!bgCtx || !bgCanvas) return;
             bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
 
-            // Grid Lines
             bgCtx.strokeStyle = 'rgba(255, 140, 0, 0.03)';
             bgCtx.lineWidth = 1;
             const step = 40;
@@ -454,7 +452,6 @@
                 bgCtx.stroke();
             }
 
-            // Particles
             particles.forEach(p => {
                 p.y -= p.speed;
                 if (p.y < 0) p.y = bgCanvas.height;
@@ -468,6 +465,7 @@
         }
         drawBgCanvas();
 
+        /* JARVIS HUD Hologram Canvas (Recreating Reference Design) */
         const hudCanvas = document.getElementById('hudCanvas');
         const hudCtx = hudCanvas ? hudCanvas.getContext('2d') : null;
         let hudAngle = 0;
@@ -478,65 +476,134 @@
             const cx = hudCanvas.width / 2;
             const cy = hudCanvas.height / 2;
 
-            // Color based on state
-            let color = 'rgba(255, 140, 0, 0.85)';
-            if (state.status === 'LISTENING') color = 'rgba(250, 204, 21, 0.9)'; // Yellow
-            else if (state.status === 'ERROR') color = 'rgba(239, 68, 68, 0.9)'; // Red
-            else if (state.status === 'SEARCHING_WEB') color = 'rgba(56, 189, 248, 0.9)'; // Cyan
-            else if (state.status === 'EXECUTING_WORKFLOW') color = 'rgba(168, 85, 247, 0.9)'; // Purple
+            // Color selection based on state
+            let primaryColor = '#ff8c00';
+            let strokeColor = 'rgba(255, 140, 0, 0.85)';
+            if (state.status === 'LISTENING') strokeColor = 'rgba(250, 204, 21, 0.9)'; // Yellow
+            else if (state.status === 'ERROR') strokeColor = 'rgba(239, 68, 68, 0.9)'; // Red
+            else if (state.status === 'SEARCHING_WEB') strokeColor = 'rgba(56, 189, 248, 0.9)';
+            else if (state.status === 'EXECUTING_WORKFLOW') strokeColor = 'rgba(168, 85, 247, 0.9)';
 
-            let speed = 0.03;
-            if (state.status === 'THINKING' || state.status === 'EXECUTING_WORKFLOW') speed = 0.08;
+            let speed = 0.02;
+            if (state.status === 'THINKING' || state.status === 'EXECUTING_WORKFLOW') speed = 0.06;
 
             hudAngle = (hudAngle + speed) % (Math.PI * 2);
 
-            // Outer Arc 1
+            // 1. Outer Corner Brackets ┌ ┐ └ ┘
+            const bracketSize = 16;
+            const bracketDist = 165;
+            hudCtx.strokeStyle = strokeColor;
+            hudCtx.lineWidth = 2;
+
+            // Top-Left ┌
             hudCtx.beginPath();
-            hudCtx.arc(cx, cy, 145, hudAngle, hudAngle + Math.PI * 0.7);
-            hudCtx.strokeStyle = color;
-            hudCtx.lineWidth = 3;
+            hudCtx.moveTo(cx - bracketDist, cy - bracketDist + bracketSize);
+            hudCtx.lineTo(cx - bracketDist, cy - bracketDist);
+            hudCtx.lineTo(cx - bracketDist + bracketSize, cy - bracketDist);
             hudCtx.stroke();
 
-            // Outer Arc 2
+            // Top-Right ┐
             hudCtx.beginPath();
-            hudCtx.arc(cx, cy, 130, -hudAngle * 1.2, -hudAngle * 1.2 + Math.PI * 0.9);
-            hudCtx.strokeStyle = color;
-            hudCtx.lineWidth = 2;
-            hudCtx.setLineDash([6, 6]);
+            hudCtx.moveTo(cx + bracketDist - bracketSize, cy - bracketDist);
+            hudCtx.lineTo(cx + bracketDist, cy - bracketDist);
+            hudCtx.lineTo(cx + bracketDist, cy - bracketDist + bracketSize);
+            hudCtx.stroke();
+
+            // Bottom-Left └
+            hudCtx.beginPath();
+            hudCtx.moveTo(cx - bracketDist, cy + bracketDist - bracketSize);
+            hudCtx.lineTo(cx - bracketDist, cy + bracketDist);
+            hudCtx.lineTo(cx - bracketDist + bracketSize, cy + bracketDist);
+            hudCtx.stroke();
+
+            // Bottom-Right ┘
+            hudCtx.beginPath();
+            hudCtx.moveTo(cx + bracketDist - bracketSize, cy + bracketDist);
+            hudCtx.lineTo(cx + bracketDist, cy + bracketDist);
+            hudCtx.lineTo(cx + bracketDist, cy + bracketDist - bracketSize);
+            hudCtx.stroke();
+
+            // 2. Outer Rotating Segment Arc with Solid Highlight Arc
+            hudCtx.beginPath();
+            hudCtx.arc(cx, cy, 140, hudAngle, hudAngle + Math.PI * 1.6);
+            hudCtx.strokeStyle = strokeColor;
+            hudCtx.lineWidth = 1.5;
+            hudCtx.setLineDash([4, 4]);
             hudCtx.stroke();
             hudCtx.setLineDash([]);
 
-            // Pulsing Center Core
-            const pulse = Math.sin(Date.now() / 250) * 5;
+            // Bright Thick Highlight Arc (as in J.A.R.V.I.S. image)
+            hudCtx.beginPath();
+            hudCtx.arc(cx, cy, 140, hudAngle + Math.PI * 0.2, hudAngle + Math.PI * 0.6);
+            hudCtx.strokeStyle = '#ffffff';
+            hudCtx.lineWidth = 3.5;
+            hudCtx.stroke();
+
+            // 3. Middle Dotted Ring
+            hudCtx.beginPath();
+            hudCtx.arc(cx, cy, 118, -hudAngle * 1.5, -hudAngle * 1.5 + Math.PI * 1.8);
+            hudCtx.strokeStyle = strokeColor;
+            hudCtx.lineWidth = 2;
+            hudCtx.setLineDash([2, 6]);
+            hudCtx.stroke();
+            hudCtx.setLineDash([]);
+
+            // 4. Inner Ring with Crosshairs
+            hudCtx.beginPath();
+            hudCtx.arc(cx, cy, 85, 0, Math.PI * 2);
+            hudCtx.strokeStyle = 'rgba(255, 140, 0, 0.35)';
+            hudCtx.lineWidth = 1;
+            hudCtx.stroke();
+
+            // 5. Pulsing Center Core Circle
+            const pulse = Math.sin(Date.now() / 250) * 4;
             hudCtx.beginPath();
             hudCtx.arc(cx, cy, 48 + pulse, 0, Math.PI * 2);
-            hudCtx.fillStyle = color;
-            hudCtx.shadowColor = color;
-            hudCtx.shadowBlur = 20;
+            hudCtx.fillStyle = 'rgba(0, 0, 0, 0.85)';
+            hudCtx.strokeStyle = strokeColor;
+            hudCtx.lineWidth = 2;
+            hudCtx.shadowColor = strokeColor;
+            hudCtx.shadowBlur = 18;
             hudCtx.fill();
+            hudCtx.stroke();
             hudCtx.shadowBlur = 0;
 
-            // Fixed Center Text
-            hudCtx.fillStyle = '#000000';
-            hudCtx.font = '900 12px Orbitron';
+            // 6. Sub-Text Labels (J.A.R.V.I.S. Style Overlay)
+            hudCtx.fillStyle = strokeColor;
+            hudCtx.font = '600 8px Orbitron';
             hudCtx.textAlign = 'center';
+            hudCtx.fillText('SCANNING', cx, cy - 18);
+
+            // Main Core Name
+            hudCtx.fillStyle = '#ffffff';
+            hudCtx.font = '900 13px Orbitron';
             hudCtx.textBaseline = 'middle';
-            hudCtx.fillText('F . R . I . D . A . Y .', cx, cy);
+            hudCtx.shadowColor = strokeColor;
+            hudCtx.shadowBlur = 8;
+            hudCtx.fillText('J.A.R.V.I.S.', cx, cy);
+            hudCtx.shadowBlur = 0;
+
+            hudCtx.fillStyle = 'rgba(255, 140, 0, 0.7)';
+            hudCtx.font = '600 7px Orbitron';
+            hudCtx.fillText('CORE OUTPUT 92%', cx, cy + 18);
 
             requestAnimationFrame(drawHUD);
         }
         if (hudCanvas) drawHUD();
 
+        /* Dynamic Interactive Physics Graph Visualizer */
         const graphCanvas = document.getElementById('graphCanvas');
         const graphCtx = graphCanvas ? graphCanvas.getContext('2d') : null;
+
         let graphNodes = [
-            { id: 'friday', label: 'F.R.I.D.A.Y.', x: 400, y: 200, color: '#ff8c00', r: 10 },
-            { id: 'memory', label: 'Long-Term Memory', x: 120, y: 60, color: '#f59e0b', r: 6 },
-            { id: 'mastra', label: 'Mastra Workflow', x: 680, y: 60, color: '#a855f7', r: 6 },
-            { id: 'mcp', label: 'MCP Tools', x: 720, y: 340, color: '#38bdf8', r: 6 },
-            { id: 'web', label: 'Google Search', x: 80, y: 340, color: '#10b981', r: 6 },
-            { id: 'user', label: 'User Context', x: 400, y: 375, color: '#f43f5e', r: 5 }
+            { id: 'friday', label: 'F.R.I.D.A.Y.', x: 400, y: 200, vx: (Math.random()-0.5)*0.3, vy: (Math.random()-0.5)*0.3, color: '#ff8c00', r: 7 },
+            { id: 'memory', label: 'Long-Term Memory', x: 100, y: 70, vx: (Math.random()-0.5)*0.3, vy: (Math.random()-0.5)*0.3, color: '#fbbf24', r: 5 },
+            { id: 'mastra', label: 'Mastra Workflow', x: 700, y: 70, vx: (Math.random()-0.5)*0.3, vy: (Math.random()-0.5)*0.3, color: '#c084fc', r: 5 },
+            { id: 'mcp', label: 'MCP Tools', x: 730, y: 330, vx: (Math.random()-0.5)*0.3, vy: (Math.random()-0.5)*0.3, color: '#38bdf8', r: 5 },
+            { id: 'web', label: 'Google Search', x: 70, y: 330, vx: (Math.random()-0.5)*0.3, vy: (Math.random()-0.5)*0.3, color: '#34d399', r: 5 },
+            { id: 'user', label: 'User Context', x: 400, y: 370, vx: (Math.random()-0.5)*0.3, vy: (Math.random()-0.5)*0.3, color: '#fb7185', r: 5 }
         ];
+
         let graphLinks = [
             { from: 'friday', to: 'memory' },
             { from: 'friday', to: 'mastra' },
@@ -554,7 +621,40 @@
                 return;
             }
 
-            // Draw Links
+            // Physics Repulsion & Position Updates
+            for (let i = 0; i < graphNodes.length; i++) {
+                let n1 = graphNodes[i];
+
+                // Continuous slight motion
+                n1.x += n1.vx;
+                n1.y += n1.vy;
+
+                // Wall bounces
+                if (n1.x < 50 || n1.x > graphCanvas.width - 50) n1.vx *= -1;
+                if (n1.y < 40 || n1.y > graphCanvas.height - 40) n1.vy *= -1;
+
+                // Repulsion logic between close nodes
+                for (let j = i + 1; j < graphNodes.length; j++) {
+                    let n2 = graphNodes[j];
+                    let dx = n2.x - n1.x;
+                    let dy = n2.y - n1.y;
+                    let dist = Math.sqrt(dx * dx + dy * dy);
+                    let minDist = 130;
+
+                    if (dist < minDist && dist > 0) {
+                        let force = (minDist - dist) / minDist * 0.05;
+                        let fx = (dx / dist) * force;
+                        let fy = (dy / dist) * force;
+
+                        n1.vx -= fx;
+                        n1.vy -= fy;
+                        n2.vx += fx;
+                        n2.vy += fy;
+                    }
+                }
+            }
+
+            // Draw Vivid Links
             graphLinks.forEach(link => {
                 const source = graphNodes.find(n => n.id === link.from);
                 const target = graphNodes.find(n => n.id === link.to);
@@ -562,33 +662,34 @@
                     graphCtx.beginPath();
                     graphCtx.moveTo(source.x, source.y);
                     graphCtx.lineTo(target.x, target.y);
-                    graphCtx.strokeStyle = 'rgba(255, 140, 0, 0.25)';
+                    graphCtx.strokeStyle = 'rgba(255, 140, 0, 0.5)';
                     graphCtx.lineWidth = 1.5;
                     graphCtx.stroke();
                 }
             });
 
-            // Draw Nodes
+            // Draw Vivid Nodes
             graphNodes.forEach(node => {
-                const pulse = Math.sin(Date.now() / 300 + node.x) * 2;
+                const pulse = Math.sin(Date.now() / 250 + node.x) * 1.5;
                 graphCtx.beginPath();
                 graphCtx.arc(node.x, node.y, node.r + pulse, 0, Math.PI * 2);
                 graphCtx.fillStyle = node.color;
                 graphCtx.shadowColor = node.color;
-                graphCtx.shadowBlur = 10;
+                graphCtx.shadowBlur = 12;
                 graphCtx.fill();
                 graphCtx.shadowBlur = 0;
 
                 graphCtx.fillStyle = '#ffffff';
-                graphCtx.font = '10px Orbitron';
+                graphCtx.font = 'bold 9px Orbitron';
                 graphCtx.textAlign = 'center';
-                graphCtx.fillText(node.label, node.x, node.y + node.r + 14);
+                graphCtx.fillText(node.label, node.x, node.y + node.r + 12);
             });
 
             requestAnimationFrame(drawGraph);
         }
         drawGraph();
 
+        /* Audio Clap Detector */
         let audioCtx = null;
         let analyser = null;
 
@@ -674,9 +775,6 @@
                 else badge.className = 'text-[11px] font-mono font-bold px-3 py-0.5 rounded-full bg-black border border-orange-500/40 text-orange-300 tracking-wider';
             }
 
-            const stateBadge = document.getElementById('aiStateBadge');
-            if (stateBadge) stateBadge.innerText = `STATUS: ${status}`;
-
             if (speechText) {
                 const speechEl = document.getElementById('fridaySpeechText');
                 if (speechEl) speechEl.innerText = speechText;
@@ -718,7 +816,6 @@ ${state.vaultResearchText}`;
                 return;
             }
 
-            // Task vs Simple Research Detection
             const isHeavyTask = promptText.includes('タスク') || promptText.includes('ワークフロー') || promptText.includes('作成して') || promptText.length > 50;
 
             if (isHeavyTask) {
@@ -772,14 +869,13 @@ ${state.vaultResearchText}`;
                 if (candidate && candidate.content?.parts?.[0]?.text) {
                     let replyText = candidate.content.parts[0].text;
                     
-                    // Mark task as complete if created
                     if (isHeavyTask && state.tasks.length > 0) {
                         state.tasks[0].status = 'COMPLETED';
                         safeSetStorage('friday_tasks', JSON.stringify(state.tasks));
                         renderTasks();
                     }
 
-                    // Execute speech & sequential text display with 0.7s delay
+                    // Execute speech & sequential text display with +0.2s delay (900ms total)
                     speakAndAnimateText(replyText);
                 } else {
                     throw new Error('無効な応答データです。');
@@ -795,7 +891,7 @@ ${state.vaultResearchText}`;
         function speakAndAnimateText(fullText) {
             updateUIState('SPEAKING', '● SPEAKING', '');
 
-            // Split into 20-character chunks to prevent truncation
+            // 20-character chunks
             const chunks = [];
             const cleanText = fullText.replace(/\n+/g, ' ');
             for (let i = 0; i < cleanText.length; i += 20) {
@@ -803,7 +899,7 @@ ${state.vaultResearchText}`;
             }
             if (chunks.length === 0) chunks.push(fullText);
 
-            // 0.7-Second Delay Sync before displaying first chunk
+            // Added +0.2s Delay Sync (900ms total) before displaying first chunk
             setTimeout(() => {
                 let index = 0;
                 const speechEl = document.getElementById('fridaySpeechText');
@@ -820,9 +916,9 @@ ${state.vaultResearchText}`;
                         }
                     }, 2200);
                 }
-            }, 700);
+            }, 900);
 
-            // Execute TTS (ElevenLabs or Web Speech API)
+            // Execute TTS
             if (state.elevenApiKey && state.elevenVoiceId) {
                 speakElevenLabs(fullText);
             } else {
@@ -924,7 +1020,7 @@ ${state.vaultResearchText}`;
         bind('toggleGraphBtn', 'click', () => {
             state.showGraphVisualizer = !state.showGraphVisualizer;
             const container = document.getElementById('obsidianGraphContainer');
-            if (container) container.style.opacity = state.showGraphVisualizer ? '0.3' : '0';
+            if (container) container.style.opacity = state.showGraphVisualizer ? '0.8' : '0';
         });
 
         bind('openTasksBtn', 'click', () => {
