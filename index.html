@@ -39,14 +39,14 @@
             text-shadow: 0 0 8px rgba(239, 68, 68, 0.85);
         }
         ::-webkit-scrollbar {
-            width: 2px;
-            height: 2px;
+            width: 3px;
+            height: 3px;
         }
         ::-webkit-scrollbar-track {
             background: #000000;
         }
         ::-webkit-scrollbar-thumb {
-            background: rgba(255, 140, 0, 0.3);
+            background: rgba(255, 140, 0, 0.35);
             border-radius: 2px;
         }
         .scanline {
@@ -69,11 +69,11 @@
             0%, 100% { opacity: 1; }
             50% { opacity: 0; }
         }
-        /* 20 Chars x 7 Lines Precise Terminal Grid Styling */
+        /* 30 Chars x 20 Lines High-Density Terminal Styling */
         .terminal-grid-box {
             font-family: 'Share Tech Mono', 'Courier New', monospace;
-            line-height: 1.35;
-            letter-spacing: 0.02em;
+            line-height: 1.32;
+            letter-spacing: 0.015em;
             word-break: break-all;
             white-space: pre-wrap;
         }
@@ -112,128 +112,127 @@
         </div>
     </header>
 
-    <!-- Main Workspace Grid (Dense & Compact) -->
-    <main class="flex-1 max-w-6xl w-full mx-auto p-1.5 md:p-2.5 grid grid-cols-12 gap-2 z-10 overflow-hidden relative">
+    <!-- Main Workspace Grid (Left & Right Slim, Center Expanded) -->
+    <main class="flex-1 w-full max-w-[1440px] mx-auto p-1.5 md:p-2 grid grid-cols-12 gap-2 z-10 overflow-hidden relative">
         
-        <!-- ================= LEFT SIDEBAR CONTROLS (TIGHT & COMPACT) ================= -->
-        <section class="col-span-12 md:col-span-3 flex flex-col justify-between space-y-1.5 z-20">
+        <!-- ================= LEFT SIDEBAR CONTROLS (SLIM & TIGHT) ================= -->
+        <section class="col-span-12 md:col-span-2 lg:col-span-2 flex flex-col justify-between space-y-1 z-20">
             
             <!-- System Telemetry & Status Badge -->
-            <div class="bg-black/85 border border-orange-500/25 rounded-lg p-2 shadow-sm">
-                <div class="text-[9px] font-orbitron text-orange-500/70 mb-0.5 flex items-center justify-between">
-                    <span>SYS.LOC: FUKUI_GAKUEN</span>
-                    <span id="turnCountBadge" class="text-orange-400 bg-orange-950/40 px-1 py-0.2 rounded border border-orange-500/30 font-mono text-[8px]">CTX: 0 TURNS</span>
+            <div class="bg-black/85 border border-orange-500/20 rounded-lg p-1.5 shadow-sm">
+                <div class="text-[8px] font-orbitron text-orange-500/70 mb-0.5 flex items-center justify-between">
+                    <span>SYS.LOC: GAKUEN</span>
+                    <span id="turnCountBadge" class="text-orange-400 bg-orange-950/40 px-1 py-0.2 rounded border border-orange-500/30 font-mono text-[7.5px]">0 TURNS</span>
                 </div>
-                <div class="text-[9px] font-orbitron text-orange-500/70 flex justify-between items-center">
-                    <span>AI MODEL:</span>
-                    <span id="aiModelBadge" class="text-orange-300 font-mono font-bold text-[9px]">gemini-3.5-flash-lite</span>
+                <div class="text-[8px] font-orbitron text-orange-500/70 flex justify-between items-center">
+                    <span>MODEL:</span>
+                    <span id="aiModelBadge" class="text-orange-300 font-mono font-bold text-[8px] truncate max-w-[90px]">3.5-flash-lite</span>
                 </div>
-                <div class="mt-1.5 text-center">
-                    <span id="hudStatusBadge" class="text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-black border border-orange-500/40 text-orange-300 tracking-wider block">
-                        ● STANDBY (「フライデー」で起動)
+                <div class="mt-1 text-center">
+                    <span id="hudStatusBadge" class="text-[8px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-black border border-orange-500/40 text-orange-300 tracking-wider block truncate">
+                        ● STANDBY
                     </span>
                 </div>
             </div>
 
             <!-- Voice & Mode Action Controls -->
-            <div class="bg-black/85 border border-orange-500/25 rounded-lg p-2 shadow-sm space-y-1">
-                <div class="text-[9px] font-orbitron text-orange-400/80 font-bold tracking-wider mb-1 border-b border-orange-500/20 pb-0.5 flex items-center justify-between">
-                    <span><i class="fa-solid fa-sliders text-orange-400 mr-1"></i> CONTROL PANEL</span>
+            <div class="bg-black/85 border border-orange-500/20 rounded-lg p-1.5 shadow-sm space-y-1">
+                <div class="text-[8px] font-orbitron text-orange-400/80 font-bold tracking-wider mb-0.5 border-b border-orange-500/20 pb-0.5 flex items-center justify-between">
+                    <span><i class="fa-solid fa-sliders text-orange-400 mr-1"></i> CONTROLS</span>
                 </div>
 
-                <button id="micBtn" class="w-full py-1.5 px-2 rounded-lg border border-orange-500/50 bg-black hover:bg-orange-500/20 text-orange-300 font-bold text-[11px] flex items-center justify-center gap-1.5 transition active:scale-95 shadow-sm cursor-pointer">
-                    <i id="micIcon" class="fa-solid fa-microphone text-orange-400 text-xs"></i>
+                <button id="micBtn" class="w-full py-1.5 px-1.5 rounded-md border border-orange-500/50 bg-black hover:bg-orange-500/20 text-orange-300 font-bold text-[10px] flex items-center justify-center gap-1 transition active:scale-95 shadow-sm cursor-pointer">
+                    <i id="micIcon" class="fa-solid fa-microphone text-orange-400 text-[10px]"></i>
                     <span id="micBtnText">話しかける</span>
                 </button>
 
-                <button id="clapToggleBtn" class="w-full py-1.5 px-2 rounded-lg border border-orange-500/30 bg-black hover:bg-orange-500/20 text-orange-300 font-bold text-[11px] flex items-center justify-center gap-1.5 transition cursor-pointer">
-                    <i class="fa-solid fa-ear-listen text-orange-400 text-xs"></i>
-                    <span id="clapStatusText">常時呼出: ON</span>
+                <button id="clapToggleBtn" class="w-full py-1.5 px-1.5 rounded-md border border-orange-500/30 bg-black hover:bg-orange-500/20 text-orange-300 font-bold text-[10px] flex items-center justify-center gap-1 transition cursor-pointer">
+                    <i class="fa-solid fa-ear-listen text-orange-400 text-[10px]"></i>
+                    <span id="clapStatusText">呼出: ON</span>
                 </button>
 
-                <button id="toggleSearchBtn" class="w-full py-1.5 px-2 rounded-lg border border-orange-500/30 bg-black hover:bg-orange-500/20 text-orange-300 font-bold text-[11px] flex items-center justify-center gap-1.5 transition cursor-pointer">
-                    <i class="fa-solid fa-globe text-orange-400 text-xs"></i>
-                    <span>検索モード: <span id="searchModeText" class="text-emerald-400 font-bold">ON</span></span>
+                <button id="toggleSearchBtn" class="w-full py-1.5 px-1.5 rounded-md border border-orange-500/30 bg-black hover:bg-orange-500/20 text-orange-300 font-bold text-[10px] flex items-center justify-center gap-1 transition cursor-pointer">
+                    <i class="fa-solid fa-globe text-orange-400 text-[10px]"></i>
+                    <span>検索: <span id="searchModeText" class="text-emerald-400 font-bold">ON</span></span>
                 </button>
             </div>
 
             <!-- Direct Text Prompt Input Form -->
-            <div class="bg-black/85 border border-orange-500/25 rounded-lg p-2 shadow-sm flex flex-col justify-end">
-                <div class="text-[9px] font-orbitron text-orange-400/80 font-bold tracking-wider mb-1 border-b border-orange-500/20 pb-0.5">
-                    <i class="fa-solid fa-terminal text-orange-400 mr-1"></i> DIRECT COMMAND
+            <div class="bg-black/85 border border-orange-500/20 rounded-lg p-1.5 shadow-sm flex flex-col justify-end">
+                <div class="text-[8px] font-orbitron text-orange-400/80 font-bold tracking-wider mb-0.5 border-b border-orange-500/20 pb-0.5">
+                    <i class="fa-solid fa-terminal text-orange-400 mr-1"></i> COMMAND
                 </div>
                 
-                <form id="textForm" class="flex flex-col gap-1.5">
+                <form id="textForm" class="flex flex-col gap-1">
                     <div class="flex gap-1">
-                        <button type="button" id="uploadImgBtn" title="画像を添付してGemini解析" class="bg-black border border-orange-500/30 hover:bg-orange-950/40 text-orange-400 p-1.5 rounded-lg transition flex items-center justify-center cursor-pointer text-xs">
+                        <button type="button" id="uploadImgBtn" title="画像を添付してGemini解析" class="bg-black border border-orange-500/30 hover:bg-orange-950/40 text-orange-400 p-1 rounded transition flex items-center justify-center cursor-pointer text-[10px]">
                             <i class="fa-solid fa-paperclip"></i>
                         </button>
-                        <input type="text" id="userInput" placeholder="指示・質問を入力..." class="flex-1 bg-black border border-orange-500/30 rounded-lg px-2.5 py-1 text-[11px] text-orange-100 placeholder-orange-700/60 focus:outline-none focus:border-orange-400 transition">
+                        <input type="text" id="userInput" placeholder="指示を入力..." class="flex-1 min-w-0 bg-black border border-orange-500/30 rounded px-1.5 py-1 text-[10px] text-orange-100 placeholder-orange-700/60 focus:outline-none focus:border-orange-400 transition">
                     </div>
-                    <button type="submit" class="w-full bg-orange-500 hover:bg-orange-400 text-black font-bold py-1.5 rounded-lg transition flex items-center justify-center gap-1.5 shadow active:scale-95 cursor-pointer text-[11px]">
-                        <i class="fa-solid fa-paper-plane text-xs"></i>
-                        <span>メッセージ送信</span>
+                    <button type="submit" class="w-full bg-orange-500 hover:bg-orange-400 text-black font-bold py-1 rounded transition flex items-center justify-center gap-1 shadow active:scale-95 cursor-pointer text-[10px]">
+                        <i class="fa-solid fa-paper-plane text-[9px]"></i>
+                        <span>送信</span>
                     </button>
                 </form>
             </div>
         </section>
 
-        <!-- ================= CENTER HOLOGRAM RING & GRAPH ================= -->
-        <section class="col-span-12 md:col-span-5 flex flex-col items-center justify-center relative overflow-hidden my-auto z-10">
+        <!-- ================= CENTER HOLOGRAM RING & EXPANDED GRAPH ================= -->
+        <section class="col-span-12 md:col-span-7 lg:col-span-7 flex flex-col items-center justify-center relative overflow-hidden my-auto z-10 min-h-[420px]">
             
-            <!-- Knowledge & Status Graph Overlay Canvas -->
+            <!-- Knowledge & Status Graph Overlay Canvas (Enlarged) -->
             <div id="obsidianGraphContainer" class="absolute inset-0 pointer-events-none flex items-center justify-center transition-opacity duration-500 opacity-90 z-0">
-                <canvas id="graphCanvas" width="600" height="380" class="w-full h-full object-contain"></canvas>
+                <canvas id="graphCanvas" width="850" height="520" class="w-full h-full object-contain"></canvas>
             </div>
 
-            <!-- Main Hologram Ring Canvas Container -->
-            <div class="relative w-full aspect-square max-w-[240px] md:max-w-[290px] flex items-center justify-center my-auto z-10">
-                <canvas id="hudCanvas" width="400" height="400" class="w-full h-full drop-shadow-[0_0_20px_rgba(255,140,0,0.45)]"></canvas>
+            <!-- Main Hologram Ring Canvas Container (Enlarged Scale) -->
+            <div class="relative w-full aspect-square max-w-[320px] md:max-w-[390px] lg:max-w-[440px] flex items-center justify-center my-auto z-10">
+                <canvas id="hudCanvas" width="500" height="500" class="w-full h-full drop-shadow-[0_0_28px_rgba(255,140,0,0.55)]"></canvas>
             </div>
         </section>
 
-        <!-- ================= RIGHT SIDEBAR (CLOCK, WEATHER, 20x7 SPEECH OUTPUT) ================= -->
-        <section class="col-span-12 md:col-span-4 flex flex-col space-y-1.5 z-20">
+        <!-- ================= RIGHT SIDEBAR (CLOCK, WEATHER, 30x20 SPEECH LOG) ================= -->
+        <section class="col-span-12 md:col-span-3 lg:col-span-3 flex flex-col space-y-1 z-20 max-h-[calc(100vh-45px)] overflow-hidden">
             
             <!-- 1. Top Right Digital Clock & Date Display -->
-            <div class="bg-black/80 border border-orange-500/20 rounded-lg p-2 shadow-md flex flex-col items-end">
-                <div id="liveClockTime" class="text-lg md:text-xl font-black font-orbitron tracking-widest text-orange-400 text-glow-orange leading-none mb-0.5">--:--:-- JST</div>
-                <div id="liveClockDate" class="text-[10px] font-orbitron text-orange-500/80 font-bold tracking-wider">----.--.-- (---)</div>
+            <div class="bg-black/80 border border-orange-500/20 rounded-lg p-1.5 shadow-md flex flex-col items-end shrink-0">
+                <div id="liveClockTime" class="text-base md:text-lg font-black font-orbitron tracking-widest text-orange-400 text-glow-orange leading-none mb-0.5">--:--:-- JST</div>
+                <div id="liveClockDate" class="text-[9px] font-orbitron text-orange-500/80 font-bold tracking-wider">----.--.-- (---)</div>
             </div>
 
             <!-- 2. Fukui City Weather Widget (Clean Borderless Rows) -->
-            <div class="bg-black/80 border border-orange-500/20 rounded-lg p-2 shadow-sm font-mono text-[11px]">
-                <div class="font-orbitron text-orange-400 font-bold border-b border-orange-500/20 pb-1 mb-1.5 flex items-center justify-between text-[10px] tracking-wider">
+            <div class="bg-black/80 border border-orange-500/20 rounded-lg p-1.5 shadow-sm font-mono text-[10px] shrink-0">
+                <div class="font-orbitron text-orange-400 font-bold border-b border-orange-500/20 pb-0.5 mb-1 flex items-center justify-between text-[9px] tracking-wider">
                     <span>WEATHER · FUKUI</span>
                     <span id="weatherTempNow" class="text-orange-300">現在 --°C</span>
                 </div>
 
-                <!-- Clean HUD Weather Rows without Inner Card Boxes -->
-                <div class="space-y-1">
+                <div class="space-y-0.5">
                     <div class="flex items-center justify-between py-0.5 px-1 hover:bg-orange-500/10 transition rounded">
-                        <span class="text-orange-300 font-bold w-12">今日</span>
-                        <span id="todayWeatherIcon" class="text-sm">☀️</span>
-                        <span class="text-orange-400 text-[10px] text-right font-bold">湿度 <span id="todayHumidity">--%</span></span>
+                        <span class="text-orange-300 font-bold w-10">今日</span>
+                        <span id="todayWeatherIcon" class="text-xs">☀️</span>
+                        <span class="text-orange-400 text-[9px] text-right font-bold">湿度 <span id="todayHumidity">--%</span></span>
                     </div>
 
                     <div class="flex items-center justify-between py-0.5 px-1 hover:bg-orange-500/10 transition rounded">
-                        <span class="text-orange-300 font-bold w-12">明日</span>
-                        <span id="tomorrowWeatherIcon" class="text-sm">🌤️</span>
-                        <span class="text-orange-400 text-[10px] text-right font-bold">湿度 <span id="tomorrowHumidity">--%</span></span>
+                        <span class="text-orange-300 font-bold w-10">明日</span>
+                        <span id="tomorrowWeatherIcon" class="text-xs">🌤️</span>
+                        <span class="text-orange-400 text-[9px] text-right font-bold">湿度 <span id="tomorrowHumidity">--%</span></span>
                     </div>
                 </div>
             </div>
 
-            <!-- 3. F.R.I.D.A.Y. Speech Output Display Box (20 Chars x 7 Lines Terminal) -->
-            <div class="bg-black/80 border border-orange-500/20 rounded-lg p-2 shadow-xl flex-1 flex flex-col justify-start overflow-hidden">
-                <div class="text-[9px] font-orbitron text-orange-400 font-bold border-b border-orange-500/20 pb-1 mb-1 flex items-center justify-between shrink-0">
+            <!-- 3. F.R.I.D.A.Y. Speech Output Display Box (30 Chars x 20 Lines Terminal) -->
+            <div class="bg-black/80 border border-orange-500/20 rounded-lg p-1.5 shadow-xl flex-1 flex flex-col justify-start overflow-hidden min-h-[220px]">
+                <div class="text-[8.5px] font-orbitron text-orange-400 font-bold border-b border-orange-500/20 pb-0.5 mb-1 flex items-center justify-between shrink-0">
                     <span><i class="fa-solid fa-terminal text-orange-400 mr-1"></i> F.R.I.D.A.Y. SPEECH LOG</span>
-                    <span class="text-[8px] text-orange-500/60 font-mono">20 CHRS x 7 LINES</span>
+                    <span class="text-[7.5px] text-orange-500/60 font-mono">30 CHRS x 20 LINES</span>
                 </div>
 
-                <!-- 20 Chars per Line x 7 Lines Window Container without nested box outlines -->
-                <div class="flex-1 bg-transparent p-1 overflow-hidden flex items-start">
-                    <p id="fridaySpeechText" class="terminal-grid-box text-[11px] md:text-xs text-orange-100 font-mono font-medium tracking-normal w-full h-full text-left leading-snug">
+                <!-- 30 Chars per Line x 20 Lines Window Container -->
+                <div class="flex-1 bg-transparent p-0.5 overflow-y-auto flex items-start">
+                    <p id="fridaySpeechText" class="terminal-grid-box text-[9.5px] md:text-[10px] text-orange-100 font-mono font-medium tracking-tight w-full h-full text-left leading-tight">
 準備はいつでもできていますよ、ボス。
 今日はどこから手をつけますか？
                     </p>
@@ -437,7 +436,7 @@
             const badge = document.getElementById('turnCountBadge');
             if (badge) {
                 const turns = Math.floor(state.conversationHistory.length / 2);
-                badge.innerText = `CTX: ${turns} TURNS`;
+                badge.innerText = `${turns} TURNS`;
             }
         }
 
@@ -546,7 +545,7 @@
         }
         drawBgCanvas();
 
-        /* HUD Hologram Canvas (with Lip-sync Pulse Animation during SPEAKING) */
+        /* HUD Hologram Canvas (Enlarged Scale & Dynamic Pulse) */
         const hudCanvas = document.getElementById('hudCanvas');
         const hudCtx = hudCanvas ? hudCanvas.getContext('2d') : null;
         let hudAngle = 0;
@@ -572,63 +571,63 @@
 
             let pulseOffset = 0;
             if (state.status === 'SPEAKING') {
-                pulseOffset = Math.sin(Date.now() / 70) * 10 + Math.cos(Date.now() / 130) * 6;
+                pulseOffset = Math.sin(Date.now() / 70) * 14 + Math.cos(Date.now() / 130) * 8;
             } else {
-                pulseOffset = Math.sin(Date.now() / 250) * 2.5;
+                pulseOffset = Math.sin(Date.now() / 250) * 3.5;
             }
 
-            // Outer Arc
+            // 1. Outer Arc (Radius scaled up to 180)
             hudCtx.beginPath();
-            hudCtx.arc(cx, cy, 130 + pulseOffset * 0.3, hudAngle, hudAngle + Math.PI * 1.6);
+            hudCtx.arc(cx, cy, 180 + pulseOffset * 0.3, hudAngle, hudAngle + Math.PI * 1.6);
             hudCtx.strokeStyle = strokeColor;
-            hudCtx.lineWidth = 1.5;
-            hudCtx.setLineDash([4, 4]);
+            hudCtx.lineWidth = 2;
+            hudCtx.setLineDash([5, 5]);
             hudCtx.stroke();
             hudCtx.setLineDash([]);
 
             // Highlight Arc
             hudCtx.beginPath();
-            hudCtx.arc(cx, cy, 130 + pulseOffset * 0.3, hudAngle + Math.PI * 0.2, hudAngle + Math.PI * 0.6);
+            hudCtx.arc(cx, cy, 180 + pulseOffset * 0.3, hudAngle + Math.PI * 0.2, hudAngle + Math.PI * 0.6);
             hudCtx.strokeStyle = '#ffffff';
-            hudCtx.lineWidth = 3;
+            hudCtx.lineWidth = 4;
             hudCtx.stroke();
 
-            // Middle Dotted Ring
+            // 2. Middle Dotted Ring (Radius scaled up to 148)
             hudCtx.beginPath();
-            hudCtx.arc(cx, cy, 108 + pulseOffset * 0.5, -hudAngle * 1.5, -hudAngle * 1.5 + Math.PI * 1.8);
+            hudCtx.arc(cx, cy, 148 + pulseOffset * 0.5, -hudAngle * 1.5, -hudAngle * 1.5 + Math.PI * 1.8);
             hudCtx.strokeStyle = strokeColor;
-            hudCtx.lineWidth = 1.5;
-            hudCtx.setLineDash([2, 5]);
+            hudCtx.lineWidth = 2;
+            hudCtx.setLineDash([3, 6]);
             hudCtx.stroke();
             hudCtx.setLineDash([]);
 
-            // Inner Ring
+            // 3. Inner Ring (Radius scaled up to 105)
             hudCtx.beginPath();
-            hudCtx.arc(cx, cy, 78 + pulseOffset * 0.6, 0, Math.PI * 2);
-            hudCtx.strokeStyle = 'rgba(255, 140, 0, 0.3)';
-            hudCtx.lineWidth = 1;
+            hudCtx.arc(cx, cy, 105 + pulseOffset * 0.6, 0, Math.PI * 2);
+            hudCtx.strokeStyle = 'rgba(255, 140, 0, 0.35)';
+            hudCtx.lineWidth = 1.2;
             hudCtx.stroke();
 
-            // Core
-            const coreRadius = Math.max(32, 44 + pulseOffset);
+            // 4. Center Core (Radius scaled up to 58 + pulse)
+            const coreRadius = Math.max(44, 58 + pulseOffset);
             hudCtx.beginPath();
             hudCtx.arc(cx, cy, coreRadius, 0, Math.PI * 2);
-            hudCtx.fillStyle = 'rgba(0, 0, 0, 0.9)';
+            hudCtx.fillStyle = 'rgba(0, 0, 0, 0.92)';
             hudCtx.strokeStyle = strokeColor;
-            hudCtx.lineWidth = state.status === 'SPEAKING' ? 2.5 : 1.8;
+            hudCtx.lineWidth = state.status === 'SPEAKING' ? 3.5 : 2.5;
             hudCtx.shadowColor = strokeColor;
-            hudCtx.shadowBlur = state.status === 'SPEAKING' ? 24 : 14;
+            hudCtx.shadowBlur = state.status === 'SPEAKING' ? 32 : 18;
             hudCtx.fill();
             hudCtx.stroke();
             hudCtx.shadowBlur = 0;
 
-            // Core Text
+            // Core Text (Enlarged)
             hudCtx.fillStyle = '#ffffff';
-            hudCtx.font = '900 12px Orbitron';
+            hudCtx.font = '900 15px Orbitron';
             hudCtx.textAlign = 'center';
             hudCtx.textBaseline = 'middle';
             hudCtx.shadowColor = strokeColor;
-            hudCtx.shadowBlur = 8;
+            hudCtx.shadowBlur = 10;
             hudCtx.fillText('F.R.I.D.A.Y.', cx, cy);
             hudCtx.shadowBlur = 0;
 
@@ -636,16 +635,17 @@
         }
         if (hudCanvas) drawHUD();
 
-        /* Knowledge & Real-time State Visualizer Graph */
+        /* Knowledge & Real-time State Visualizer Graph (Enlarged Nodes & Readable Text) */
         const graphCanvas = document.getElementById('graphCanvas');
         const graphCtx = graphCanvas ? graphCanvas.getContext('2d') : null;
 
+        // Enlarged node bubbles (r: 9-10) with broader dispersion
         let graphNodes = [
-            { id: 'memory', label: 'Long-Term Memory', x: 70, y: 50, vx: (Math.random()-0.5)*0.18, vy: (Math.random()-0.5)*0.18, color: '#fbbf24', r: 4.5, stateMatch: ['MEMORY_READ', 'THINKING'] },
-            { id: 'mastra', label: 'Mastra Workflow', x: 530, y: 50, vx: (Math.random()-0.5)*0.18, vy: (Math.random()-0.5)*0.18, color: '#c084fc', r: 4.5, stateMatch: ['CREATING_TASK'] },
-            { id: 'mcp', label: 'MCP Tools', x: 540, y: 330, vx: (Math.random()-0.5)*0.18, vy: (Math.random()-0.5)*0.18, color: '#34d399', r: 4.5, stateMatch: ['EXECUTING_WORKFLOW'] },
-            { id: 'web', label: 'Google Search', x: 60, y: 330, vx: (Math.random()-0.5)*0.18, vy: (Math.random()-0.5)*0.18, color: '#38bdf8', r: 4.5, stateMatch: ['SEARCHING_WEB'] },
-            { id: 'user', label: 'User Context', x: 300, y: 345, vx: (Math.random()-0.5)*0.18, vy: (Math.random()-0.5)*0.18, color: '#fb7185', r: 4.5, stateMatch: ['LISTENING'] }
+            { id: 'memory', label: 'Long-Term Memory', x: 100, y: 70, vx: (Math.random()-0.5)*0.18, vy: (Math.random()-0.5)*0.18, color: '#fbbf24', r: 9, stateMatch: ['MEMORY_READ', 'THINKING'] },
+            { id: 'mastra', label: 'Mastra Workflow', x: 750, y: 70, vx: (Math.random()-0.5)*0.18, vy: (Math.random()-0.5)*0.18, color: '#c084fc', r: 9, stateMatch: ['CREATING_TASK'] },
+            { id: 'mcp', label: 'MCP Tools', x: 760, y: 440, vx: (Math.random()-0.5)*0.18, vy: (Math.random()-0.5)*0.18, color: '#34d399', r: 9, stateMatch: ['EXECUTING_WORKFLOW'] },
+            { id: 'web', label: 'Google Search', x: 90, y: 440, vx: (Math.random()-0.5)*0.18, vy: (Math.random()-0.5)*0.18, color: '#38bdf8', r: 9, stateMatch: ['SEARCHING_WEB'] },
+            { id: 'user', label: 'User Context', x: 425, y: 470, vx: (Math.random()-0.5)*0.18, vy: (Math.random()-0.5)*0.18, color: '#fb7185', r: 9, stateMatch: ['LISTENING'] }
         ];
 
         function drawGraph() {
@@ -665,15 +665,15 @@
                 n1.x += n1.vx;
                 n1.y += n1.vy;
 
-                if (n1.x < 35 || n1.x > graphCanvas.width - 35) n1.vx *= -1;
-                if (n1.y < 25 || n1.y > graphCanvas.height - 25) n1.vy *= -1;
+                if (n1.x < 45 || n1.x > graphCanvas.width - 45) n1.vx *= -1;
+                if (n1.y < 35 || n1.y > graphCanvas.height - 35) n1.vy *= -1;
 
                 const dCoreX = n1.x - centerCoreX;
                 const dCoreY = n1.y - centerCoreY;
                 const distCore = Math.sqrt(dCoreX * dCoreX + dCoreY * dCoreY);
-                if (distCore < 110) {
-                    n1.x = centerCoreX + (dCoreX / distCore) * 115;
-                    n1.y = centerCoreY + (dCoreY / distCore) * 115;
+                if (distCore < 160) {
+                    n1.x = centerCoreX + (dCoreX / distCore) * 165;
+                    n1.y = centerCoreY + (dCoreY / distCore) * 165;
                 }
             }
 
@@ -686,9 +686,9 @@
 
                 if (isActive) {
                     graphCtx.strokeStyle = node.color;
-                    graphCtx.lineWidth = 2;
+                    graphCtx.lineWidth = 3;
                     graphCtx.shadowColor = node.color;
-                    graphCtx.shadowBlur = 14;
+                    graphCtx.shadowBlur = 18;
                     graphCtx.stroke();
                     graphCtx.shadowBlur = 0;
 
@@ -696,32 +696,34 @@
                     const px = centerCoreX + (node.x - centerCoreX) * progress;
                     const py = centerCoreY + (node.y - centerCoreY) * progress;
                     graphCtx.beginPath();
-                    graphCtx.arc(px, py, 3, 0, Math.PI * 2);
+                    graphCtx.arc(px, py, 4.5, 0, Math.PI * 2);
                     graphCtx.fillStyle = '#ffffff';
                     graphCtx.fill();
                 } else {
-                    graphCtx.strokeStyle = 'rgba(255, 140, 0, 0.12)';
-                    graphCtx.lineWidth = 1;
+                    graphCtx.strokeStyle = 'rgba(255, 140, 0, 0.16)';
+                    graphCtx.lineWidth = 1.2;
                     graphCtx.stroke();
                 }
             });
 
             graphNodes.forEach(node => {
                 const isActive = node.stateMatch.includes(state.status);
-                const currentRadius = isActive ? node.r * 1.8 : node.r;
+                const currentRadius = isActive ? node.r * 1.7 : node.r;
 
                 graphCtx.beginPath();
                 graphCtx.arc(node.x, node.y, currentRadius, 0, Math.PI * 2);
                 graphCtx.fillStyle = node.color;
                 graphCtx.shadowColor = node.color;
-                graphCtx.shadowBlur = isActive ? 20 : 6;
+                graphCtx.shadowBlur = isActive ? 28 : 12;
                 graphCtx.fill();
+                graphCtx.stroke();
                 graphCtx.shadowBlur = 0;
 
-                graphCtx.fillStyle = isActive ? '#ffffff' : 'rgba(255, 255, 255, 0.65)';
-                graphCtx.font = isActive ? 'bold 9px Orbitron' : '7.5px Orbitron';
+                // Enlarged & High-Legibility Graph Label Text
+                graphCtx.fillStyle = isActive ? '#ffffff' : 'rgba(255, 230, 200, 0.9)';
+                graphCtx.font = isActive ? 'bold 12px Orbitron' : '10.5px Orbitron';
                 graphCtx.textAlign = 'center';
-                graphCtx.fillText(node.label, node.x, node.y + currentRadius + 10);
+                graphCtx.fillText(node.label, node.x, node.y + currentRadius + 14);
             });
 
             requestAnimationFrame(drawGraph);
@@ -825,12 +827,12 @@
             const badge = document.getElementById('hudStatusBadge');
             if (badge) {
                 badge.innerText = badgeText;
-                if (status === 'LISTENING') badge.className = 'text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-black border border-yellow-500/60 text-yellow-400 text-glow-yellow block';
-                else if (status === 'ERROR') badge.className = 'text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-black border border-red-500/60 text-red-400 text-glow-red block';
-                else if (status === 'SEARCHING_WEB') badge.className = 'text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-black border border-sky-500/60 text-sky-400 block';
-                else if (status === 'CREATING_TASK') badge.className = 'text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-black border border-purple-500/60 text-purple-400 block';
-                else if (status === 'EXECUTING_WORKFLOW') badge.className = 'text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-black border border-emerald-500/60 text-emerald-400 block';
-                else badge.className = 'text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-black border border-orange-500/40 text-orange-300 tracking-wider block';
+                if (status === 'LISTENING') badge.className = 'text-[8px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-black border border-yellow-500/60 text-yellow-400 text-glow-yellow block truncate';
+                else if (status === 'ERROR') badge.className = 'text-[8px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-black border border-red-500/60 text-red-400 text-glow-red block truncate';
+                else if (status === 'SEARCHING_WEB') badge.className = 'text-[8px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-black border border-sky-500/60 text-sky-400 block truncate';
+                else if (status === 'CREATING_TASK') badge.className = 'text-[8px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-black border border-purple-500/60 text-purple-400 block truncate';
+                else if (status === 'EXECUTING_WORKFLOW') badge.className = 'text-[8px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-black border border-emerald-500/60 text-emerald-400 block truncate';
+                else badge.className = 'text-[8px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-black border border-orange-500/40 text-orange-300 tracking-wider block truncate';
             }
 
             if (speechText) {
@@ -838,14 +840,13 @@
             }
         }
 
-        /* 20 Chars per Line x 7 Lines Terminal Output with Natural Wrapping */
+        /* 30 Chars per Line x 20 Lines High-Capacity Terminal Output with Natural Wrapping */
         let activeTypingTimer = null;
 
-        function buildNatural20x7Layout(rawText) {
-            const MAX_CHARS_PER_LINE = 20;
-            const MAX_LINES = 7;
+        function buildNatural30x20Layout(rawText) {
+            const MAX_CHARS_PER_LINE = 30;
+            const MAX_LINES = 20;
 
-            // Split into paragraphs / natural segments
             const segments = rawText.replace(/\r/g, '').split('\n');
             const lines = [];
 
@@ -855,7 +856,6 @@
                     const ch = seg[i];
                     currentLine += ch;
 
-                    // Natural punctuation wrap or line length boundary
                     const isPunctuation = (ch === '。' || ch === '！' || ch === '？' || ch === '!' || ch === '?');
 
                     if (isPunctuation || currentLine.length >= MAX_CHARS_PER_LINE) {
@@ -868,7 +868,6 @@
                 }
             });
 
-            // Keep only the most recent 7 lines
             const recentLines = lines.slice(-MAX_LINES);
             return recentLines.join('\n');
         }
@@ -898,9 +897,9 @@
 
                 charIdx++;
                 const currentChunk = cleanText.substring(0, charIdx);
-                speechEl.innerText = buildNatural20x7Layout(currentChunk);
+                speechEl.innerText = buildNatural30x20Layout(currentChunk);
 
-            }, 40); // 40ms per character
+            }, 35); // 35ms per character for brisk response
         }
 
         function getSystemPrompt() {
@@ -943,7 +942,7 @@ ${state.vaultResearchText}`;
             const isHeavyTask = promptText.includes('タスク') || promptText.includes('ワークフロー') || promptText.includes('作成して') || promptText.length > 60;
 
             if (isHeavyTask) {
-                updateUIState('CREATING_TASK', '● MASTRA TASK', '指示からMastraワークフロータスクを作成中...');
+                updateUIState('CREATING_TASK', '● TASK', '指示からMastraワークフロータスクを作成中...');
                 const newTask = {
                     id: Date.now(),
                     text: promptText,
@@ -954,9 +953,9 @@ ${state.vaultResearchText}`;
                 safeSetStorage('friday_tasks', JSON.stringify(state.tasks));
                 renderTasks();
             } else if (state.useSearchGrounding) {
-                updateUIState('SEARCHING_WEB', '● SEARCHING WEB', 'Google検索グラウンディングで最新情報を参照中...');
+                updateUIState('SEARCHING_WEB', '● SEARCH', 'Google検索グラウンディングで最新情報を参照中...');
             } else {
-                updateUIState('THINKING', '● THINKING', '思考中...');
+                updateUIState('THINKING', '● THINK', '思考中...');
             }
 
             try {
@@ -1250,7 +1249,7 @@ ${state.vaultResearchText}`;
         bind('clapToggleBtn', 'click', () => {
             state.clapEnabled = !state.clapEnabled;
             const el = document.getElementById('clapStatusText');
-            if (el) el.innerText = state.clapEnabled ? '常時呼出: ON' : '常時呼出: OFF';
+            if (el) el.innerText = state.clapEnabled ? '呼出: ON' : '呼出: OFF';
         });
 
         bind('toggleSearchBtn', 'click', () => {
