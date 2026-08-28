@@ -215,7 +215,7 @@
     </div>
 
     <div id="settingsModal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-orange-500/40 rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
+        <div class="bg-slate-900 border border-orange-500/40 rounded-2xl w-full max-w-md p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
             <button id="closeSettingsBtn" class="absolute top-4 right-4 text-slate-400 hover:text-orange-300 text-lg">
                 <i class="fa-solid fa-xmark"></i>
             </button>
@@ -239,22 +239,32 @@
                     </select>
                 </div>
 
+                <!-- Speech Rate Slider -->
                 <div>
-                    <label class="block font-orbitron text-orange-300 mb-1">TTS 音声エンジン選択</label>
-                    <select id="ttsEngineSelect" class="w-full bg-slate-950 border border-orange-500/30 rounded-xl px-3 py-2 text-orange-100 focus:outline-none focus:border-orange-400">
-                        <option value="web" selected>ブラウザ内蔵 SpeechSynthesis (推奨・女性高音高速)</option>
-                        <option value="gemini">Gemini Neural TTS (高音質)</option>
-                    </select>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="font-orbitron text-orange-300">SPEECH RATE (話す速度)</label>
+                        <span id="speechRateVal" class="text-orange-400 font-mono font-bold">1.35x</span>
+                    </div>
+                    <input type="range" id="speechRateSlider" min="0.7" max="2.2" step="0.05" value="1.35" class="w-full accent-orange-400">
+                    <div class="flex justify-between text-[10px] text-slate-400">
+                        <span>ゆっくり (0.7x)</span>
+                        <span>標準 (1.0x)</span>
+                        <span>超高速 (2.2x)</span>
+                    </div>
                 </div>
 
+                <!-- Speech Pitch Slider -->
                 <div>
-                    <label class="block font-orbitron text-orange-300 mb-1">Gemini AI ボイスタイプ</label>
-                    <select id="geminiVoiceSelect" class="w-full bg-slate-950 border border-orange-500/30 rounded-xl px-3 py-2 text-orange-100 focus:outline-none focus:border-orange-400">
-                        <option value="Aoede">Aoede (明るく爽やか)</option>
-                        <option value="Kore">Kore (落ち着いた女性声)</option>
-                        <option value="Zephyr">Zephyr (スマート・ハキハキ)</option>
-                        <option value="Puck">Puck (アップビート)</option>
-                    </select>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="font-orbitron text-orange-300">VOICE PITCH (声の高さ)</label>
+                        <span id="speechPitchVal" class="text-orange-400 font-mono font-bold">1.30</span>
+                    </div>
+                    <input type="range" id="speechPitchSlider" min="0.8" max="1.8" step="0.05" value="1.30" class="w-full accent-orange-400">
+                    <div class="flex justify-between text-[10px] text-slate-400">
+                        <span>低音 (0.8)</span>
+                        <span>標準 (1.0)</span>
+                        <span>高音・明瞭 (1.8)</span>
+                    </div>
                 </div>
 
                 <div>
@@ -297,14 +307,14 @@
             return (str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
 
-        /* Application State (Web Search Defaults to ON) */
+        /* Application State */
         let state = {
             status: 'STANDBY',
             apiKey: localStorage.getItem('friday_gemini_key') || '',
             aiModel: localStorage.getItem('friday_ai_model') || 'gemini-3.5-flash-lite',
             useSearchGrounding: localStorage.getItem('friday_search_mode') !== null ? (localStorage.getItem('friday_search_mode') === 'true') : true,
-            ttsEngine: localStorage.getItem('friday_tts_engine') || 'web',
-            geminiVoice: localStorage.getItem('friday_gemini_voice') || 'Aoede',
+            speechRate: parseFloat(localStorage.getItem('friday_speech_rate')) || 1.35,
+            speechPitch: parseFloat(localStorage.getItem('friday_speech_pitch')) || 1.30,
             clapEnabled: true,
             clapThreshold: parseFloat(localStorage.getItem('friday_clap_sens')) || 0.20,
             vaultText: localStorage.getItem('friday_vault') || `【プロフィール】
@@ -316,7 +326,6 @@
             chatHistory: JSON.parse(localStorage.getItem('friday_chat_history') || '[]')
         };
 
-        /* Automatically migrate deprecated models */
         if (state.aiModel.includes('2.5-flash-lite') || state.aiModel.includes('1.5')) {
             state.aiModel = 'gemini-3.5-flash-lite';
             localStorage.setItem('friday_ai_model', state.aiModel);
@@ -369,7 +378,7 @@ ${state.vaultText}
 - Google検索する: EXECUTE:search:検索ワード`;
         }
 
-        /* Canvas HUD Animation (Arc Orange Color Theme) */
+        /* Canvas HUD Animation */
         const canvas = document.getElementById('hudCanvas');
         const ctx = canvas ? canvas.getContext('2d') : null;
         let angle = 0;
@@ -380,7 +389,7 @@ ${state.vaultText}
             const cx = canvas.width / 2;
             const cy = canvas.height / 2;
 
-            let color = '#ff8c00'; // Friday Arc Orange Accent
+            let color = '#ff8c00';
             if (state.status === 'LISTENING') color = '#ef4444';
             else if (state.status === 'THINKING') color = '#eab308';
             else if (state.status === 'SPEAKING') color = '#10b981';
@@ -608,7 +617,7 @@ ${state.vaultText}
 
                     const cleanReply = parseAndExecuteCommands(replyText);
                     appendLog('F.R.I.D.A.Y.', cleanReply, citations);
-                    speakText(cleanReply);
+                    speakBrowserSpeech(cleanReply);
                 } else {
                     throw new Error('無効な応答データが返されました。');
                 }
@@ -654,7 +663,7 @@ ${state.vaultText}
                 if (part && part.inlineData) {
                     const imageUrl = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
                     appendImageLog('F.R.I.D.A.Y.', `ボス、ご要求のホログラム画像を合成しました。`, imageUrl);
-                    speakText('ボス、ホログラム画像の生成が完了しました。');
+                    speakBrowserSpeech('ボス、ホログラム画像の生成が完了しました。');
                 } else {
                     throw new Error('画像データの取得に失敗しました。');
                 }
@@ -663,10 +672,6 @@ ${state.vaultText}
                 appendLog('SYSTEM', `⚠️ 生成エラー: ${err.message}`);
                 updateStatus('STANDBY', '生成失敗');
             }
-        }
-
-        function speakText(text) {
-            speakBrowserSpeech(text);
         }
 
         function speakBrowserSpeech(text) {
@@ -678,11 +683,10 @@ ${state.vaultText}
 
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'ja-JP';
-            utterance.rate = 1.35; // 高速（テキパキとテンポ良く）
-            utterance.pitch = 1.30; // 高めの明瞭な女性声トーン
+            utterance.rate = state.speechRate || 1.35; // ユーザー設定の話速を適用
+            utterance.pitch = state.speechPitch || 1.30; // ユーザー設定のピッチを適用
 
             const voices = window.speechSynthesis.getVoices();
-            // 日本語の女性音声（Google 日本語, Nanami, Haruka, Kyoko, Ayumi等）を優先選択
             const jpVoices = voices.filter(v => v.lang.includes('ja') || v.lang.includes('JA'));
             const preferredVoice = jpVoices.find(v => 
                 v.name.includes('Nanami') ||
@@ -888,10 +892,16 @@ ${state.vaultText}
         function openSettingsModal() {
             setElVal('apiKeyInput', state.apiKey);
             setElVal('aiModelSelect', state.aiModel);
-            setElVal('ttsEngineSelect', state.ttsEngine);
-            setElVal('geminiVoiceSelect', state.geminiVoice);
+            setElVal('speechRateSlider', state.speechRate);
+            setElVal('speechPitchSlider', state.speechPitch);
             setElVal('clapSensitivity', state.clapThreshold);
             
+            const rateVal = document.getElementById('speechRateVal');
+            if (rateVal) rateVal.innerText = state.speechRate.toFixed(2) + 'x';
+
+            const pitchVal = document.getElementById('speechPitchVal');
+            if (pitchVal) pitchVal.innerText = state.speechPitch.toFixed(2);
+
             const clapSensVal = document.getElementById('clapSensVal');
             if (clapSensVal) clapSensVal.innerText = state.clapThreshold.toFixed(2);
             
@@ -901,22 +911,34 @@ ${state.vaultText}
         bind('openSettingsBtn', 'click', openSettingsModal);
         bind('closeSettingsBtn', 'click', () => settingsModal?.classList.add('hidden'));
 
+        bind('speechRateSlider', 'input', (e) => {
+            const val = parseFloat(e.target.value);
+            const rateVal = document.getElementById('speechRateVal');
+            if (rateVal) rateVal.innerText = val.toFixed(2) + 'x';
+        });
+
+        bind('speechPitchSlider', 'input', (e) => {
+            const val = parseFloat(e.target.value);
+            const pitchVal = document.getElementById('speechPitchVal');
+            if (pitchVal) pitchVal.innerText = val.toFixed(2);
+        });
+
         bind('saveSettingsBtn', 'click', () => {
             state.apiKey = getElVal('apiKeyInput').trim();
             state.aiModel = getElVal('aiModelSelect') || 'gemini-3.5-flash-lite';
-            state.ttsEngine = getElVal('ttsEngineSelect') || 'web';
-            state.geminiVoice = getElVal('geminiVoiceSelect') || 'Aoede';
+            state.speechRate = parseFloat(getElVal('speechRateSlider')) || 1.35;
+            state.speechPitch = parseFloat(getElVal('speechPitchSlider')) || 1.30;
             state.clapThreshold = parseFloat(getElVal('clapSensitivity')) || 0.20;
 
             localStorage.setItem('friday_gemini_key', state.apiKey);
             localStorage.setItem('friday_ai_model', state.aiModel);
-            localStorage.setItem('friday_tts_engine', state.ttsEngine);
-            localStorage.setItem('friday_gemini_voice', state.geminiVoice);
+            localStorage.setItem('friday_speech_rate', state.speechRate);
+            localStorage.setItem('friday_speech_pitch', state.speechPitch);
             localStorage.setItem('friday_clap_sens', state.clapThreshold);
 
             updateModelBadge();
             settingsModal?.classList.add('hidden');
-            appendLog('SYSTEM', `設定を保存しました。(思考モデル: ${state.aiModel})`);
+            appendLog('SYSTEM', `設定を更新しました。(話速: ${state.speechRate.toFixed(2)}x / ピッチ: ${state.speechPitch.toFixed(2)})`);
         });
 
         bind('clapSensitivity', 'input', (e) => {
