@@ -60,31 +60,6 @@
 </head>
 <body class="h-screen w-screen flex flex-col scanline bg-black overflow-hidden relative">
 
-    <div id="authOverlay" class="fixed inset-0 bg-black/95 backdrop-blur-xl z-50 flex flex-col items-center justify-center p-4">
-        <div class="bg-black border border-orange-500/40 rounded-2xl p-8 max-w-md w-full text-center shadow-[0_0_50px_rgba(255,140,0,0.2)]">
-            <div class="mb-6 relative inline-block">
-                <div class="w-20 h-20 rounded-full border-2 border-orange-500/60 border-t-orange-400 animate-spin flex items-center justify-center mx-auto">
-                    <i class="fa-solid fa-lock text-2xl text-orange-400"></i>
-                </div>
-            </div>
-            <h2 class="text-xl font-bold font-orbitron tracking-widest text-orange-400 mb-2 text-glow-orange">SECURITY ACCESS CONTROL</h2>
-            <p class="text-xs text-orange-500/70 mb-6 font-mono">F.R.I.D.A.Y. CORE PROTOCOL // AUTHENTICATION REQUIRED</p>
-            
-            <button id="googleLoginBtn" onclick="handleGoogleLogin(event)" class="w-full bg-white hover:bg-slate-100 text-slate-900 font-bold py-3 px-4 rounded-xl transition flex items-center justify-center gap-3 shadow-lg active:scale-95 text-xs font-mono cursor-pointer relative z-50">
-                <svg class="w-4 h-4" viewBox="0 0 24 24">
-                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-                </svg>
-                Google アカウントでログインして起動
-            </button>
-            <div class="mt-4 text-[10px] text-orange-500/50 font-mono">
-                受諾されたユーザー（tsu9ch1）のみアクセス権限が付与されます
-            </div>
-        </div>
-    </div>
-
     <!-- Background Canvas for Sci-Fi Visual Effects -->
     <canvas id="bgCanvas" class="absolute inset-0 w-full h-full pointer-events-none z-0"></canvas>
 
@@ -99,10 +74,10 @@
             </h1>
         </div>
 
-        <!-- Realtime Live Clock Display (Year/Month/Day/Hour/Min/Sec JST) -->
-        <div class="hidden sm:flex items-center space-x-2 text-xs font-orbitron text-orange-300/90 bg-black/90 border border-orange-500/30 px-3 py-1 rounded-lg shadow-[0_0_10px_rgba(255,140,0,0.1)]">
-            <i class="fa-regular fa-clock text-orange-400 animate-pulse"></i>
-            <span id="liveClockDisplay" class="font-bold tracking-wider">----.--.-- (---) --:--:-- JST</span>
+        <!-- Realtime Digital Clock & Date Display (Stacked HUD Style) -->
+        <div class="hidden sm:flex flex-col items-end font-orbitron text-orange-400 bg-black/90 border border-orange-500/30 px-3 py-1 rounded-lg shadow-[0_0_10px_rgba(255,140,0,0.15)]">
+            <div id="liveClockTime" class="text-sm md:text-base font-black tracking-widest text-glow-orange leading-none mb-0.5">--:--:--</div>
+            <div id="liveClockDate" class="text-[9px] text-orange-500/80 font-bold tracking-wider">----.--.-- (---)</div>
         </div>
 
         <div class="flex items-center space-x-2">
@@ -382,7 +357,6 @@
         /* Application State */
         let state = {
             status: 'STANDBY',
-            authenticated: safeGetStorage('friday_auth') === 'true',
             apiKey: safeGetStorage('friday_gemini_key') || '',
             elevenApiKey: safeGetStorage('friday_eleven_key') || '',
             elevenVoiceId: safeGetStorage('friday_eleven_voice') || 'gHBfNp2PWSyFgpPlzCOd',
@@ -398,15 +372,6 @@
             showGraphVisualizer: true,
             tasks: JSON.parse(safeGetStorage('friday_tasks') || '[]')
         };
-
-        function checkAuthStatus() {
-            const authOverlay = document.getElementById('authOverlay');
-            if (state.authenticated && authOverlay) {
-                authOverlay.style.display = 'none';
-                authOverlay.classList.add('hidden');
-            }
-        }
-        checkAuthStatus();
 
         /* Background Canvas Visual Effects */
         const bgCanvas = document.getElementById('bgCanvas');
@@ -527,19 +492,28 @@
             hudCtx.beginPath();
             hudCtx.arc(cx, cy, 140, hudAngle, hudAngle + Math.PI * 1.6);
             hudCtx.strokeStyle = strokeColor;
+            speed = 0.02;
+            if (state.status === 'THINKING' || state.status === 'EXECUTING_WORKFLOW') speed = 0.06;
+
+            hudAngle = (hudAngle + speed) % (Math.PI * 2);
+
+            // 1. Outer Rotating Segment Arc with Solid Highlight Arc
+            hudCtx.beginPath();
+            hudCtx.arc(cx, cy, 140, hudAngle, hudAngle + Math.PI * 1.6);
+            hudCtx.strokeStyle = strokeColor;
             hudCtx.lineWidth = 1.5;
             hudCtx.setLineDash([4, 4]);
             hudCtx.stroke();
             hudCtx.setLineDash([]);
 
-            // Bright Thick Highlight Arc (as in J.A.R.V.I.S. image)
+            // Bright Thick Highlight Arc
             hudCtx.beginPath();
             hudCtx.arc(cx, cy, 140, hudAngle + Math.PI * 0.2, hudAngle + Math.PI * 0.6);
             hudCtx.strokeStyle = '#ffffff';
             hudCtx.lineWidth = 3.5;
             hudCtx.stroke();
 
-            // 3. Middle Dotted Ring
+            // 2. Middle Dotted Ring
             hudCtx.beginPath();
             hudCtx.arc(cx, cy, 118, -hudAngle * 1.5, -hudAngle * 1.5 + Math.PI * 1.8);
             hudCtx.strokeStyle = strokeColor;
@@ -548,14 +522,14 @@
             hudCtx.stroke();
             hudCtx.setLineDash([]);
 
-            // 4. Inner Ring with Crosshairs
+            // 3. Inner Ring with Crosshairs
             hudCtx.beginPath();
             hudCtx.arc(cx, cy, 85, 0, Math.PI * 2);
             hudCtx.strokeStyle = 'rgba(255, 140, 0, 0.35)';
             hudCtx.lineWidth = 1;
             hudCtx.stroke();
 
-            // 5. Pulsing Center Core Circle
+            // 4. Pulsing Center Core Circle
             const pulse = Math.sin(Date.now() / 250) * 4;
             hudCtx.beginPath();
             hudCtx.arc(cx, cy, 48 + pulse, 0, Math.PI * 2);
@@ -568,24 +542,15 @@
             hudCtx.stroke();
             hudCtx.shadowBlur = 0;
 
-            // 6. Sub-Text Labels (J.A.R.V.I.S. Style Overlay)
-            hudCtx.fillStyle = strokeColor;
-            hudCtx.font = '600 8px Orbitron';
-            hudCtx.textAlign = 'center';
-            hudCtx.fillText('SCANNING', cx, cy - 18);
-
-            // Main Core Name
+            // Main Core Name Only
             hudCtx.fillStyle = '#ffffff';
             hudCtx.font = '900 13px Orbitron';
+            hudCtx.textAlign = 'center';
             hudCtx.textBaseline = 'middle';
             hudCtx.shadowColor = strokeColor;
             hudCtx.shadowBlur = 8;
-            hudCtx.fillText('J.A.R.V.I.S.', cx, cy);
+            hudCtx.fillText('F.R.I.D.A.Y.', cx, cy);
             hudCtx.shadowBlur = 0;
-
-            hudCtx.fillStyle = 'rgba(255, 140, 0, 0.7)';
-            hudCtx.font = '600 7px Orbitron';
-            hudCtx.fillText('CORE OUTPUT 92%', cx, cy + 18);
 
             requestAnimationFrame(drawHUD);
         }
@@ -899,7 +864,7 @@ ${state.vaultResearchText}`;
             }
             if (chunks.length === 0) chunks.push(fullText);
 
-            // Added +0.2s Delay Sync (900ms total) before displaying first chunk
+            // Added +0.5s Delay Sync (1400ms total) before displaying first chunk
             setTimeout(() => {
                 let index = 0;
                 const speechEl = document.getElementById('fridaySpeechText');
@@ -916,7 +881,7 @@ ${state.vaultResearchText}`;
                         }
                     }, 2200);
                 }
-            }, 900);
+            }, 1400);
 
             // Execute TTS
             if (state.elevenApiKey && state.elevenVoiceId) {
@@ -1000,17 +965,17 @@ ${state.vaultResearchText}`;
             const now = new Date();
             const clockStr = now.toLocaleString('ja-JP', {
                 timeZone: 'Asia/Tokyo',
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                weekday: 'short',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            }) + ' JST';
+        // Live Clock Updates (Stacked Digital Layout)
+        setInterval(() => {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('ja-JP', { timeZone: 'Asia/Tokyo', hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' JST';
+            const dateStr = now.toLocaleDateString('ja-JP', { timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short' });
 
-            const liveClock = document.getElementById('liveClockDisplay');
-            if (liveClock) liveClock.innerText = clockStr;
+            const liveTime = document.getElementById('liveClockTime');
+            if (liveTime) liveTime.innerText = timeStr;
+
+            const liveDate = document.getElementById('liveClockDate');
+            if (liveDate) liveDate.innerText = dateStr;
 
             const mobileClock = document.getElementById('mobileClockDisplay');
             if (mobileClock) mobileClock.innerText = now.toLocaleTimeString('ja-JP');
