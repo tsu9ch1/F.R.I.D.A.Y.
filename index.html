@@ -9,8 +9,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts (Orbitron & Noto Sans JP) -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;700&family=Orbitron:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <!-- Google Fonts (Orbitron, Share Tech Mono, & Noto Sans JP) -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;700&family=Orbitron:wght@400;600;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     
     <style>
         html, body {
@@ -25,6 +25,9 @@
         }
         .font-orbitron {
             font-family: 'Orbitron', sans-serif;
+        }
+        .font-tech {
+            font-family: 'Share Tech Mono', 'Noto Sans JP', monospace;
         }
         .text-glow-orange {
             text-shadow: 0 0 10px rgba(255, 140, 0, 0.85);
@@ -66,6 +69,14 @@
             0%, 100% { opacity: 1; }
             50% { opacity: 0; }
         }
+        /* 10 Chars x 7 Lines Terminal Grid Styling */
+        .terminal-grid-box {
+            font-family: 'Share Tech Mono', 'Courier New', monospace;
+            line-height: 1.4;
+            letter-spacing: 0.05em;
+            word-break: break-all;
+            white-space: pre-wrap;
+        }
     </style>
 </head>
 <body class="h-screen w-screen flex flex-col scanline bg-black overflow-hidden relative">
@@ -73,7 +84,7 @@
     <!-- Background Canvas for Particle Effects -->
     <canvas id="bgCanvas" class="absolute inset-0 w-full h-full pointer-events-none z-0"></canvas>
 
-    <header class="w-full bg-black/80 border-b border-orange-500/20 px-4 md:px-6 py-2 flex justify-between items-center shrink-0 z-30">
+    <header class="w-full bg-black/90 border-b border-orange-500/20 px-4 py-2 flex justify-between items-center shrink-0 z-30">
         <div class="flex items-center space-x-3">
             <div class="relative flex h-2.5 w-2.5">
                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
@@ -84,15 +95,9 @@
             </h1>
         </div>
 
-        <!-- Realtime Digital Clock & Date Display (Stacked HUD Style) -->
-        <div class="hidden sm:flex flex-col items-end font-orbitron text-orange-400 bg-black/90 border border-orange-500/30 px-3 py-1 rounded-lg shadow-[0_0_10px_rgba(255,140,0,0.15)]">
-            <div id="liveClockTime" class="text-sm md:text-base font-black tracking-widest text-glow-orange leading-none mb-0.5">--:--:-- JST</div>
-            <div id="liveClockDate" class="text-[9px] text-orange-500/80 font-bold tracking-wider">----.--.-- (---)</div>
-        </div>
-
         <div class="flex items-center space-x-2">
             <button id="toggleGraphBtn" class="px-2.5 py-1 rounded-lg border border-orange-500/30 hover:bg-orange-500/20 text-orange-300 text-xs font-orbitron transition flex items-center gap-1.5 cursor-pointer">
-                <i class="fa-solid fa-circle-nodes text-orange-400"></i> GRAPH VISUALIZER
+                <i class="fa-solid fa-circle-nodes text-orange-400"></i> GRAPH
             </button>
             <button id="openTasksBtn" class="px-2.5 py-1 rounded-lg border border-orange-500/30 hover:bg-orange-500/20 text-orange-300 text-xs font-orbitron transition flex items-center gap-1.5 cursor-pointer">
                 <i class="fa-solid fa-list-check text-orange-400"></i> WORKFLOW
@@ -106,73 +111,141 @@
         </div>
     </header>
 
-    <main class="flex-1 max-w-6xl w-full mx-auto p-2 md:p-4 flex flex-col justify-between items-center z-10 overflow-hidden relative">
+    <main class="flex-1 w-full mx-auto p-2 md:p-3 grid grid-cols-12 gap-3 z-10 overflow-hidden relative">
         
-        <!-- Location & Telemetry Bar -->
-        <div class="w-full flex justify-between items-center text-[10px] font-orbitron text-orange-500/60 shrink-0 px-2">
-            <div>SYS.LOC: FUKUI_GAKUEN // LAT: 36.065 // MCP: ACTIVE</div>
-            <div id="mobileClockDisplay" class="sm:hidden text-orange-400 font-mono">--:--:--</div>
-            <div class="flex items-center gap-2">
-                <span id="turnCountBadge" class="text-orange-500/80 bg-black/90 px-1.5 py-0.5 rounded border border-orange-500/20 font-mono text-[9px]">CTX: 0 TURNS</span>
-                <span id="aiModelBadge" class="text-orange-400 bg-black/90 px-2 py-0.5 rounded border border-orange-500/30 font-mono">gemini-3.5-flash-lite</span>
-            </div>
-        </div>
-
-        <!-- Central Hologram Ring Section (~40% Viewport Scale) -->
-        <section class="w-full flex-1 p-1 flex flex-col items-center justify-center relative overflow-hidden my-1 shrink-0">
+        <!-- ================= LEFT SIDEBAR CONTROLS ================= -->
+        <section class="col-span-12 md:col-span-3 flex flex-col justify-between space-y-3 z-20">
             
-            <!-- Knowledge & Status Graph Overlay Canvas -->
-            <div id="obsidianGraphContainer" class="absolute inset-0 pointer-events-none flex items-center justify-center transition-opacity duration-500 opacity-90 z-0">
-                <canvas id="graphCanvas" width="900" height="420" class="w-full h-full object-contain"></canvas>
+            <!-- System Telemetry & Status Badge -->
+            <div class="bg-black/80 border border-orange-500/30 rounded-xl p-3 shadow-lg">
+                <div class="text-[10px] font-orbitron text-orange-500/70 mb-1 flex items-center justify-between">
+                    <span>SYS.LOC: FUKUI_GAKUEN</span>
+                    <span id="turnCountBadge" class="text-orange-400 bg-orange-950/40 px-1.5 py-0.5 rounded border border-orange-500/30 font-mono">CTX: 0 TURNS</span>
+                </div>
+                <div class="text-[10px] font-orbitron text-orange-500/70 flex justify-between items-center">
+                    <span>AI MODEL:</span>
+                    <span id="aiModelBadge" class="text-orange-300 font-mono font-bold">gemini-3.5-flash-lite</span>
+                </div>
+                <div class="mt-2 text-center">
+                    <span id="hudStatusBadge" class="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-black border border-orange-500/40 text-orange-300 tracking-wider block">
+                        ● STANDBY (「フライデー」で起動)
+                    </span>
+                </div>
             </div>
 
-            <!-- Main Hologram Ring Canvas Container -->
-            <div class="relative w-full aspect-square max-w-[260px] md:max-w-[300px] lg:max-w-[330px] flex items-center justify-center my-auto z-10">
-                <canvas id="hudCanvas" width="400" height="400" class="w-full h-full drop-shadow-[0_0_25px_rgba(255,140,0,0.5)]"></canvas>
-            </div>
+            <!-- Voice & Mode Action Controls -->
+            <div class="bg-black/80 border border-orange-500/30 rounded-xl p-3 shadow-lg space-y-2">
+                <div class="text-[10px] font-orbitron text-orange-400/80 font-bold tracking-wider mb-2 border-b border-orange-500/20 pb-1">
+                    <i class="fa-solid fa-sliders text-orange-400 mr-1"></i> CONTROL PANEL
+                </div>
 
-            <!-- Current Status Badge Indicator -->
-            <div class="text-center my-1.5 z-10">
-                <span id="hudStatusBadge" class="text-[11px] font-mono font-bold px-3 py-0.5 rounded-full bg-black border border-orange-500/40 text-orange-300 tracking-wider">
-                    ● STANDBY (「フライデー」で起動)
-                </span>
-            </div>
-
-            <!-- Single-Line Character-by-Character Typewriter Speech Text Container -->
-            <div class="w-full max-w-2xl bg-black/90 border border-orange-500/30 rounded-xl px-4 py-2.5 shadow-2xl relative min-h-[48px] max-h-[54px] flex items-center justify-center shrink-0 overflow-hidden z-10">
-                <p id="fridaySpeechText" class="text-xs md:text-sm text-orange-100 font-medium leading-none tracking-wide text-center transition-all duration-150 w-full px-2 truncate">
-                    準備はいつでもできていますよ、ボス。今日はどこから手をつけますか？
-                </p>
-            </div>
-
-            <!-- Control Buttons Row -->
-            <div class="w-full max-w-xl grid grid-cols-3 gap-2 mt-2 shrink-0 z-10">
-                <button id="micBtn" class="py-2 px-2 rounded-xl border border-orange-500/50 bg-black/90 hover:bg-orange-500/20 text-orange-300 font-bold text-xs flex items-center justify-center gap-2 transition active:scale-95 shadow-lg cursor-pointer">
-                    <i id="micIcon" class="fa-solid fa-microphone text-orange-400"></i>
+                <button id="micBtn" class="w-full py-2.5 px-3 rounded-xl border border-orange-500/50 bg-black hover:bg-orange-500/20 text-orange-300 font-bold text-xs flex items-center justify-center gap-2 transition active:scale-95 shadow-md cursor-pointer">
+                    <i id="micIcon" class="fa-solid fa-microphone text-orange-400 text-sm"></i>
                     <span id="micBtnText">話しかける</span>
                 </button>
 
-                <button id="clapToggleBtn" class="py-2 px-2 rounded-xl border border-orange-500/30 bg-black/90 hover:bg-orange-500/20 text-orange-300 font-bold text-xs flex items-center justify-center gap-2 transition cursor-pointer">
-                    <i class="fa-solid fa-ear-listen text-orange-400"></i>
+                <button id="clapToggleBtn" class="w-full py-2.5 px-3 rounded-xl border border-orange-500/30 bg-black hover:bg-orange-500/20 text-orange-300 font-bold text-xs flex items-center justify-center gap-2 transition cursor-pointer">
+                    <i class="fa-solid fa-ear-listen text-orange-400 text-sm"></i>
                     <span id="clapStatusText">常時呼出: ON</span>
                 </button>
 
-                <button id="toggleSearchBtn" class="py-2 px-2 rounded-xl border border-orange-500/30 bg-black/90 hover:bg-orange-500/20 text-orange-300 font-bold text-xs flex items-center justify-center gap-2 transition cursor-pointer">
-                    <i class="fa-solid fa-globe text-orange-400"></i>
-                    <span>検索: <span id="searchModeText" class="text-emerald-400 font-bold">ON</span></span>
+                <button id="toggleSearchBtn" class="w-full py-2.5 px-3 rounded-xl border border-orange-500/30 bg-black hover:bg-orange-500/20 text-orange-300 font-bold text-xs flex items-center justify-center gap-2 transition cursor-pointer">
+                    <i class="fa-solid fa-globe text-orange-400 text-sm"></i>
+                    <span>検索モード: <span id="searchModeText" class="text-emerald-400 font-bold">ON</span></span>
                 </button>
             </div>
 
-            <!-- Direct Prompt Input Form -->
-            <form id="textForm" class="w-full max-w-xl mt-2 flex gap-2 shrink-0 z-10">
-                <button type="button" id="uploadImgBtn" title="画像を添付してGemini解析" class="bg-black border border-orange-500/30 hover:bg-orange-950/40 text-orange-400 px-3 rounded-xl transition flex items-center justify-center cursor-pointer">
-                    <i class="fa-solid fa-paperclip"></i>
-                </button>
-                <input type="text" id="userInput" placeholder="フライデーに指示・メッセージを送信..." class="flex-1 bg-black border border-orange-500/30 rounded-xl px-3.5 py-1.5 text-xs text-orange-100 placeholder-orange-700/60 focus:outline-none focus:border-orange-400 transition">
-                <button type="submit" class="bg-orange-500 hover:bg-orange-400 text-black font-bold px-4 rounded-xl transition flex items-center justify-center shadow-lg active:scale-95 cursor-pointer">
-                    <i class="fa-solid fa-paper-plane"></i>
-                </button>
-            </form>
+            <!-- Direct Text Prompt & Multimodal Input Form -->
+            <div class="bg-black/80 border border-orange-500/30 rounded-xl p-3 shadow-lg flex-1 flex flex-col justify-end">
+                <div class="text-[10px] font-orbitron text-orange-400/80 font-bold tracking-wider mb-2 border-b border-orange-500/20 pb-1">
+                    <i class="fa-solid fa-terminal text-orange-400 mr-1"></i> DIRECT COMMAND
+                </div>
+                
+                <form id="textForm" class="flex flex-col gap-2">
+                    <div class="flex gap-1.5">
+                        <button type="button" id="uploadImgBtn" title="画像を添付してGemini解析" class="bg-black border border-orange-500/30 hover:bg-orange-950/40 text-orange-400 p-2 rounded-xl transition flex items-center justify-center cursor-pointer">
+                            <i class="fa-solid fa-paperclip"></i>
+                        </button>
+                        <input type="text" id="userInput" placeholder="指示・メッセージを入力..." class="flex-1 bg-black border border-orange-500/30 rounded-xl px-3 py-1.5 text-xs text-orange-100 placeholder-orange-700/60 focus:outline-none focus:border-orange-400 transition">
+                    </div>
+                    <button type="submit" class="w-full bg-orange-500 hover:bg-orange-400 text-black font-bold py-2 rounded-xl transition flex items-center justify-center gap-2 shadow-lg active:scale-95 cursor-pointer text-xs">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        <span>メッセージ送信</span>
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- ================= CENTER HOLOGRAM RING & GRAPH ================= -->
+        <section class="col-span-12 md:col-span-5 flex flex-col items-center justify-center relative overflow-hidden my-auto z-10">
+            
+            <!-- Knowledge & Status Graph Overlay Canvas -->
+            <div id="obsidianGraphContainer" class="absolute inset-0 pointer-events-none flex items-center justify-center transition-opacity duration-500 opacity-90 z-0">
+                <canvas id="graphCanvas" width="600" height="420" class="w-full h-full object-contain"></canvas>
+            </div>
+
+            <!-- Main Hologram Ring Canvas Container -->
+            <div class="relative w-full aspect-square max-w-[260px] md:max-w-[310px] flex items-center justify-center my-auto z-10">
+                <canvas id="hudCanvas" width="400" height="400" class="w-full h-full drop-shadow-[0_0_25px_rgba(255,140,0,0.5)]"></canvas>
+            </div>
+        </section>
+
+        <!-- ================= RIGHT SIDEBAR (CLOCK, WEATHER, SPEECH OUTPUT) ================= -->
+        <section class="col-span-12 md:col-span-4 flex flex-col space-y-3 z-20">
+            
+            <!-- 1. Top Right Digital Clock & Date Display -->
+            <div class="bg-black/90 border border-orange-500/40 rounded-xl p-3 shadow-xl flex flex-col items-end">
+                <div id="liveClockTime" class="text-xl md:text-2xl font-black font-orbitron tracking-widest text-orange-400 text-glow-orange leading-none mb-1">--:--:-- JST</div>
+                <div id="liveClockDate" class="text-xs font-orbitron text-orange-500/80 font-bold tracking-wider">----.--.-- (---)</div>
+            </div>
+
+            <!-- 2. Fukui City Weather Widget (WEATHER · FUKUI) -->
+            <div class="bg-black/90 border border-orange-500/30 rounded-xl p-3 shadow-lg">
+                <div class="text-[10px] font-orbitron text-orange-400 font-bold border-b border-orange-500/20 pb-1 mb-2 flex items-center justify-between">
+                    <span><i class="fa-solid fa-cloud-sun text-orange-400 mr-1"></i> WEATHER · FUKUI</span>
+                    <span id="weatherTempNow" class="text-orange-300 font-mono">現在 --°C</span>
+                </div>
+
+                <div class="space-y-2 text-xs font-mono">
+                    <!-- Today Weather -->
+                    <div class="flex items-center justify-between bg-orange-950/20 px-2.5 py-1.5 rounded-lg border border-orange-500/20">
+                        <span class="text-orange-300 font-bold">今日</span>
+                        <span id="todayWeatherIcon" class="text-base">☀️</span>
+                        <div class="text-right">
+                            <span class="text-orange-400 font-bold">湿度 <span id="todayHumidity">--%</span></span>
+                        </div>
+                    </div>
+
+                    <!-- Tomorrow Weather -->
+                    <div class="flex items-center justify-between bg-orange-950/20 px-2.5 py-1.5 rounded-lg border border-orange-500/20">
+                        <span class="text-orange-300 font-bold">明日</span>
+                        <span id="tomorrowWeatherIcon" class="text-base">🌤️</span>
+                        <div class="text-right">
+                            <span class="text-orange-400 font-bold">湿度 <span id="tomorrowHumidity">--%</span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. F.R.I.D.A.Y. Speech Output Display Box (10 Chars x 7 Lines Terminal) -->
+            <div class="bg-black/90 border border-orange-500/40 rounded-xl p-3 shadow-2xl flex-1 flex flex-col justify-start overflow-hidden">
+                <div class="text-[10px] font-orbitron text-orange-400 font-bold border-b border-orange-500/20 pb-1 mb-2 flex items-center justify-between shrink-0">
+                    <span><i class="fa-solid fa-terminal text-orange-400 mr-1"></i> F.R.I.D.A.Y. SPEECH LOG</span>
+                    <span class="text-[9px] text-orange-500/60 font-mono">10 CHRS x 7 LINES</span>
+                </div>
+
+                <!-- 10 Chars per Line x 7 Lines Window Container -->
+                <div class="flex-1 bg-black/60 border border-orange-500/20 rounded-lg p-2.5 overflow-hidden flex items-start">
+                    <p id="fridaySpeechText" class="terminal-grid-box text-sm text-orange-100 font-mono font-medium tracking-wider w-full h-full text-left leading-relaxed">
+準備はいつでも
+できていますよ
+ボス。今日は何
+から手つけます
+か？
+                    </p>
+                </div>
+            </div>
+
         </section>
     </main>
 
@@ -186,7 +259,7 @@
                 <i class="fa-solid fa-list-check text-orange-400"></i> MASTRA WORKFLOW & MCP TASKS
             </h3>
             <p class="text-[11px] text-orange-500/70 mb-3">
-                フライデーが会話から重度の指示を自動判断して作成したタスクキュー一覧です。
+                フライデーが会話から指示を自動判断して作成したタスクキュー一覧です。
             </p>
 
             <div id="tasksList" class="flex-1 overflow-y-auto space-y-2.5 pr-1 font-mono text-xs my-2">
@@ -208,10 +281,10 @@
                 <i class="fa-solid fa-xmark"></i>
             </button>
             <h3 class="text-sm font-bold font-orbitron text-orange-400 mb-1 flex items-center gap-2">
-                <i class="fa-solid fa-brain text-orange-400"></i> LONG-TERM MEMORY (長期記憶・会話文脈)
+                <i class="fa-solid fa-brain text-orange-400"></i> LONG-TERM MEMORY (長期記憶)
             </h3>
             <p class="text-[11px] text-orange-500/70 mb-3">
-                メインエージェントおよびリサーチエージェントが記憶・抽出したユーザー情報と会話文脈です。
+                メインエージェントおよびリサーチエージェントが記憶したユーザー情報と会話文脈です。
             </p>
 
             <div class="mb-2 flex gap-2">
@@ -363,7 +436,6 @@
             activeTab: 'main',
             showGraphVisualizer: true,
             tasks: JSON.parse(safeGetStorage('friday_tasks') || '[]'),
-            // Multi-turn Conversational Memory (Direct Context)
             conversationHistory: JSON.parse(safeGetStorage('friday_conversation_history') || '[]')
         };
 
@@ -372,6 +444,55 @@
             if (badge) {
                 const turns = Math.floor(state.conversationHistory.length / 2);
                 badge.innerText = `CTX: ${turns} TURNS`;
+            }
+        }
+
+        /* Weather API Fetcher for Fukui City (Open-Meteo API) */
+        async function fetchFukuiWeather() {
+            try {
+                // Fukui City Lat: 36.0652, Lon: 136.2219
+                const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=36.0652&longitude=136.2219&current=temperature_2m,relative_humidity_2m,weather_code&daily=weather_code,relative_humidity_2m_mean&timezone=Asia%2FTokyo');
+                if (!res.ok) throw new Error('Weather API error');
+                const data = await res.json();
+
+                const tempNow = Math.round(data.current?.temperature_2m || 24);
+                const humToday = Math.round(data.current?.relative_humidity_2m || 65);
+                const humTomorrow = Math.round(data.daily?.relative_humidity_2m_mean?.[1] || 60);
+
+                const getWeatherSymbol = (code) => {
+                    if (code === 0) return '☀️';
+                    if (code >= 1 && code <= 3) return '🌤️';
+                    if (code === 45 || code === 48) return '🌫️';
+                    if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) return '🌧️';
+                    if (code >= 71 && code <= 77) return '❄️';
+                    if (code >= 95) return '🌩️';
+                    return '🌤️';
+                };
+
+                const todayCode = data.daily?.weather_code?.[0] ?? data.current?.weather_code ?? 1;
+                const tomorrowCode = data.daily?.weather_code?.[1] ?? 1;
+
+                const tempNowEl = document.getElementById('weatherTempNow');
+                if (tempNowEl) tempNowEl.innerText = `現在 ${tempNow}°C`;
+
+                const todayIconEl = document.getElementById('todayWeatherIcon');
+                if (todayIconEl) todayIconEl.innerText = getWeatherSymbol(todayCode);
+
+                const todayHumEl = document.getElementById('todayHumidity');
+                if (todayHumEl) todayHumEl.innerText = `${humToday}%`;
+
+                const tomorrowIconEl = document.getElementById('tomorrowWeatherIcon');
+                if (tomorrowIconEl) tomorrowIconEl.innerText = getWeatherSymbol(tomorrowCode);
+
+                const tomorrowHumEl = document.getElementById('tomorrowHumidity');
+                if (tomorrowHumEl) tomorrowHumEl.innerText = `${humTomorrow}%`;
+
+            } catch (err) {
+                console.warn('Weather fetch fallback:', err);
+                const todayHumEl = document.getElementById('todayHumidity');
+                if (todayHumEl) todayHumEl.innerText = '62%';
+                const tomorrowHumEl = document.getElementById('tomorrowHumidity');
+                if (tomorrowHumEl) tomorrowHumEl.innerText = '58%';
             }
         }
 
@@ -443,22 +564,19 @@
             const cx = hudCanvas.width / 2;
             const cy = hudCanvas.height / 2;
 
-            // Color selection based on state
             let strokeColor = 'rgba(255, 140, 0, 0.85)';
-            if (state.status === 'LISTENING') strokeColor = 'rgba(250, 204, 21, 0.95)'; // Yellow
-            else if (state.status === 'ERROR') strokeColor = 'rgba(239, 68, 68, 0.95)'; // Red
-            else if (state.status === 'SEARCHING_WEB') strokeColor = 'rgba(56, 189, 248, 0.95)'; // Sky Blue
-            else if (state.status === 'CREATING_TASK') strokeColor = 'rgba(192, 132, 252, 0.95)'; // Purple
-            else if (state.status === 'EXECUTING_WORKFLOW') strokeColor = 'rgba(52, 211, 153, 0.95)'; // Emerald
+            if (state.status === 'LISTENING') strokeColor = 'rgba(250, 204, 21, 0.95)';
+            else if (state.status === 'ERROR') strokeColor = 'rgba(239, 68, 68, 0.95)';
+            else if (state.status === 'SEARCHING_WEB') strokeColor = 'rgba(56, 189, 248, 0.95)';
+            else if (state.status === 'CREATING_TASK') strokeColor = 'rgba(192, 132, 252, 0.95)';
+            else if (state.status === 'EXECUTING_WORKFLOW') strokeColor = 'rgba(52, 211, 153, 0.95)';
 
-            // Dynamic rotation speed
             let speed = 0.02;
             if (state.status === 'THINKING' || state.status === 'SEARCHING_WEB' || state.status === 'EXECUTING_WORKFLOW') speed = 0.06;
             else if (state.status === 'SPEAKING') speed = 0.04;
 
             hudAngle = (hudAngle + speed) % (Math.PI * 2);
 
-            // Dynamic Lip-Sync Pulse Calculation for Core & Rings
             let pulseOffset = 0;
             if (state.status === 'SPEAKING') {
                 pulseOffset = Math.sin(Date.now() / 70) * 12 + Math.cos(Date.now() / 130) * 8;
@@ -466,7 +584,7 @@
                 pulseOffset = Math.sin(Date.now() / 250) * 3;
             }
 
-            // 1. Outer Rotating Segment Arc
+            // Outer Arc
             hudCtx.beginPath();
             hudCtx.arc(cx, cy, 140 + pulseOffset * 0.3, hudAngle, hudAngle + Math.PI * 1.6);
             hudCtx.strokeStyle = strokeColor;
@@ -475,14 +593,14 @@
             hudCtx.stroke();
             hudCtx.setLineDash([]);
 
-            // Bright Thick Highlight Arc
+            // Highlight Arc
             hudCtx.beginPath();
             hudCtx.arc(cx, cy, 140 + pulseOffset * 0.3, hudAngle + Math.PI * 0.2, hudAngle + Math.PI * 0.6);
             hudCtx.strokeStyle = '#ffffff';
             hudCtx.lineWidth = 3.5;
             hudCtx.stroke();
 
-            // 2. Middle Dotted Ring
+            // Middle Dotted Ring
             hudCtx.beginPath();
             hudCtx.arc(cx, cy, 118 + pulseOffset * 0.5, -hudAngle * 1.5, -hudAngle * 1.5 + Math.PI * 1.8);
             hudCtx.strokeStyle = strokeColor;
@@ -491,14 +609,14 @@
             hudCtx.stroke();
             hudCtx.setLineDash([]);
 
-            // 3. Inner Ring
+            // Inner Ring
             hudCtx.beginPath();
             hudCtx.arc(cx, cy, 85 + pulseOffset * 0.7, 0, Math.PI * 2);
             hudCtx.strokeStyle = 'rgba(255, 140, 0, 0.35)';
             hudCtx.lineWidth = 1;
             hudCtx.stroke();
 
-            // 4. Pulsing Lip-Sync Center Core Circle
+            // Core
             const coreRadius = Math.max(36, 48 + pulseOffset);
             hudCtx.beginPath();
             hudCtx.arc(cx, cy, coreRadius, 0, Math.PI * 2);
@@ -511,7 +629,7 @@
             hudCtx.stroke();
             hudCtx.shadowBlur = 0;
 
-            // Main Core Text
+            // Core Text
             hudCtx.fillStyle = '#ffffff';
             hudCtx.font = '900 13px Orbitron';
             hudCtx.textAlign = 'center';
@@ -530,11 +648,11 @@
         const graphCtx = graphCanvas ? graphCanvas.getContext('2d') : null;
 
         let graphNodes = [
-            { id: 'memory', label: 'Long-Term Memory', x: 120, y: 70, vx: (Math.random()-0.5)*0.2, vy: (Math.random()-0.5)*0.2, color: '#fbbf24', r: 6, stateMatch: ['MEMORY_READ', 'THINKING'] },
-            { id: 'mastra', label: 'Mastra Workflow', x: 760, y: 70, vx: (Math.random()-0.5)*0.2, vy: (Math.random()-0.5)*0.2, color: '#c084fc', r: 6, stateMatch: ['CREATING_TASK'] },
-            { id: 'mcp', label: 'MCP Tools', x: 790, y: 340, vx: (Math.random()-0.5)*0.2, vy: (Math.random()-0.5)*0.2, color: '#34d399', r: 6, stateMatch: ['EXECUTING_WORKFLOW'] },
-            { id: 'web', label: 'Google Search', x: 90, y: 340, vx: (Math.random()-0.5)*0.2, vy: (Math.random()-0.5)*0.2, color: '#38bdf8', r: 6, stateMatch: ['SEARCHING_WEB'] },
-            { id: 'user', label: 'User Context', x: 450, y: 385, vx: (Math.random()-0.5)*0.2, vy: (Math.random()-0.5)*0.2, color: '#fb7185', r: 6, stateMatch: ['LISTENING'] }
+            { id: 'memory', label: 'Long-Term Memory', x: 80, y: 60, vx: (Math.random()-0.5)*0.2, vy: (Math.random()-0.5)*0.2, color: '#fbbf24', r: 5, stateMatch: ['MEMORY_READ', 'THINKING'] },
+            { id: 'mastra', label: 'Mastra Workflow', x: 520, y: 60, vx: (Math.random()-0.5)*0.2, vy: (Math.random()-0.5)*0.2, color: '#c084fc', r: 5, stateMatch: ['CREATING_TASK'] },
+            { id: 'mcp', label: 'MCP Tools', x: 530, y: 360, vx: (Math.random()-0.5)*0.2, vy: (Math.random()-0.5)*0.2, color: '#34d399', r: 5, stateMatch: ['EXECUTING_WORKFLOW'] },
+            { id: 'web', label: 'Google Search', x: 70, y: 360, vx: (Math.random()-0.5)*0.2, vy: (Math.random()-0.5)*0.2, color: '#38bdf8', r: 5, stateMatch: ['SEARCHING_WEB'] },
+            { id: 'user', label: 'User Context', x: 300, y: 380, vx: (Math.random()-0.5)*0.2, vy: (Math.random()-0.5)*0.2, color: '#fb7185', r: 5, stateMatch: ['LISTENING'] }
         ];
 
         function drawGraph() {
@@ -554,34 +672,15 @@
                 n1.x += n1.vx;
                 n1.y += n1.vy;
 
-                if (n1.x < 60 || n1.x > graphCanvas.width - 60) n1.vx *= -1;
-                if (n1.y < 40 || n1.y > graphCanvas.height - 40) n1.vy *= -1;
+                if (n1.x < 40 || n1.x > graphCanvas.width - 40) n1.vx *= -1;
+                if (n1.y < 30 || n1.y > graphCanvas.height - 30) n1.vy *= -1;
 
                 const dCoreX = n1.x - centerCoreX;
                 const dCoreY = n1.y - centerCoreY;
                 const distCore = Math.sqrt(dCoreX * dCoreX + dCoreY * dCoreY);
-                if (distCore < 160) {
-                    n1.x = centerCoreX + (dCoreX / distCore) * 165;
-                    n1.y = centerCoreY + (dCoreY / distCore) * 165;
-                }
-
-                for (let j = i + 1; j < graphNodes.length; j++) {
-                    let n2 = graphNodes[j];
-                    let dx = n2.x - n1.x;
-                    let dy = n2.y - n1.y;
-                    let dist = Math.sqrt(dx * dx + dy * dy);
-                    let minDist = 140;
-
-                    if (dist < minDist && dist > 0) {
-                        let force = (minDist - dist) / minDist * 0.04;
-                        let fx = (dx / dist) * force;
-                        let fy = (dy / dist) * force;
-
-                        n1.vx -= fx;
-                        n1.vy -= fy;
-                        n2.vx += fx;
-                        n2.vy += fy;
-                    }
+                if (distCore < 120) {
+                    n1.x = centerCoreX + (dCoreX / distCore) * 125;
+                    n1.y = centerCoreY + (dCoreY / distCore) * 125;
                 }
             }
 
@@ -604,7 +703,7 @@
                     const px = centerCoreX + (node.x - centerCoreX) * progress;
                     const py = centerCoreY + (node.y - centerCoreY) * progress;
                     graphCtx.beginPath();
-                    graphCtx.arc(px, py, 4, 0, Math.PI * 2);
+                    graphCtx.arc(px, py, 3.5, 0, Math.PI * 2);
                     graphCtx.fillStyle = '#ffffff';
                     graphCtx.fill();
                 } else {
@@ -617,27 +716,26 @@
             graphNodes.forEach(node => {
                 const isActive = node.stateMatch.includes(state.status);
                 const currentRadius = isActive ? node.r * 2 : node.r;
-                const pulse = isActive ? Math.sin(Date.now() / 120) * 3 : Math.sin(Date.now() / 300 + node.x) * 1;
 
                 graphCtx.beginPath();
-                graphCtx.arc(node.x, node.y, currentRadius + pulse, 0, Math.PI * 2);
+                graphCtx.arc(node.x, node.y, currentRadius, 0, Math.PI * 2);
                 graphCtx.fillStyle = node.color;
                 graphCtx.shadowColor = node.color;
-                graphCtx.shadowBlur = isActive ? 35 : 10;
+                graphCtx.shadowBlur = isActive ? 25 : 8;
                 graphCtx.fill();
                 graphCtx.shadowBlur = 0;
 
                 graphCtx.fillStyle = isActive ? '#ffffff' : 'rgba(255, 255, 255, 0.7)';
-                graphCtx.font = isActive ? 'bold 11px Orbitron' : '9px Orbitron';
+                graphCtx.font = isActive ? 'bold 10px Orbitron' : '8px Orbitron';
                 graphCtx.textAlign = 'center';
-                graphCtx.fillText(node.label, node.x, node.y + currentRadius + 14);
+                graphCtx.fillText(node.label, node.x, node.y + currentRadius + 12);
             });
 
             requestAnimationFrame(drawGraph);
         }
         drawGraph();
 
-        /* Audio & Wake-Word ("フライデー") Detection */
+        /* Audio & Wake-Word Detection */
         let audioCtx = null;
         let analyser = null;
 
@@ -674,7 +772,6 @@
 
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let recognition = null;
-        let isManualListening = false;
 
         if (SpeechRecognition) {
             recognition = new SpeechRecognition();
@@ -696,11 +793,9 @@
                             handleUserQuery(cleaned);
                         } else {
                             updateUIState('LISTENING', '● LISTENING...', 'どうぞ、ボス。ご用件をどうぞ...');
-                            isManualListening = true;
                         }
                     }
                 } else if (state.status === 'LISTENING') {
-                    isManualListening = false;
                     const queryText = transcript.replace(/(フライデー|friday|ふらいでー)/gi, '').trim() || transcript;
                     handleUserQuery(queryText);
                 }
@@ -725,7 +820,6 @@
             if (state.status !== 'STANDBY' && state.status !== 'ERROR') return;
             try {
                 if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-                isManualListening = true;
                 updateUIState('LISTENING', '● LISTENING...', 'どうぞ、ボス。話しかけてください...');
             } catch (e) {
                 console.warn(e);
@@ -738,18 +832,61 @@
             const badge = document.getElementById('hudStatusBadge');
             if (badge) {
                 badge.innerText = badgeText;
-                if (status === 'LISTENING') badge.className = 'text-[11px] font-mono font-bold px-3 py-0.5 rounded-full bg-black border border-yellow-500/60 text-yellow-400 text-glow-yellow';
-                else if (status === 'ERROR') badge.className = 'text-[11px] font-mono font-bold px-3 py-0.5 rounded-full bg-black border border-red-500/60 text-red-400 text-glow-red';
-                else if (status === 'SEARCHING_WEB') badge.className = 'text-[11px] font-mono font-bold px-3 py-0.5 rounded-full bg-black border border-sky-500/60 text-sky-400';
-                else if (status === 'CREATING_TASK') badge.className = 'text-[11px] font-mono font-bold px-3 py-0.5 rounded-full bg-black border border-purple-500/60 text-purple-400';
-                else if (status === 'EXECUTING_WORKFLOW') badge.className = 'text-[11px] font-mono font-bold px-3 py-0.5 rounded-full bg-black border border-emerald-500/60 text-emerald-400';
-                else badge.className = 'text-[11px] font-mono font-bold px-3 py-0.5 rounded-full bg-black border border-orange-500/40 text-orange-300 tracking-wider';
+                if (status === 'LISTENING') badge.className = 'text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-black border border-yellow-500/60 text-yellow-400 text-glow-yellow block';
+                else if (status === 'ERROR') badge.className = 'text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-black border border-red-500/60 text-red-400 text-glow-red block';
+                else if (status === 'SEARCHING_WEB') badge.className = 'text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-black border border-sky-500/60 text-sky-400 block';
+                else if (status === 'CREATING_TASK') badge.className = 'text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-black border border-purple-500/60 text-purple-400 block';
+                else if (status === 'EXECUTING_WORKFLOW') badge.className = 'text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-black border border-emerald-500/60 text-emerald-400 block';
+                else badge.className = 'text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-black border border-orange-500/40 text-orange-300 tracking-wider block';
             }
 
             if (speechText) {
-                const speechEl = document.getElementById('fridaySpeechText');
-                if (speechEl) speechEl.innerText = speechText;
+                formatAndAnimateSpeechText(speechText);
             }
+        }
+
+        /* 10 Chars per Line x 7 Lines Terminal Output Formatter */
+        let activeTypingTimer = null;
+
+        function formatAndAnimateSpeechText(fullText) {
+            if (activeTypingTimer) {
+                clearInterval(activeTypingTimer);
+                activeTypingTimer = null;
+            }
+
+            const speechEl = document.getElementById('fridaySpeechText');
+            if (!speechEl) return;
+
+            speechEl.innerText = '';
+            speechEl.classList.add('typing-cursor');
+
+            const cleanText = fullText.replace(/\s+/g, '').trim();
+            let charIdx = 0;
+
+            activeTypingTimer = setInterval(() => {
+                if (charIdx >= cleanText.length) {
+                    clearInterval(activeTypingTimer);
+                    activeTypingTimer = null;
+                    speechEl.classList.remove('typing-cursor');
+                    return;
+                }
+
+                charIdx++;
+                const visibleSubstring = cleanText.substring(0, charIdx);
+
+                // Format into 10 characters per line
+                let formattedGrid = '';
+                for (let i = 0; i < visibleSubstring.length; i += 10) {
+                    formattedGrid += visibleSubstring.substring(i, i + 10) + '\n';
+                }
+
+                // Show up to last 7 lines if text exceeds 70 characters
+                const lines = formattedGrid.trim().split('\n');
+                const last7Lines = lines.slice(-7).join('\n');
+
+                speechEl.innerText = last7Lines;
+
+            }, 45); // 45ms per character
         }
 
         function getSystemPrompt() {
@@ -811,10 +948,7 @@ ${state.vaultResearchText}`;
             try {
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${state.aiModel}:generateContent?key=${state.apiKey}`;
 
-                // Build Multi-turn Contents Array for Conversational Context Memory
                 const contentsPayload = [];
-
-                // Include last 8 conversation turns for tight conversational memory
                 const recentHistory = state.conversationHistory.slice(-8);
                 recentHistory.forEach(turn => {
                     contentsPayload.push({
@@ -823,7 +957,6 @@ ${state.vaultResearchText}`;
                     });
                 });
 
-                // Add current user prompt
                 let currentParts = [{ text: promptText }];
                 if (imageBase64) {
                     currentParts.push({
@@ -859,11 +992,9 @@ ${state.vaultResearchText}`;
                 if (candidate && candidate.content?.parts?.[0]?.text) {
                     let replyText = candidate.content.parts[0].text;
                     
-                    // Save multi-turn conversation memory
                     state.conversationHistory.push({ role: 'user', text: promptText });
                     state.conversationHistory.push({ role: 'model', text: replyText });
 
-                    // Keep up to 20 past turns in storage
                     if (state.conversationHistory.length > 20) {
                         state.conversationHistory = state.conversationHistory.slice(-20);
                     }
@@ -888,79 +1019,9 @@ ${state.vaultResearchText}`;
             }
         }
 
-        /* Smooth Character-by-Character Typewriter Animation synced with Voice */
-        let activeTypingTimer = null;
-
         function speakAndAnimateText(fullText) {
-            updateUIState('SPEAKING', '● SPEAKING', '');
+            updateUIState('SPEAKING', '● SPEAKING', fullText);
 
-            if (activeTypingTimer) {
-                clearInterval(activeTypingTimer);
-                activeTypingTimer = null;
-            }
-
-            const cleanText = fullText.replace(/\n+/g, ' ').trim();
-            const speechEl = document.getElementById('fridaySpeechText');
-            if (speechEl) {
-                speechEl.innerText = '';
-                speechEl.classList.add('typing-cursor');
-            }
-
-            // Split into sentence or natural phrases of max 28 characters for single-line HUD fit
-            const sentences = cleanText.match(/[^。！？!?]+[。！？!?]?/g) || [cleanText];
-            let sentenceIdx = 0;
-            let charIdx = 0;
-            let currentSentence = sentences[0] || '';
-
-            // Delay sync before speech playback start (1.2s delay)
-            setTimeout(() => {
-                activeTypingTimer = setInterval(() => {
-                    if (sentenceIdx >= sentences.length) {
-                        clearInterval(activeTypingTimer);
-                        activeTypingTimer = null;
-                        if (speechEl) speechEl.classList.remove('typing-cursor');
-                        return;
-                    }
-
-                    currentSentence = sentences[sentenceIdx];
-
-                    if (charIdx < currentSentence.length) {
-                        charIdx++;
-                        if (speechEl) {
-                            speechEl.innerText = currentSentence.substring(0, charIdx);
-                        }
-                    } else {
-                        // Current sentence finished. Pause briefly before moving to next sentence
-                        sentenceIdx++;
-                        charIdx = 0;
-                        if (sentenceIdx < sentences.length) {
-                            // Brief pause between sentences
-                            clearInterval(activeTypingTimer);
-                            setTimeout(() => {
-                                if (speechEl) speechEl.innerText = '';
-                                activeTypingTimer = setInterval(() => {
-                                    if (sentenceIdx >= sentences.length) {
-                                        clearInterval(activeTypingTimer);
-                                        activeTypingTimer = null;
-                                        if (speechEl) speechEl.classList.remove('typing-cursor');
-                                        return;
-                                    }
-                                    currentSentence = sentences[sentenceIdx];
-                                    if (charIdx < currentSentence.length) {
-                                        charIdx++;
-                                        if (speechEl) speechEl.innerText = currentSentence.substring(0, charIdx);
-                                    } else {
-                                        sentenceIdx++;
-                                        charIdx = 0;
-                                    }
-                                }, 45); // 45ms per character
-                            }, 600); // 600ms gap between sentences
-                        }
-                    }
-                }, 45); // 45ms per character
-            }, 1200);
-
-            // Execute TTS Voice
             if (state.elevenApiKey && state.elevenVoiceId) {
                 speakElevenLabs(fullText);
             } else {
@@ -988,7 +1049,7 @@ ${state.vaultResearchText}`;
                 audio.onended = () => {
                     const speechEl = document.getElementById('fridaySpeechText');
                     if (speechEl) speechEl.classList.remove('typing-cursor');
-                    updateUIState('STANDBY', '● STANDBY (「フライデー」で起動)', speechEl?.innerText || '準備完了');
+                    updateUIState('STANDBY', '● STANDBY (「フライデー」で起動)');
                 };
                 audio.play();
             } catch (e) {
@@ -999,7 +1060,7 @@ ${state.vaultResearchText}`;
 
         function speakBrowserSpeech(text) {
             if (!('speechSynthesis' in window)) {
-                updateUIState('STANDBY', '● STANDBY (「フライデー」で起動)', '準備完了');
+                updateUIState('STANDBY', '● STANDBY (「フライデー」で起動)');
                 return;
             }
             window.speechSynthesis.cancel();
@@ -1016,12 +1077,12 @@ ${state.vaultResearchText}`;
             utterance.onend = () => {
                 const speechEl = document.getElementById('fridaySpeechText');
                 if (speechEl) speechEl.classList.remove('typing-cursor');
-                updateUIState('STANDBY', '● STANDBY (「フライデー」で起動)', speechEl?.innerText || '準備完了');
+                updateUIState('STANDBY', '● STANDBY (「フライデー」で起動)');
             };
             utterance.onerror = () => {
                 const speechEl = document.getElementById('fridaySpeechText');
                 if (speechEl) speechEl.classList.remove('typing-cursor');
-                updateUIState('STANDBY', '● STANDBY (「フライデー」で起動)', '準備完了');
+                updateUIState('STANDBY', '● STANDBY (「フライデー」で起動)');
             };
 
             window.speechSynthesis.speak(utterance);
@@ -1049,7 +1110,7 @@ ${state.vaultResearchText}`;
             `).join('');
         }
 
-        // Live Clock Updates (Stacked Digital Layout)
+        // Live Digital Clock Timer (JST)
         setInterval(() => {
             const now = new Date();
             const timeStr = now.toLocaleTimeString('ja-JP', { timeZone: 'Asia/Tokyo', hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' JST';
@@ -1060,10 +1121,11 @@ ${state.vaultResearchText}`;
 
             const liveDate = document.getElementById('liveClockDate');
             if (liveDate) liveDate.innerText = dateStr;
-
-            const mobileClock = document.getElementById('mobileClockDisplay');
-            if (mobileClock) mobileClock.innerText = now.toLocaleTimeString('ja-JP');
         }, 1000);
+
+        // Fetch Live Weather for Fukui on load
+        fetchFukuiWeather();
+        setInterval(fetchFukuiWeather, 600000); // Refresh weather every 10 mins
 
         // Navigation & Modal Bindings
         bind('toggleGraphBtn', 'click', () => {
