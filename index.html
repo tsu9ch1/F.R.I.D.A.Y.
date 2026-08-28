@@ -25,15 +25,13 @@
         .font-orbitron {
             font-family: 'Orbitron', sans-serif;
         }
-        .neon-glow-orange {
-            box-shadow: 0 0 25px rgba(255, 140, 0, 0.25), inset 0 0 20px rgba(255, 140, 0, 0.1);
-        }
         .text-glow-orange {
             text-shadow: 0 0 10px rgba(255, 140, 0, 0.85);
         }
         /* Custom Scrollbar */
         ::-webkit-scrollbar {
-            width: 4px;
+            width: 3px;
+            height: 3px;
         }
         ::-webkit-scrollbar-track {
             background: #000000;
@@ -42,7 +40,7 @@
             background: rgba(255, 140, 0, 0.3);
             border-radius: 2px;
         }
-        /* Scanline Background Effect */
+        /* Scanline Overlay Effect */
         .scanline {
             background: linear-gradient(
                 to bottom,
@@ -53,58 +51,54 @@
             );
             background-size: 100% 4px;
         }
-        .radar-grid {
-            background-image: radial-gradient(rgba(255, 140, 0, 0.12) 1px, transparent 0);
-            background-size: 18px 18px;
-        }
     </style>
 </head>
 <body class="h-screen w-screen flex flex-col scanline select-none bg-black overflow-hidden">
 
-    <header class="w-full bg-black border-b border-orange-500/30 px-4 md:px-6 py-2 flex justify-between items-center shrink-0 z-30">
+    <header class="w-full bg-black border-b border-orange-500/20 px-4 md:px-6 py-1.5 flex justify-between items-center shrink-0 z-30">
         <div class="flex items-center space-x-3">
-            <div class="relative flex h-3 w-3">
+            <div class="relative flex h-2.5 w-2.5">
                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-3 w-3 bg-orange-500"></span>
+                <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-orange-500"></span>
             </div>
-            <h1 class="text-lg md:text-xl font-black font-orbitron tracking-widest text-orange-400 text-glow-orange flex items-center gap-2">
-                F.R.I.D.A.Y. <span class="text-[9px] md:text-[10px] text-orange-500 font-mono font-normal border border-orange-800/80 px-2 py-0.5 rounded-full bg-black">GEMINI CORE</span>
+            <h1 class="text-base md:text-lg font-black font-orbitron tracking-widest text-orange-400 text-glow-orange flex items-center gap-2">
+                F.R.I.D.A.Y. <span class="text-[9px] text-orange-500 font-mono font-normal border border-orange-800/60 px-2 py-0.5 rounded-full bg-black">GEMINI CORE</span>
             </h1>
         </div>
 
         <!-- Realtime Live Clock Header -->
-        <div class="hidden sm:flex items-center space-x-2 text-xs font-orbitron text-orange-300/90 bg-black border border-orange-500/30 px-3.5 py-1 rounded-xl">
+        <div class="hidden sm:flex items-center space-x-2 text-xs font-orbitron text-orange-300/90 bg-black border border-orange-500/20 px-3 py-0.5 rounded-lg">
             <i class="fa-regular fa-clock text-orange-400 animate-pulse"></i>
             <span id="liveClockDisplay" class="font-bold tracking-wider">----.--.-- (---) --:--:-- JST</span>
         </div>
 
         <div class="flex items-center space-x-2">
-            <button id="openVaultBtn" class="px-2.5 py-1 rounded-lg border border-orange-500/40 hover:bg-orange-500/20 text-orange-300 text-xs font-orbitron transition flex items-center gap-1.5">
+            <button id="openVaultBtn" class="px-2.5 py-1 rounded-lg border border-orange-500/30 hover:bg-orange-500/20 text-orange-300 text-xs font-orbitron transition flex items-center gap-1.5">
                 <i class="fa-solid fa-brain text-orange-400"></i> MEMORY
             </button>
-            <button id="openSettingsBtn" class="px-2.5 py-1 rounded-lg border border-orange-500/40 hover:bg-orange-500/20 text-orange-300 text-xs font-orbitron transition flex items-center gap-1.5">
+            <button id="openSettingsBtn" class="px-2.5 py-1 rounded-lg border border-orange-500/30 hover:bg-orange-500/20 text-orange-300 text-xs font-orbitron transition flex items-center gap-1.5">
                 <i class="fa-solid fa-sliders text-orange-400"></i> CONFIG
             </button>
         </div>
     </header>
 
-    <main class="flex-1 max-w-4xl w-full mx-auto p-2 md:p-4 flex flex-col justify-between items-center z-10 overflow-hidden">
+    <main class="flex-1 max-w-5xl w-full mx-auto p-2 md:p-3 flex flex-col justify-between items-center z-10 overflow-hidden">
         
-        <!-- Top Location & Clock Bar -->
-        <div class="w-full flex justify-between items-center text-[10px] font-orbitron text-orange-500/70 shrink-0 px-1 mb-1">
+        <!-- Top Location Bar (Without background grid or boxes) -->
+        <div class="w-full flex justify-between items-center text-[10px] font-orbitron text-orange-500/60 shrink-0 px-1">
             <div>SYS.LOC: FUKUI_GAKUEN // LAT: 36.065</div>
             <div id="mobileClockDisplay" class="sm:hidden text-orange-400 font-mono">--:--:--</div>
             <div class="flex items-center gap-2">
-                <span id="aiModelBadge" class="text-orange-400 bg-black px-2 py-0.5 rounded border border-orange-500/30 font-mono">gemini-3.5-flash-lite</span>
+                <span id="aiModelBadge" class="text-orange-400 bg-black px-2 py-0.5 rounded border border-orange-500/20 font-mono">gemini-3.5-flash-lite</span>
             </div>
         </div>
 
-        <!-- Central Pure Black Hologram Box -->
-        <section class="w-full flex-1 bg-black border border-orange-500/30 rounded-2xl p-3 md:p-4 flex flex-col items-center justify-between relative overflow-hidden neon-glow-orange radar-grid my-1 shrink-0">
+        <!-- Central Hologram Main Display Area (Pure Black, Borderless) -->
+        <section class="w-full flex-1 bg-black p-1 flex flex-col items-center justify-center relative overflow-hidden my-1 shrink-0">
             
-            <!-- Dynamic Central HUD Circle -->
-            <div class="relative w-full aspect-square max-w-[230px] md:max-w-[270px] flex items-center justify-center my-auto">
-                <canvas id="hudCanvas" width="320" height="320" class="w-full h-full drop-shadow-[0_0_20px_rgba(255,140,0,0.35)]"></canvas>
+            <!-- Dynamic Large HUD Circle (Consumes ~60% Screen Area) -->
+            <div class="relative w-full aspect-square max-w-[360px] md:max-w-[460px] lg:max-w-[500px] flex items-center justify-center my-auto">
+                <canvas id="hudCanvas" width="500" height="500" class="w-full h-full drop-shadow-[0_0_25px_rgba(255,140,0,0.3)]"></canvas>
             </div>
 
             <!-- Current Status Badge -->
@@ -114,34 +108,29 @@
                 </span>
             </div>
 
-            <!-- F.R.I.D.A.Y. Speech Box Area -->
-            <div class="w-full max-w-xl bg-black border border-orange-500/40 rounded-xl p-3 shadow-2xl relative min-h-[85px] max-h-[110px] flex flex-col justify-center shrink-0">
-                <div class="text-[9px] font-orbitron text-orange-500/80 font-bold mb-1 flex justify-between items-center border-b border-orange-500/20 pb-1">
-                    <span>F.R.I.D.A.Y. RESPONSE</span>
-                    <span id="responseStatusSub" class="text-[9px] text-orange-400/60 font-mono">[SPACE]キー または 手たたき音で起動</span>
-                </div>
-                <p id="fridaySpeechText" class="text-xs md:text-sm text-orange-100 font-medium leading-relaxed tracking-wide overflow-y-auto">
+            <!-- F.R.I.D.A.Y. Single-Line Speech Display Bar (No Header Label) -->
+            <div class="w-full max-w-2xl bg-black/90 border border-orange-500/30 rounded-xl px-4 py-2.5 shadow-2xl relative min-h-[44px] max-h-[50px] flex items-center justify-center shrink-0">
+                <p id="fridaySpeechText" class="text-xs md:text-sm text-orange-100 font-medium leading-none tracking-wide text-center truncate w-full">
                     準備はいつでもできていますよ、ボス。今日はどこから手をつけますか？
                 </p>
-                <div id="citationContainer" class="hidden mt-1 pt-1 border-t border-orange-500/20 text-[9px] text-orange-400">
-                    <span class="font-bold font-orbitron"><i class="fa-solid fa-link"></i> SOURCES:</span>
-                    <span id="citationLinks" class="ml-2 space-x-2"></span>
+                <div id="citationContainer" class="hidden absolute -top-5 right-2 text-[9px] text-orange-400 bg-black px-2 py-0.5 rounded border border-orange-500/30">
+                    <span id="citationLinks" class="space-x-2"></span>
                 </div>
             </div>
 
-            <!-- Primary Voice & Interaction Controls Toolbar -->
+            <!-- Primary Control Buttons -->
             <div class="w-full max-w-xl grid grid-cols-3 gap-2 mt-2 shrink-0">
-                <button id="micBtn" class="py-2.5 px-2 rounded-xl border border-orange-500/60 bg-black hover:bg-orange-500/20 text-orange-300 font-bold text-xs flex items-center justify-center gap-2 transition active:scale-95 shadow-lg">
+                <button id="micBtn" class="py-2 px-2 rounded-xl border border-orange-500/50 bg-black hover:bg-orange-500/20 text-orange-300 font-bold text-xs flex items-center justify-center gap-2 transition active:scale-95 shadow-lg">
                     <i id="micIcon" class="fa-solid fa-microphone text-orange-400"></i>
                     <span id="micBtnText">話しかける</span>
                 </button>
 
-                <button id="clapToggleBtn" class="py-2.5 px-2 rounded-xl border border-orange-500/40 bg-black hover:bg-orange-500/20 text-orange-300 font-bold text-xs flex items-center justify-center gap-2 transition">
+                <button id="clapToggleBtn" class="py-2 px-2 rounded-xl border border-orange-500/30 bg-black hover:bg-orange-500/20 text-orange-300 font-bold text-xs flex items-center justify-center gap-2 transition">
                     <i class="fa-solid fa-hands-clapping"></i>
                     <span id="clapStatusText">クラップ: ON</span>
                 </button>
 
-                <button id="toggleSearchBtn" class="py-2.5 px-2 rounded-xl border border-orange-500/40 bg-black hover:bg-orange-500/20 text-orange-300 font-bold text-xs flex items-center justify-center gap-2 transition">
+                <button id="toggleSearchBtn" class="py-2 px-2 rounded-xl border border-orange-500/30 bg-black hover:bg-orange-500/20 text-orange-300 font-bold text-xs flex items-center justify-center gap-2 transition">
                     <i class="fa-solid fa-globe text-orange-400"></i>
                     <span>検索: <span id="searchModeText" class="text-orange-300 font-bold">ON</span></span>
                 </button>
@@ -149,10 +138,10 @@
 
             <!-- Direct Text Prompt Input Form -->
             <form id="textForm" class="w-full max-w-xl mt-2 flex gap-2 shrink-0">
-                <button type="button" id="uploadImgBtn" title="画像を添付してGemini解析" class="bg-black border border-orange-500/40 hover:bg-orange-950/40 text-orange-400 px-3 rounded-xl transition flex items-center justify-center">
+                <button type="button" id="uploadImgBtn" title="画像を添付してGemini解析" class="bg-black border border-orange-500/30 hover:bg-orange-950/40 text-orange-400 px-3 rounded-xl transition flex items-center justify-center">
                     <i class="fa-solid fa-paperclip"></i>
                 </button>
-                <input type="text" id="userInput" placeholder="フライデーに指示メッセージを送信..." class="flex-1 bg-black border border-orange-500/40 rounded-xl px-3.5 py-2 text-xs text-orange-100 placeholder-orange-700/60 focus:outline-none focus:border-orange-400 transition">
+                <input type="text" id="userInput" placeholder="フライデーに指示メッセージを送信..." class="flex-1 bg-black border border-orange-500/30 rounded-xl px-3.5 py-1.5 text-xs text-orange-100 placeholder-orange-700/60 focus:outline-none focus:border-orange-400 transition">
                 <button type="submit" class="bg-orange-500 hover:bg-orange-400 text-black font-bold px-4 rounded-xl transition flex items-center justify-center shadow-lg active:scale-95">
                     <i class="fa-solid fa-paper-plane"></i>
                 </button>
@@ -160,6 +149,7 @@
         </section>
     </main>
 
+    <!-- Modals remain intact -->
     <div id="vaultModal" class="fixed inset-0 bg-black/95 backdrop-blur-md hidden z-50 flex items-center justify-center p-4">
         <div class="bg-black border border-orange-500/40 rounded-2xl w-full max-w-lg p-5 shadow-2xl relative">
             <button id="closeVaultBtn" class="absolute top-4 right-4 text-orange-500/60 hover:text-orange-300 text-lg">
@@ -245,25 +235,7 @@
     <input type="file" id="imageFileInput" accept="image/*" class="hidden">
 
     <script>
-        function bind(id, event, callback) {
-            const el = document.getElementById(id);
-            if (el) el.addEventListener(event, callback);
-        }
-
-        function getElVal(id) {
-            const el = document.getElementById(id);
-            return el ? el.value : '';
-        }
-
-        function setElVal(id, val) {
-            const el = document.getElementById(id);
-            if (el) el.value = val;
-        }
-
-        function escapeHtml(str) {
-            return (str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        }
-
+        /* State Variables */
         let state = {
             status: 'STANDBY',
             apiKey: localStorage.getItem('friday_gemini_key') || '',
@@ -320,18 +292,19 @@
         function updateStatus(newStatus, subText = '') {
             state.status = newStatus;
             const badgeEl = document.getElementById('hudStatusBadge');
-            const subEl = document.getElementById('responseStatusSub');
 
             if (badgeEl) {
                 badgeEl.innerText = `● ${newStatus}`;
-                if (newStatus === 'LISTENING' || newStatus === 'THINKING') {
+                if (newStatus === 'LISTENING') {
+                    badgeEl.className = 'text-[11px] font-mono font-bold px-3 py-0.5 rounded-full bg-black border border-yellow-500 text-yellow-400 tracking-wider animate-pulse';
+                } else if (newStatus === 'ERROR' || newStatus.includes('ERR')) {
+                    badgeEl.className = 'text-[11px] font-mono font-bold px-3 py-0.5 rounded-full bg-black border border-red-500 text-red-500 tracking-wider animate-pulse';
+                } else if (newStatus === 'THINKING') {
                     badgeEl.className = 'text-[11px] font-mono font-bold px-3 py-0.5 rounded-full bg-black border border-orange-500/80 text-orange-300 tracking-wider animate-pulse';
                 } else {
                     badgeEl.className = 'text-[11px] font-mono font-bold px-3 py-0.5 rounded-full bg-black border border-orange-500/40 text-orange-300 tracking-wider';
                 }
             }
-
-            if (subEl && subText) subEl.innerText = subText;
         }
 
         function getSystemPrompt() {
@@ -362,6 +335,7 @@ ${state.vaultText}
 - Google検索する: EXECUTE:search:検索ワード`;
         }
 
+        /* Dynamic Canvas Arc Colors (Yellow for Listening, Red for Error, Arc Orange for Standby/Default) */
         const canvas = document.getElementById('hudCanvas');
         const ctx = canvas ? canvas.getContext('2d') : null;
         let angle = 0;
@@ -372,48 +346,56 @@ ${state.vaultText}
             const cx = canvas.width / 2;
             const cy = canvas.height / 2;
 
-            // Always Arc Orange with Translucency
-            const baseColor = 'rgba(255, 140, 0, 0.85)';
-            const dimColor = 'rgba(255, 140, 0, 0.35)';
+            // Color selection based on state
+            let baseColor = 'rgba(255, 140, 0, 0.85)';
+            let dimColor = 'rgba(255, 140, 0, 0.35)';
+
+            if (state.status === 'LISTENING') {
+                baseColor = 'rgba(255, 204, 0, 0.95)'; // Bright Yellow
+                dimColor = 'rgba(255, 204, 0, 0.4)';
+            } else if (state.status === 'ERROR' || state.status.includes('ERR')) {
+                baseColor = 'rgba(255, 50, 50, 0.95)'; // Bright Red
+                dimColor = 'rgba(255, 50, 50, 0.4)';
+            }
 
             angle = (angle + 0.03) % (Math.PI * 2);
 
-            // Outer Orbit Arc 1
+            // Outer Arc 1
             ctx.beginPath();
-            ctx.arc(cx, cy, 125, angle, angle + Math.PI * 0.7);
+            ctx.arc(cx, cy, 210, angle, angle + Math.PI * 0.75);
             ctx.strokeStyle = baseColor;
-            ctx.lineWidth = 2;
+            ctx.lineWidth = 3;
             ctx.stroke();
 
-            // Outer Orbit Arc 2
+            // Outer Arc 2
             ctx.beginPath();
-            ctx.arc(cx, cy, 110, angle, angle + Math.PI * 0.85);
+            ctx.arc(cx, cy, 190, angle, angle + Math.PI * 0.85);
             ctx.strokeStyle = dimColor;
-            ctx.lineWidth = 3;
+            ctx.lineWidth = 4;
             ctx.stroke();
 
             // Inner Rotating Dashed Arc
             ctx.beginPath();
-            ctx.arc(cx, cy, 80, -angle * 1.5, -angle * 1.5 + Math.PI * 1.3);
+            ctx.arc(cx, cy, 135, -angle * 1.5, -angle * 1.5 + Math.PI * 1.3);
             ctx.strokeStyle = baseColor;
-            ctx.lineWidth = 2.5;
-            ctx.setLineDash([6, 5]);
+            ctx.lineWidth = 3.5;
+            ctx.setLineDash([8, 6]);
             ctx.stroke();
             ctx.setLineDash([]);
 
             // Center Pulsing Core Circle
-            const pulse = Math.sin(Date.now() / 200) * 3;
+            const pulse = Math.sin(Date.now() / 180) * 5;
             ctx.beginPath();
-            ctx.arc(cx, cy, 38 + pulse, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(255, 140, 0, 0.8)';
-            ctx.shadowColor = 'rgba(255, 140, 0, 0.9)';
-            ctx.shadowBlur = 20;
+            ctx.arc(cx, cy, 60 + pulse, 0, Math.PI * 2);
+            ctx.fillStyle = baseColor;
+            ctx.shadowColor = baseColor;
+            ctx.shadowBlur = 30;
             ctx.fill();
             ctx.shadowBlur = 0;
 
             /* Central Text Displaying F . R . I . D . A . Y . */
             ctx.fillStyle = '#000000';
-            ctx.font = '900 8.5px Orbitron';
+            ctx.font = '900 13px Orbitron';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText('F . R . I . D . A . Y .', cx, cy);
@@ -424,7 +406,8 @@ ${state.vaultText}
 
         function displayFridayWords(text, citations = []) {
             const speechTextEl = document.getElementById('fridaySpeechText');
-            if (speechTextEl) speechTextEl.innerText = text;
+            // Clean multi-line responses into a sleek single line
+            if (speechTextEl) speechTextEl.innerText = text.replace(/\n+/g, ' ');
 
             const citationContainer = document.getElementById('citationContainer');
             const citationLinks = document.getElementById('citationLinks');
@@ -439,54 +422,14 @@ ${state.vaultText}
             }
         }
 
-        async function fetchWithRetry(url, options, retries = 2, backoff = 1000) {
-            try {
-                const res = await fetch(url, options);
-                if (res.status === 403) {
-                    throw new Error('⚠️ APIキーが無効か未設定です。「CONFIG」ボタンからGoogle AI StudioのAPIキーを設定してください。');
-                }
-                if (res.status === 429) {
-                    throw new Error('⚠️ レート制限 (429) に達しました。1分ほど時間をおいて試してください。');
-                }
-                if (!res.ok) {
-                    const errJson = await res.json().catch(() => ({}));
-                    const detail = errJson.error?.message || `HTTPエラー ${res.status}`;
-                    throw new Error(`⚠️ Google API Error (${res.status}): ${detail}`);
-                }
-                return res;
-            } catch (err) {
-                if (retries <= 0 || err.message.includes('403') || err.message.includes('429')) {
-                    throw err;
-                }
-                await new Promise(r => setTimeout(r, backoff));
-                return fetchWithRetry(url, options, retries - 1, backoff * 2);
-            }
-        }
-
-        function parseAndExecuteCommands(text) {
-            const lines = text.split('\n');
-            const cleanLines = [];
-
-            for (let line of lines) {
-                if (line.includes('EXECUTE:open_browser:')) {
-                    window.open(line.split('EXECUTE:open_browser:')[1].trim(), '_blank');
-                } else if (line.includes('EXECUTE:search:')) {
-                    window.open(`https://www.google.com/search?q=${encodeURIComponent(line.split('EXECUTE:search:')[1].trim())}`, '_blank');
-                } else {
-                    cleanLines.push(line);
-                }
-            }
-            return cleanLines.join('\n').trim();
-        }
-
+        /* Error Handler with Red State */
         async function handleUserQuery(promptText, imageBase64 = null) {
             if (!state.apiKey) {
                 displayFridayWords('⚠️ APIキーが設定されていません。右上の「CONFIG」ボタンから Google AI Studio の APIキーを入力してください。');
-                updateStatus('STANDBY', 'APIキーを設定してください。');
+                updateStatus('ERROR', 'APIキーを設定してください。');
                 return;
             }
 
-            // Auto-detect image generation triggers in user prompt
             if (!imageBase64 && (promptText.includes('生成') || promptText.includes('描いて') || promptText.includes('画像を作成') || promptText.includes('ホログラム'))) {
                 generateHologramImage(promptText);
                 return;
@@ -548,13 +491,14 @@ ${state.vaultText}
             } catch (err) {
                 console.error('Gemini API Fetch Error:', err);
                 displayFridayWords(err.message);
-                updateStatus('STANDBY', 'APIエラーが発生しました。');
+                updateStatus('ERROR', 'APIエラーが発生しました。');
             }
         }
 
         async function generateHologramImage(promptText) {
             if (!state.apiKey) {
                 displayFridayWords('⚠️ APIキーを設定してください。');
+                updateStatus('ERROR', 'APIキー未設定');
                 return;
             }
 
@@ -594,7 +538,7 @@ ${state.vaultText}
             } catch (err) {
                 console.error('Image Gen Error:', err);
                 displayFridayWords(`⚠️ 生成エラー: ${err.message}`);
-                updateStatus('STANDBY', '生成失敗');
+                updateStatus('ERROR', '生成失敗');
             }
         }
 
@@ -626,51 +570,12 @@ ${state.vaultText}
 
             utterance.onstart = () => updateStatus('SPEAKING', text);
             utterance.onend = () => updateStatus('STANDBY', '[SPACE]キー または クラップ音で起動');
-            utterance.onerror = () => updateStatus('STANDBY', '[SPACE]キー または クラップ音で起動');
+            utterance.onerror = () => updateStatus('ERROR', '[SPACE]キー または クラップ音で起動');
 
             window.speechSynthesis.speak(utterance);
         }
 
-        let audioCtx = null;
-        let analyser = null;
-
-        async function initClapDetector() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                analyser = audioCtx.createAnalyser();
-                const source = audioCtx.createMediaStreamSource(stream);
-                source.connect(analyser);
-
-                analyser.fftSize = 512;
-                const bufferLength = analyser.frequencyBinCount;
-                const dataArray = new Uint8Array(bufferLength);
-
-                function checkAudioSpike() {
-                    if (state.clapEnabled && state.status === 'STANDBY') {
-                        analyser.getByteFrequencyData(dataArray);
-                        let sum = 0;
-                        for (let i = 0; i < bufferLength; i++) {
-                            sum += dataArray[i];
-                        }
-                        let average = sum / bufferLength / 255;
-
-                        if (average > state.clapThreshold) {
-                            console.log('Clap detected! Level:', average);
-                            startVoiceRecognition();
-                        }
-                    }
-                    setTimeout(checkAudioSpike, 80);
-                }
-                checkAudioSpike();
-            } catch (err) {
-                console.warn('Microphone access for clap detection:', err);
-            }
-        }
-
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        let recognition = null;
-
+        /* Speech Recognition Error with Red State */
         if (SpeechRecognition) {
             recognition = new SpeechRecognition();
             recognition.lang = 'ja-JP';
@@ -688,7 +593,7 @@ ${state.vaultText}
 
             recognition.onerror = (event) => {
                 console.error('Speech recognition error:', event.error);
-                updateStatus('STANDBY', '音声入力エラーが発生しました。');
+                updateStatus('ERROR', '音声入力エラーが発生しました。');
             };
 
             recognition.onend = () => {
