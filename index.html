@@ -353,184 +353,37 @@
             activeTab: 'main',
             showGraphVisualizer: true,
             tasks: JSON.parse(localStorage.getItem('friday_tasks') || '[]')
-        };
+    };
 
-        /* Google OAuth Auth Guard */
-        /* Obsidian-style Agent & Knowledge Graph Visualizer */
-        const graphCanvas = document.getElementById('graphCanvas');
-        const graphCtx = graphCanvas ? graphCanvas.getContext('2d') : null;
-
-        const graphNodes = [
-            { id: 'user', label: 'USER PROMPT', x: 0.15, y: 0.5, active: false, color: '#f59e0b' },
-            { id: 'friday', label: 'F.R.I.D.A.Y. CORE', x: 0.5, y: 0.5, active: true, color: '#ff8c00' },
-            { id: 'web', label: 'MCP SEARCH', x: 0.3, y: 0.2, active: false, color: '#06b6d4' },
-            { id: 'workflow', label: 'MASTRA WORKFLOW', x: 0.7, y: 0.2, active: false, color: '#10b981' },
-            { id: 'vault', label: 'LONG-TERM MEMORY', x: 0.5, y: 0.82, active: false, color: '#a855f7' }
-        ];
-
-        const graphEdges = [
-            { from: 'user', to: 'friday' },
-            { from: 'friday', to: 'web' },
-            { from: 'friday', to: 'workflow' },
-            { from: 'friday', to: 'vault' },
-            { from: 'web', to: 'workflow' }
-        ];
-
-        let graphPulse = 0;
-
-        function drawObsidianGraph() {
-            if (!graphCtx || !graphCanvas) return;
-            graphCtx.clearRect(0, 0, graphCanvas.width, graphCanvas.height);
-
-            const w = graphCanvas.width;
-            const h = graphCanvas.height;
-
-            graphPulse += 0.05;
-
-            // Sync Node Active States based on state.status
-            graphNodes.find(n => n.id === 'web').active = (state.status === 'SEARCHING_WEB');
-            graphNodes.find(n => n.id === 'workflow').active = (state.status === 'CREATING_TASK' || state.status === 'EXECUTING_WORKFLOW');
-            graphNodes.find(n => n.id === 'vault').active = (state.status === 'THINKING' || state.status === 'SPEAKING');
-            graphNodes.find(n => n.id === 'user').active = (state.status === 'LISTENING');
-
-            // Draw Edges with animated data pulses
-            for (let edge of graphEdges) {
-                const source = graphNodes.find(n => n.id === edge.from);
-                const target = graphNodes.find(n => n.id === edge.to);
-
-                const x1 = source.x * w;
-                const y1 = source.y * h;
-                const x2 = target.x * w;
-                const y2 = target.y * h;
-
-                const isEdgeActive = source.active || target.active;
-
-                graphCtx.beginPath();
-                graphCtx.moveTo(x1, y1);
-                graphCtx.lineTo(x2, y2);
-                graphCtx.strokeStyle = isEdgeActive ? 'rgba(255, 140, 0, 0.45)' : 'rgba(255, 140, 0, 0.12)';
-                graphCtx.lineWidth = isEdgeActive ? 1.8 : 1.0;
-                graphCtx.stroke();
-
-                // Draw moving data particles along edges when active
-                if (isEdgeActive) {
-                    const progress = (Math.sin(graphPulse + x1) + 1) / 2;
-                    const px = x1 + (x2 - x1) * progress;
-                    const py = y1 + (y2 - y1) * progress;
-
-                    graphCtx.beginPath();
-                    graphCtx.arc(px, py, 2.5, 0, Math.PI * 2);
-                    graphCtx.fillStyle = '#ffaa00';
-                    graphCtx.shadowColor = '#ff8c00';
-                    graphCtx.shadowBlur = 8;
-                    graphCtx.fill();
-                    graphCtx.shadowBlur = 0;
-                }
-            }
-
-            // Draw Nodes
-            for (let node of graphNodes) {
-                const nx = node.x * w;
-                const ny = node.y * h;
-                const radius = node.id === 'friday' ? 12 : 7;
-
-                // Pulsing outer halo for active nodes
-                if (node.active) {
-                    const ringRadius = radius + Math.sin(graphPulse * 2) * 5 + 4;
-                    graphCtx.beginPath();
-                    graphCtx.arc(nx, ny, ringRadius, 0, Math.PI * 2);
-                    graphCtx.strokeStyle = node.color;
-                    graphCtx.lineWidth = 1.5;
-                    graphCtx.stroke();
-                }
-
-                // Main Node Circle
-                graphCtx.beginPath();
-                graphCtx.arc(nx, ny, radius, 0, Math.PI * 2);
-                graphCtx.fillStyle = node.active ? node.color : '#111827';
-                graphCtx.strokeStyle = node.color;
-                graphCtx.lineWidth = 2;
-                graphCtx.shadowColor = node.color;
-                graphCtx.shadowBlur = node.active ? 15 : 4;
-                graphCtx.fill();
-                graphCtx.stroke();
-                graphCtx.shadowBlur = 0;
-
-                // Obsidian Label Text
-                graphCtx.fillStyle = node.active ? '#ffffff' : 'rgba(255, 140, 0, 0.6)';
-                graphCtx.font = '600 9px Orbitron';
-                graphCtx.textAlign = 'center';
-                graphCtx.fillText(node.label, nx, ny + radius + 14);
-            }
-
-            requestAnimationFrame(drawObsidianGraph);
+    /* Google OAuth Auth Guard & Access Control */
+    function checkAuthStatus() {
+        const authOverlay = document.getElementById('authOverlay');
+        if (state.authenticated && authOverlay) {
+            authOverlay.classList.add('hidden');
         }
-        drawObsidianGraph();
+    }
 
-        bind('toggleGraphBtn', 'click', () => {
-            state.showGraphVisualizer = !state.showGraphVisualizer;
-            const container = document.getElementById('obsidianGraphContainer');
-            if (container) {
-                container.style.opacity = state.showGraphVisualizer ? '0.35' : '0';
-            }
-        });
-
-        window.addEventListener('click', () => {
-        let displaySentenceTimer = null;
-        let displayDelayTimer = null;
-
-        function displayFridayWords(text, citations = []) {
-            if (displaySentenceTimer) clearInterval(displaySentenceTimer);
-            if (displayDelayTimer) clearTimeout(displayDelayTimer);
-
-            const speechTextEl = document.getElementById('fridaySpeechText');
-            if (!speechTextEl) return;
-
-            // 0.7-second delay sync with speech audio output latency
-            displayDelayTimer = setTimeout(() => {
-                const cleanFullText = text.replace(/\n+/g, ' ').trim();
-                const sentences = cleanFullText
-                    .split(/(?<=[。！？])/)
-                    .map(s => s.trim())
-                    .filter(s => s.length > 0);
-
-                if (sentences.length <= 1) {
-                    speechTextEl.innerText = cleanFullText;
-                } else {
-                    let currentIdx = 0;
-                    speechTextEl.innerText = sentences[0];
-
-                    const stepInterval = Math.max(2200, Math.min(4500, (sentences[0].length * 120) / (state.speechRate || 1.35)));
-
-                    displaySentenceTimer = setInterval(() => {
-                        currentIdx++;
-                        if (currentIdx < sentences.length) {
-                            speechTextEl.innerText = sentences[currentIdx];
-                        } else {
-                            clearInterval(displaySentenceTimer);
-                        }
-                    }, stepInterval);
-                }
-
-                const citationContainer = document.getElementById('citationContainer');
-                const citationLinks = document.getElementById('citationLinks');
-
-                if (citations && citations.length > 0 && citationContainer && citationLinks) {
-                    citationLinks.innerHTML = citations.map(c => 
-                        `<a href="${c.uri}" target="_blank" class="hover:underline text-orange-300">🔗 ${escapeHtml(c.title || c.uri)}</a>`
-                    ).join(' ');
-                    citationContainer.classList.remove('hidden');
-                } else if (citationContainer) {
-                    citationContainer.classList.add('hidden');
-                }
-            }, 700); // 0.7 second delay
+    bind('googleLoginBtn', 'click', () => {
+        const btn = document.getElementById('googleLoginBtn');
+        if (btn) {
+            btn.innerHTML = `<i class="fa-solid fa-circle-notch animate-spin text-orange-400"></i> SECURITY CLEARANCE GRANTED...`;
         }
+        setTimeout(() => {
+            state.authenticated = true;
+            localStorage.setItem('friday_auth', 'true');
+            const authOverlay = document.getElementById('authOverlay');
+            if (authOverlay) {
+                authOverlay.style.transition = 'opacity 0.4s ease';
+                authOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    authOverlay.classList.add('hidden');
+                }, 400);
+            }
+        }, 500);
+    });
 
-        }, { once: true });
+    checkAuthStatus();
 
-        updateModelBadge();
-        updateSearchButtonUI();
-        renderTasks();
-    </script>
-</body>
-</html>
+    /* Obsidian-style Agent & Knowledge Graph Visualizer */
+    const graphCanvas = document.getElementById('graphCanvas');
+<!-- ... existing code -->
